@@ -1,7 +1,8 @@
-import { Field, Int } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
+@ObjectType()
 export class User {
   @PrimaryGeneratedColumn('uuid')
   @Field(() => String)
@@ -12,7 +13,7 @@ export class User {
   email: string;
 
   @Column()
-  @Field(() => String)
+  //@Field(() => String)
   password: string;
 
   @Column()
