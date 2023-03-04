@@ -5,14 +5,17 @@
 type User {
   id: String!
   email: String!
+  password: String!
   name: String!
   age: Int!
 }
 
 type Query {
-  getHello: String!
+  fetchUser: String!
 }
 
 type Mutation {
   createUser(email: String!, password: String!, name: String!, age: Float!): User!
+  login(email: String!, password: String!): String!
+  restoreAccessToken: String!
 }

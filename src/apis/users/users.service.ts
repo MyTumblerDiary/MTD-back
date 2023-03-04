@@ -9,13 +9,15 @@ export class UserService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
+
+  async findOne({ email }) {
+    return await this.userRepository.findOneBy({ email });
+  }
+
   async create({ email, hashedPassword: password, name, age }) {
     const user = await this.userRepository.findOneBy({ email });
     if (user) throw new ConflictException('이미 등록된 이메일 입니다.');
 
     return await this.userRepository.save({ email, password, name, age });
-  }
-  hello() {
-    return 'Hello World!';
   }
 }
