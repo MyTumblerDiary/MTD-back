@@ -4,6 +4,9 @@
 
 type User {
   id: String!
+  createdAt: String!
+  updatedAt: String!
+  deletedAt: String!
   email: String!
   password: String!
   name: String!

@@ -7,7 +7,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-@Entity()
 @ObjectType()
 export class CommonEntity {
   @PrimaryGeneratedColumn('uuid')
@@ -15,11 +14,14 @@ export class CommonEntity {
   id: string;
 
   @CreateDateColumn()
+  @Field(() => String)
   createdAt: Date;
 
   @UpdateDateColumn()
+  @Field(() => String)
   updatedAt: Date;
 
   @DeleteDateColumn()
+  @Field(() => String)
   deletedAt: Date;
 }

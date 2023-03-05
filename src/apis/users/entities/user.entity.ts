@@ -1,13 +1,20 @@
-import { Field, Int, ObjectType, PartialType } from '@nestjs/graphql';
+import {
+  Field,
+  InputType,
+  Int,
+  ObjectType,
+  PartialType,
+} from '@nestjs/graphql';
 import { CommonEntity } from 'src/commons/entities/common.entity';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
+@InputType('UserInputType', { isAbstract: true })
 @Entity()
 @ObjectType()
-export class User {
-  @PrimaryGeneratedColumn('uuid')
-  @Field(() => String)
-  id: string;
+export class User extends CommonEntity {
+  // @PrimaryGeneratedColumn('uuid')
+  // @Field(() => String)
+  // id: string;
 
   @Column()
   @Field(() => String)
