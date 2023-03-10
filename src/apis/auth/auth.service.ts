@@ -2,6 +2,7 @@ import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -36,5 +37,23 @@ export class AuthService {
     this.setRefreshToken({ user, res: context.res });
     // //5. 일치하는 유저가 있으면?! accessToken(=JWT)
     return this.getAccessToken({ user });
+  }
+  async social_login({ req, res }) {
+    //1. 가입확인
+    let user = await this.userService.findOne({ email: req.email });
+    //2. 회원가입
+    if (!user) {
+      user = await this.userService.create({
+        createUserInput: {
+          email: req.email,
+          hashedPassword: req.password,
+          name: req.name,
+          age: req.age,
+        },
+      });
+    }
+    //3. 로그인
+    this.setRefreshToken({ user, res });
+    res.redirect('http://localhost:5500/MTD/front/social-login.html');
   }
 }

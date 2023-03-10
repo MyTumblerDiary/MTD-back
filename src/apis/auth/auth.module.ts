@@ -6,6 +6,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../users/entities/user.entity';
 import { UserService } from '../users/users.service';
 import { JwtRefreshStrategy } from 'src/commons/auth/jwt-refresh.strategy';
+import { AuthController } from './auth.controller';
+import { JwtGoogleStrategy } from 'src/commons/auth/jwt-social-google.strategy copy';
 @Module({
   imports: [
     JwtModule.register({}), //
@@ -14,9 +16,13 @@ import { JwtRefreshStrategy } from 'src/commons/auth/jwt-refresh.strategy';
 
   providers: [
     JwtRefreshStrategy,
+    JwtGoogleStrategy,
     AuthResolver, //
     AuthService,
     UserService,
+  ],
+  controllers: [
+    AuthController, //
   ],
 })
 export class AuthModule {}
