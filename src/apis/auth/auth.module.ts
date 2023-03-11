@@ -5,12 +5,10 @@ import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../users/entities/user.entity';
 import { UserService } from '../users/users.service';
-import { JwtRefreshStrategy } from 'src/commons/auth/jwt-refresh.strategy';
 import { AuthController } from './auth.controller';
-import { JwtGoogleStrategy } from 'src/commons/auth/jwt-social-google.strategy';
-import { JwtKakaoStrategy } from 'src/commons/auth/jwt-social-kakao.strategy';
-import { ConfigModule } from '@nestjs/config';
-import { configOptions } from 'src/config/config';
+import { JwtRefreshStrategy } from 'src/commons/auth/strategies/jwt-refresh.strategy';
+import { JwtGoogleStrategy } from 'src/commons/auth/strategies/jwt-social-google.strategy';
+import { JwtKakaoStrategy } from 'src/commons/auth/strategies/jwt-social-kakao.strategy';
 @Module({
   imports: [
     JwtModule.register({}), //
