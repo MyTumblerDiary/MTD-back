@@ -43,6 +43,7 @@ export class AuthService {
     console.log(req.user.email);
     let user = await this.userService.findOne({ email: req.user.email });
     //2. 회원가입
+    console.log(req.user.password);
     const hashedPassword = await bcrypt.hash(req.user.password, 10);
     if (!user) {
       user = await this.userService.create({
@@ -55,7 +56,7 @@ export class AuthService {
       });
     }
     //3. 로그인
-    this.setRefreshToken({ user, res });
+    await this.setRefreshToken({ user, res });
     res.redirect('http://localhost:5500/front/social-login.html');
   }
 }
