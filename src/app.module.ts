@@ -7,6 +7,7 @@ import { AuthModule } from './apis/auth/auth.module';
 import { UserModule } from './apis/users/users.module';
 import { configOptions } from './config/config';
 import { ormOption } from './config/typeorm.config';
+import { DynamicGqlModule } from './dynamic-gql.module';
 
 const ENV = process.env.NODE_ENV;
 
@@ -15,11 +16,7 @@ const ENV = process.env.NODE_ENV;
     ConfigModule.forRoot(configOptions),
     UserModule,
     AuthModule,
-    GraphQLModule.forRoot<ApolloDriverConfig>({
-      driver: ApolloDriver,
-      autoSchemaFile: 'src/commons/graphql/schema.gql',
-      context: ({ req, res }) => ({ req, res }),
-    }),
+    DynamicGqlModule.forRoot(),
     TypeOrmModule.forRoot(ormOption),
   ],
   providers: [

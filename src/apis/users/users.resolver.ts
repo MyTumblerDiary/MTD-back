@@ -20,7 +20,7 @@ export class UserResolver {
   @UseGuards(GqlAuthAccessGuard)
   @Query(() => String)
   fetchUser(
-    @CurrentUser() currentUser: any, //
+    @CurrentUser() currentUser: User, //
   ) {
     console.log('fetchUser 실행완료');
     console.log('유저정보:', currentUser);
