@@ -8,6 +8,9 @@ import { UserService } from '../users/users.service';
 import { JwtRefreshStrategy } from 'src/commons/auth/jwt-refresh.strategy';
 import { AuthController } from './auth.controller';
 import { JwtGoogleStrategy } from 'src/commons/auth/jwt-social-google.strategy';
+import { JwtKakaoStrategy } from 'src/commons/auth/jwt-social-kakao.strategy';
+import { ConfigModule } from '@nestjs/config';
+import { configOptions } from 'src/config/config';
 @Module({
   imports: [
     JwtModule.register({}), //
@@ -17,6 +20,7 @@ import { JwtGoogleStrategy } from 'src/commons/auth/jwt-social-google.strategy';
   providers: [
     JwtRefreshStrategy,
     JwtGoogleStrategy,
+    JwtKakaoStrategy,
     AuthResolver, //
     AuthService,
     UserService,

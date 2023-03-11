@@ -56,6 +56,6 @@ export class AuthService {
     }
     //3. 로그인
     this.setRefreshToken({ user, res });
-    res.redirect('http://localhost:5500/MTD/front/social-login.html');
+    res.redirect('http://localhost:5500/front/social-login.html');
   }
 }
