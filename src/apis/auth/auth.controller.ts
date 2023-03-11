@@ -22,22 +22,6 @@ export class AuthController {
     //@Req() req: Request & IOAuthUser, //
     @Res() res: Response,
   ) {
-    return this.authService.social_login({ req, res });
-    //     //1. 가입확인
-    //     let user = await this.userService.findOne({ email: req.user.email });
-    //     //2. 회원가입
-    //     if (!user) {
-    //       user = await this.userService.create({
-    //         email: req.user.email,
-    //         hashedPassword: req.user.password,
-    //         name: req.user.name,
-    //         age: req.user.age,
-    //       });
-    //     }
-    //     //3. 로그인
-    //     this.authService.setRefreshToken({ user, res });
-
-    //     res.redirect('http://localhost:5500');
-    //     // 구글로그인 진행 //3. 로그인 //2. 회원가입
+    return await this.authService.social_login({ req, res });
   }
 }

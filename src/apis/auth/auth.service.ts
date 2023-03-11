@@ -40,15 +40,17 @@ export class AuthService {
   }
   async social_login({ req, res }) {
     //1. 가입확인
-    let user = await this.userService.findOne({ email: req.email });
+    console.log(req.user.email);
+    let user = await this.userService.findOne({ email: req.user.email });
     //2. 회원가입
+    const hashedPassword = await bcrypt.hash(req.user.password, 10);
     if (!user) {
       user = await this.userService.create({
         createUserInput: {
-          email: req.email,
-          hashedPassword: req.password,
-          name: req.name,
-          age: req.age,
+          email: req.user.email,
+          password: hashedPassword,
+          name: req.user.name,
+          age: req.user.age,
         },
       });
     }

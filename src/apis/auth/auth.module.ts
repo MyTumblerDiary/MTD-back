@@ -7,7 +7,7 @@ import { User } from '../users/entities/user.entity';
 import { UserService } from '../users/users.service';
 import { JwtRefreshStrategy } from 'src/commons/auth/jwt-refresh.strategy';
 import { AuthController } from './auth.controller';
-import { JwtGoogleStrategy } from 'src/commons/auth/jwt-social-google.strategy copy';
+import { JwtGoogleStrategy } from 'src/commons/auth/jwt-social-google.strategy';
 @Module({
   imports: [
     JwtModule.register({}), //
