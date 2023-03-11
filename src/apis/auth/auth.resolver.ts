@@ -1,8 +1,8 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
-import { AuthService } from './auth.service';
 import { GqlAuthRefreshGuard } from 'src/commons/auth/gql-auth.guard';
 import { CurrentUser } from 'src/commons/auth/gql-user.param';
+import { AuthService } from './auth.service';
 @Resolver()
 export class AuthResolver {
   constructor(

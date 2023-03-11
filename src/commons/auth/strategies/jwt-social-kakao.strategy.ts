@@ -1,5 +1,5 @@
 import { PassportStrategy } from '@nestjs/passport';
-import { Strategy, Profile } from 'passport-kakao';
+import { Strategy } from 'passport-kakao';
 
 export class JwtKakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
   constructor() {

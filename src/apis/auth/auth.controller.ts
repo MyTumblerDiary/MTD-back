@@ -1,13 +1,8 @@
 import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { CreateUserInput } from '../users/dto/createUsers.input';
-import { User } from '../users/entities/user.entity';
+import { Request, Response } from 'express';
 import { UserService } from '../users/users.service';
 import { AuthService } from './auth.service';
-
-interface IOAuthUser {
-  user: Pick<User, 'email' | 'password' | 'name' | 'age'>;
-}
 
 @Controller()
 export class AuthController {
@@ -27,11 +22,7 @@ export class AuthController {
 
   @Get('/login/kakao')
   @UseGuards(AuthGuard('kakao'))
-  async loginKakao(
-    @Req() req: Request,
-    //@Req() req: Request & IOAuthUser, //
-    @Res() res: Response,
-  ) {
+  async loginKakao(@Req() req: Request, @Res() res: Response) {
     return await this.authService.social_login({ req, res });
   }
 }
