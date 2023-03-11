@@ -3,7 +3,6 @@ import { User } from './entities/user.entity';
 import { UserService } from './users.service';
 
 import { UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { GqlAuthAccessGuard } from 'src/commons/auth/gql-auth.guard';
 import { CurrentUser } from 'src/commons/auth/gql-user.param';
 import { CreateUserInput } from './dto/createUsers.input';

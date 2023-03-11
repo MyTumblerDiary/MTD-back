@@ -7,7 +7,7 @@ export class JwtKakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
       clientID: process.env.OAUTH_KAKAO_ID,
       clientSecret: process.env.OAUTH_KAKAO_SECRET,
       callbackURL: process.env.OAUTH_KAKAO_CALLBACK,
-      scope: ['account_email', 'profile_nickname'],
+      scope: ['account_email', 'profile_nickname']
     });
   }
   validate(accessToken, refreshToken, profile) {
