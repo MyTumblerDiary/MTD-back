@@ -12,13 +12,13 @@ export class UserService {
   ) {}
 
   async findOne({ email }) {
-    return await this.userRepository.findOneBy({ email });
+    return await this.userRepository.findOne({ where: { email } });
   }
 
   async create({ createUserInput }) {
     const hashedPassword = await bcrypt.hash(createUserInput.password, 10);
     const email = createUserInput.email;
-    const user = await this.userRepository.findOneBy({ email });
+    const user = await this.userRepository.findOne({ where: { email } });
     if (user) throw new ConflictException('이미 등록된 이메일 입니다.');
     const result = await this.userRepository.save({
       email: createUserInput.email,
