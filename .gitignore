@@ -2,7 +2,7 @@
 /dist
 /node_modules
 /config
-
+yarn.lock
 
 # Logs
 logs
@@ -35,3 +35,7 @@ lerna-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+#database
+mysql
+redis 

@@ -12,15 +12,24 @@ services:
       - 3000:3000
 
   my-database:
-    platform: linux/arm64/v8
-    image: mysql:latest
+    image: mysql:8.0.32
     environment:
-      MYSQL_DATABASE: process.env.DB_NAME
-      MYSQL_ROOT_PASSWORD: process.env.DB_PASSWORD
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: test-db
+      MYSQL_USER: test-user
+      MYSQL_NATIVE_PASSWORD: test-password
     ports:
       - 3306:3306
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=mysql_native_password
+    volumes:
+      - ./mysql/data:/var/lib/mysql
 
   my-redis:
     image: redis:latest
     ports:
       - 6379:6379
+    volumes:
+      - ./redis/data:/data
