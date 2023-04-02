@@ -1,0 +1,42 @@
+name: CI
+on:
+  - push
+
+jobs:
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+    env:
+      working-directory: ./
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 18.x
+
+      - name: Cache node modules
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
+
+      - name: Install dependencies
+        run: yarn install --concurrency 4
+        working-directory: ./
+
+      - name: Run format check
+        run: yarn format
+        working-directory: ./
+
+      - name: Run lint check
+        run: yarn lint
+        working-directory: ./
+
+      # - name: Run typeorm migration
+      #   run: npm run typeorm migration:run -- -d ./src/config/data-source.ts
+      #   working-directory: ./server
+
+      - name: Build project
+        run: yarn build
+        working-directory: ./
