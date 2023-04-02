@@ -35,6 +35,8 @@ jobs:
           port: 22
           script: |
             cd /home/ubuntu/MTD-back
+            git config --global user.email "kth5954@naver.com"
+            git config --global user.name "kth5954"
             git pull origin dev
       - name: Copy the Application to the EC2 instance
         uses: appleboy/scp-action@master
