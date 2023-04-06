@@ -9,7 +9,6 @@ type User {
   deletedAt: String!
   email: String!
   password: String!
-  name: String!
   nickname: String!
 }
 
@@ -17,6 +16,8 @@ type Query {
   fetchUser: String!
   sendEmail(id: String!): Boolean!
   checkcode(email: String!, code: String!): Boolean!
+  checkEmail(email: String!): Boolean!
+  checkNickname(nickname: String!): Boolean!
 }
 
 type Mutation {
@@ -28,6 +29,5 @@ type Mutation {
 input CreateUserInput {
   email: String!
   password: String!
-  name: String!
   nickname: String!
 }

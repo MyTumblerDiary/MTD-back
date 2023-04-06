@@ -20,9 +20,5 @@ export class User extends CommonEntity {
 
   @Column()
   @Field(() => String)
-  name: string;
-
-  @Column()
-  @Field(() => String)
   nickname: string;
 }

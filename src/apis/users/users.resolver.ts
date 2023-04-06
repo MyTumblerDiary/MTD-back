@@ -39,4 +39,14 @@ export class UserResolver {
   ): Promise<boolean> {
     return await this.userService.checkCode({ email, code });
   }
+
+  @Query(() => Boolean)
+  async checkEmail(@Args('email') email: string): Promise<boolean> {
+    return await this.userService.checkEmail({ email });
+  }
+
+  @Query(() => Boolean)
+  async checkNickname(@Args('nickname') nickname: string): Promise<boolean> {
+    return await this.userService.checkNickname({ nickname });
+  }
 }
