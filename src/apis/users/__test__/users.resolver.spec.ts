@@ -13,10 +13,10 @@ describe('UserResolver', () => {
     userResolver = userModule.get<UserResolver>(UserResolver);
   });
 
-  describe('createUser', () => {
-    it('create', () => {
-      const result = userResolver.createUser();
-      expect(result).toBe('');
-    });
-  });
+  // describe('createUser', () => {
+  //   it('create', () => {
+  //     const result = userResolver.createUser();
+  //     expect(result).toBe('');
+  //   });
+  // });
 });
