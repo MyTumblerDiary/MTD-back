@@ -10,11 +10,13 @@ type User {
   email: String!
   password: String!
   name: String!
-  age: Int!
+  nickname: String!
 }
 
 type Query {
   fetchUser: String!
+  sendEmail(id: String!): Boolean!
+  checkcode(email: String!, code: String!): Boolean!
 }
 
 type Mutation {
@@ -27,5 +29,5 @@ input CreateUserInput {
   email: String!
   password: String!
   name: String!
-  age: Int!
+  nickname: String!
 }

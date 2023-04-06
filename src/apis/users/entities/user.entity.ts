@@ -23,6 +23,6 @@ export class User extends CommonEntity {
   name: string;
 
   @Column()
-  @Field(() => Int)
-  age: number;
+  @Field(() => String)
+  nickname: string;
 }

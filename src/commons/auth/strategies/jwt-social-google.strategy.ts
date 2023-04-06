@@ -15,7 +15,7 @@ export class JwtGoogleStrategy extends PassportStrategy(Strategy, 'google') {
       email: profile.emails[0].value,
       password: '1234555',
       name: profile.displayName,
-      age: 0,
+      nickname: profile.displayName,
     };
   }
 }

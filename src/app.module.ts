@@ -1,5 +1,5 @@
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { Module } from '@nestjs/common';
+import { CacheModule, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -11,6 +11,8 @@ import { DynamicGqlModule } from './dynamic-gql.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { GqlThrottlerGuard } from './commons/guards/gql.throttler.guard';
+import { ClientOpts } from 'redis';
+import * as redisStore from 'cache-manager-redis-store';
 
 const ENV = process.env.NODE_ENV;
 
@@ -24,7 +26,15 @@ const ENV = process.env.NODE_ENV;
     ThrottlerModule.forRoot({
       ttl: 60,
       limit: 20,
-    })
+    }),
+    CacheModule.register<ClientOpts>({
+      store: redisStore,
+      url: 'redis://my-redis:6379',
+      isGlobal: true,
+      // host: process.env.HOST,
+      // port: parseInt(process.env.REDIS_PORT),
+      ttl: 120,
+    }),
   ],
   providers: [
     {
@@ -33,8 +43,8 @@ const ENV = process.env.NODE_ENV;
     },
     {
       provide: APP_GUARD,
-      useClass: GqlThrottlerGuard
-    }
+      useClass: GqlThrottlerGuard,
+    },
   ],
 })
-export class AppModule { }
+export class AppModule {}
