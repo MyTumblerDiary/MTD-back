@@ -41,7 +41,7 @@ export class AuthService {
           email: req.user.email,
           password: hashedPassword,
           name: req.user.name,
-          age: req.user.age,
+          nickname: req.user.nickname,
         },
       });
     }

@@ -15,7 +15,7 @@ services:
     image: mysql:8.0.32
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: test-db
+      MYSQL_DATABASE: testdb
       MYSQL_USER: test-user
       MYSQL_NATIVE_PASSWORD: test-password
     ports:

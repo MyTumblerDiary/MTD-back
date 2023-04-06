@@ -26,4 +26,17 @@ export class UserResolver {
     console.log('유저정보:', currentUser);
     return 'qqq';
   }
+
+  @Query(() => Boolean)
+  async sendEmail(@Args('id') id: string): Promise<boolean> {
+    return await this.userService.sendEmail(id);
+  }
+
+  @Query(() => Boolean)
+  async checkcode(
+    @Args('email') email: string,
+    @Args('code') code: string,
+  ): Promise<boolean> {
+    return await this.userService.checkCode({ email, code });
+  }
 }

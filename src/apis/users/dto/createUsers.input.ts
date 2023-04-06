@@ -5,5 +5,5 @@ export class CreateUserInput extends PickType(User, [
   'email',
   'password',
   'name',
-  'age',
+  'nickname',
 ] as const) {}
