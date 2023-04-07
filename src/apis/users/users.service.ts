@@ -24,16 +24,9 @@ export class UserService {
 
   async create({ createUserInput }) {
     const hashedPassword = await bcrypt.hash(createUserInput.password, 10);
-    const email = createUserInput.email;
-    const nickname = createUserInput.nickname;
-    const user = await this.userRepository.findOne({ where: { email } });
-    if (user) throw new ConflictException('이미 등록된 이메일 입니다.');
-    const check = await this.userRepository.findOne({ where: { nickname } });
-    if (user) throw new ConflictException('이미 등록된 닉네임 입니다.');
     const result = await this.userRepository.save({
       email: createUserInput.email,
       password: hashedPassword,
-      name: createUserInput.name,
       nickname: createUserInput.nickname,
     });
     return result;
@@ -83,6 +76,18 @@ export class UserService {
   async checkCode({ email, code }) {
     const chk = await this.cacheManager.get(`${email}'s AuthenticationCode`);
     if (chk != code) throw new ConflictException('코드가 맞지 않습니다.');
+    return true;
+  }
+
+  async checkEmail({ email }) {
+    const user = await this.userRepository.findOne({ where: { email } });
+    if (user) throw new ConflictException('이미 등록된 이메일 입니다.');
+    return true;
+  }
+
+  async checkNickname({ nickname }) {
+    const user = await this.userRepository.findOne({ where: { nickname } });
+    if (user) throw new ConflictException('이미 등록된 닉네임 입니다.');
     return true;
   }
 }
