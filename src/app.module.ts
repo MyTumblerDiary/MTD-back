@@ -24,27 +24,27 @@ const ENV = process.env.NODE_ENV;
     DynamicGqlModule.forRoot(),
     TypeOrmModule.forRoot(ormOption),
     ThrottlerModule.forRoot({
-      ttl: 60,
-      limit: 20,
+      ttl: 1,
+      limit: 5,
     }),
-    CacheModule.register<ClientOpts>({
-      store: redisStore,
-      url: 'redis://my-redis:6379',
-      isGlobal: true,
-      // host: process.env.HOST,
-      // port: parseInt(process.env.REDIS_PORT),
-      ttl: 120,
-    }),
+    // CacheModule.register<ClientOpts>({
+    //   store: redisStore,
+    //   url: 'redis://my-redis:6379',
+    //   isGlobal: true,
+    //   // host: process.env.HOST,
+    //   // port: parseInt(process.env.REDIS_PORT),
+    //   ttl: 120,
+    // }),
   ],
   providers: [
     {
       provide: 'NODE_ENV',
       useValue: ENV,
     },
-    {
-      provide: APP_GUARD,
-      useClass: GqlThrottlerGuard,
-    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: GqlThrottlerGuard,
+    // },
   ],
 })
-export class AppModule {}
+export class AppModule { }

@@ -15,8 +15,8 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
-  ) {}
+    // @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) { }
 
   async findOne({ email }) {
     return await this.userRepository.findOne({ where: { email } });
@@ -56,10 +56,10 @@ export class UserService {
       },
     });
 
-    if (randomCode) {
-      await this.cacheManager.get(`${id}'s AuthenticationCode`);
-    }
-    await this.cacheManager.set(`${id}'s AuthenticationCode`, randomCode);
+    // if (randomCode) {
+    //   await this.cacheManager.get(`${id}'s AuthenticationCode`);
+    // }
+    // await this.cacheManager.set(`${id}'s AuthenticationCode`, randomCode);
 
     const sendResult = await transport.sendMail({
       from: {
@@ -74,8 +74,8 @@ export class UserService {
   }
 
   async checkCode({ email, code }) {
-    const chk = await this.cacheManager.get(`${email}'s AuthenticationCode`);
-    if (chk != code) throw new ConflictException('코드가 맞지 않습니다.');
+    // const chk = await this.cacheManager.get(`${email}'s AuthenticationCode`);
+    // if (chk != code) throw new ConflictException('코드가 맞지 않습니다.');
     return true;
   }
 

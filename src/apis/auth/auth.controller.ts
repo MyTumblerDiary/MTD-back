@@ -9,7 +9,7 @@ export class AuthController {
   constructor(
     private readonly userService: UserService,
     private readonly authService: AuthService,
-  ) {}
+  ) { }
   @Get('/login/google')
   @UseGuards(AuthGuard('google'))
   async loginGoogle(
@@ -20,9 +20,16 @@ export class AuthController {
     return await this.authService.social_login({ req, res });
   }
 
+  // @Get('/login/kakao')
+  // @UseGuards(AuthGuard('kakao'))
+  // async loginKakao() {
+  //   return;
+  // }
+
   @Get('/login/kakao')
   @UseGuards(AuthGuard('kakao'))
-  async loginKakao(@Req() req: Request, @Res() res: Response) {
+  async loginKakaoCall(@Req() req: Request, @Res() res: Response) {
     return await this.authService.social_login({ req, res });
   }
 }
+

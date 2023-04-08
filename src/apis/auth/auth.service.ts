@@ -2,22 +2,24 @@ import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UserService } from '../users/users.service';
+import { Request, Response } from 'express';
+
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService, //
-  ) {}
+  ) { }
 
-  setRefreshToken({ user, res }) {
+  async setRefreshToken({ user, res }) {
     const refreshToken = this.jwtService.sign(
       { email: user.email, sub: user.id }, //
       { secret: 'myRefreshKey', expiresIn: '2w' },
     );
-    res.setHeader('Set-Cookie', `refreshToken=${refreshToken}`);
+    await res.setHeader('Set-Cookie', `refreshToken=${refreshToken}`);
   }
-  getAccessToken({ user }) {
+  async getAccessToken({ user }) {
     return this.jwtService.sign(
       { email: user.email, sub: user.id }, //
       { secret: 'myAccessKey', expiresIn: '1h' },
@@ -46,7 +48,7 @@ export class AuthService {
       });
     }
     await this.setRefreshToken({ user, res });
-    await this.getAccessToken({ user });
-    res.redirect('http://localhost:5500/front/social-login.html');
+    const accessToken = await this.getAccessToken({ user });
+    res.redirect('http://localhost:3000/login/social?token=' + accessToken);
   }
 }
