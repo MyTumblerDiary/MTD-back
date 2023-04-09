@@ -19,11 +19,12 @@ export class AuthService {
     );
     await res.setHeader('Set-Cookie', `refreshToken=${refreshToken}`);
   }
-  async getAccessToken({ user }) {
-    return this.jwtService.sign(
+  async setAccessToken({ user, res }) {
+    const accessToken = this.jwtService.sign(
       { email: user.email, sub: user.id }, //
-      { secret: 'myAccessKey', expiresIn: '1h' },
+      { secret: 'myAccessKey', expiresIn: '1h' }
     );
+    await res.setHeader('Set-Cookie', `accessToken=${accessToken}`)
   }
   async loginUser({ email, password, context }) {
     const user = await this.userService.findOne({ email });
@@ -32,7 +33,7 @@ export class AuthService {
     if (!isAuth)
       throw new UnprocessableEntityException('비밀번호가 틀렸습니다.');
     this.setRefreshToken({ user, res: context.res });
-    return this.getAccessToken({ user });
+    return this.setAccessToken({ user, res: context.res });
   }
   async social_login({ req, res }) {
     let user = await this.userService.findOne({ email: req.user.email });
@@ -48,7 +49,9 @@ export class AuthService {
       });
     }
     await this.setRefreshToken({ user, res });
-    const accessToken = await this.getAccessToken({ user });
-    res.redirect('http://localhost:3000/login/social?token=' + accessToken);
+    const accessToken = await this.setAccessToken({ user, res });
+    res.status(200).json({
+      ok: true
+    })
   }
 }
