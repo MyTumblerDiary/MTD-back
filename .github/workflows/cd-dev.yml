@@ -33,6 +33,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.SSH_KEY }}
           port: 22
+          shell: bash
           script: |
             cd /home/ubuntu/MTD-back
             git pull origin dev
