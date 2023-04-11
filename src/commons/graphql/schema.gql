@@ -15,20 +15,37 @@ type User {
 
 type Query {
   fetchUser: String!
+
+  """이메일 보내기"""
   sendEmail(id: String!): Boolean!
+
+  """이메일인증 코드 확인"""
   checkcode(email: String!, code: String!): Boolean!
+
+  """중복 이메일 확인"""
   checkEmail(email: String!): Boolean!
+
+  """닉네임 중복 확인"""
   checkNickname(nickname: String!): Boolean!
 }
 
 type Mutation {
+  """회원가입"""
   createUser(createUserInput: CreateUserInput!): User!
+
+  """유저정보 수정"""
+  updateUser(userId: String!, updateUserInput: UpdateUserInput!): User!
   login(email: String!, password: String!): String!
   restoreAccessToken: String!
 }
 
 input CreateUserInput {
   email: String!
+  password: String!
+  nickname: String!
+}
+
+input UpdateUserInput {
   password: String!
   nickname: String!
 }

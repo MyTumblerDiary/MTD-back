@@ -6,7 +6,7 @@ import { Column, Entity } from 'typeorm';
 @Entity()
 @ObjectType()
 export class User extends CommonEntity {
-  @Column()
+  @Column({ unique: true })
   @Field(() => String)
   email: string;
 
