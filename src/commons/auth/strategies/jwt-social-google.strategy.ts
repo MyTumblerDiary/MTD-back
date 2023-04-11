@@ -9,13 +9,13 @@ export class JwtGoogleStrategy extends PassportStrategy(Strategy, 'google') {
       callbackURL: process.env.OAUTH_GOOGLE_CALLBACK,
       scope: ['email', 'profile'],
     });
-
   }
   validate(accessToken: string, refreshToken: string, profile: any): any {
     return {
       email: profile.emails[0].value,
       password: '1234555',
       nickname: profile.displayName,
+      social: true,
     };
   }
 }

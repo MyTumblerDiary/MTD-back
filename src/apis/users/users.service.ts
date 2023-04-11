@@ -14,9 +14,8 @@ import { Cache } from 'cache-manager';
 export class UserService {
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    // @Inject(CACHE_MANAGER) private cacheManager: Cache,
-  ) { }
+    private readonly userRepository: Repository<User>, // @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
 
   async findOne({ email }) {
     return await this.userRepository.findOne({ where: { email } });
@@ -51,7 +50,6 @@ export class UserService {
         clientId: process.env.GMAIL_CLIENT_ID,
         clientSecret: process.env.GMAIL_CLIENT_SECRET,
         refreshToken: process.env.GMAIL_REFRESH_TOKEN,
-        //accessToken: process.env.GMAIL_ACCESS_TOKEN,
         expires: 3600,
       },
     });

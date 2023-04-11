@@ -9,7 +9,7 @@ export class AuthController {
   constructor(
     private readonly userService: UserService,
     private readonly authService: AuthService,
-  ) { }
+  ) {}
   @Get('/login/google')
   @UseGuards(AuthGuard('google'))
   async loginGoogle(
@@ -32,4 +32,3 @@ export class AuthController {
     return await this.authService.social_login({ req, res });
   }
 }
-
