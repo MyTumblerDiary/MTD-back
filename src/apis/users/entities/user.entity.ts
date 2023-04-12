@@ -6,11 +6,7 @@ import { Column, Entity } from 'typeorm';
 @Entity()
 @ObjectType()
 export class User extends CommonEntity {
-  // @PrimaryGeneratedColumn('uuid')
-  // @Field(() => String)
-  // id: string;
-
-  @Column()
+  @Column({ unique: true })
   @Field(() => String)
   email: string;
 
@@ -21,4 +17,8 @@ export class User extends CommonEntity {
   @Column()
   @Field(() => String)
   nickname: string;
+
+  @Column({ default: false })
+  @Field(() => Boolean)
+  social: boolean;
 }

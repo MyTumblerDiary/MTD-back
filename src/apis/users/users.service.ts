@@ -14,23 +14,38 @@ import { Cache } from 'cache-manager';
 export class UserService {
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    // @Inject(CACHE_MANAGER) private cacheManager: Cache,
-  ) { }
+    private readonly userRepository: Repository<User>, // @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
 
   async findOne({ email }) {
     return await this.userRepository.findOne({ where: { email } });
   }
 
   async create({ createUserInput }) {
-    const hashedPassword = await bcrypt.hash(createUserInput.password, 10);
+    createUserInput.password = await bcrypt.hash(createUserInput.password, 10);
     const result = await this.userRepository.save({
-      email: createUserInput.email,
-      password: hashedPassword,
-      nickname: createUserInput.nickname,
+      ...createUserInput,
     });
     return result;
   }
+
+  async updateUser({ userId, updateUserInput }) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    updateUserInput.password = await bcrypt.hash(updateUserInput.password, 10);
+    const newUser = {
+      ...user,
+      id: userId,
+      ...updateUserInput,
+    };
+    return await this.userRepository.save(newUser);
+  }
+
+  // async fetchUserPassword(email: string) {
+  //   const user = await this.userRepository.findOne({ where: { email } });
+  //   if (!user) throw new ConflictException('존재하지 않는 이메일입니다');
+  //   return 1;
+  // }
+
   async sendEmail(id: string): Promise<boolean> {
     //const user = await this.userRepository.findOne({ where: { id } });
 
@@ -51,7 +66,6 @@ export class UserService {
         clientId: process.env.GMAIL_CLIENT_ID,
         clientSecret: process.env.GMAIL_CLIENT_SECRET,
         refreshToken: process.env.GMAIL_REFRESH_TOKEN,
-        //accessToken: process.env.GMAIL_ACCESS_TOKEN,
         expires: 3600,
       },
     });
