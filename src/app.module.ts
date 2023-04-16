@@ -27,14 +27,14 @@ const ENV = process.env.NODE_ENV;
       ttl: 1,
       limit: 5,
     }),
-    // CacheModule.register<ClientOpts>({
-    //   store: redisStore,
-    //   url: 'redis://my-redis:6379',
-    //   isGlobal: true,
-    //   // host: process.env.HOST,
-    //   // port: parseInt(process.env.REDIS_PORT),
-    //   ttl: 120,
-    // }),
+    CacheModule.register<ClientOpts>({
+      store: redisStore,
+      url: 'redis://my-redis:6379',
+      isGlobal: true,
+      // host: process.env.HOST,
+      // port: parseInt(process.env.REDIS_PORT),
+      ttl: 120,
+    }),
   ],
   providers: [
     {
@@ -47,4 +47,4 @@ const ENV = process.env.NODE_ENV;
     // },
   ],
 })
-export class AppModule { }
+export class AppModule {}

@@ -14,7 +14,8 @@ import { Cache } from 'cache-manager';
 export class UserService {
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>, // @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly userRepository: Repository<User>, //
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async findOne({ email }) {
@@ -29,24 +30,31 @@ export class UserService {
     return result;
   }
 
-  async updateUser({ userId, updateUserInput }) {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
+  async updateUser({ userEmail, updateUserInput }) {
+    const user = await this.userRepository.findOne({
+      where: { email: userEmail },
+    });
     updateUserInput.password = await bcrypt.hash(updateUserInput.password, 10);
     const newUser = {
       ...user,
-      id: userId,
+      email: userEmail,
       ...updateUserInput,
     };
     return await this.userRepository.save(newUser);
   }
 
-  // async fetchUserPassword(email: string) {
-  //   const user = await this.userRepository.findOne({ where: { email } });
-  //   if (!user) throw new ConflictException('존재하지 않는 이메일입니다');
-  //   return 1;
-  // }
+  async deleteUser({ userId }) {
+    const result = await this.userRepository.softDelete({ id: userId });
+    return result.affected ? true : false;
+  }
 
-  async sendEmail(id: string): Promise<boolean> {
+  async fetchUserPassword(email: string) {
+    const user = await this.userRepository.findOne({ where: { email } });
+    if (!user) throw new ConflictException('존재하지 않는 이메일입니다');
+    return 1;
+  }
+
+  async sendEmail(email: string): Promise<boolean> {
     //const user = await this.userRepository.findOne({ where: { id } });
 
     const getRandomCode = (min, max) => {
@@ -66,14 +74,13 @@ export class UserService {
         clientId: process.env.GMAIL_CLIENT_ID,
         clientSecret: process.env.GMAIL_CLIENT_SECRET,
         refreshToken: process.env.GMAIL_REFRESH_TOKEN,
-        expires: 3600,
       },
     });
 
-    // if (randomCode) {
-    //   await this.cacheManager.get(`${id}'s AuthenticationCode`);
-    // }
-    // await this.cacheManager.set(`${id}'s AuthenticationCode`, randomCode);
+    if (randomCode) {
+      await this.cacheManager.get(`${email}'s AuthenticationCode`);
+    }
+    await this.cacheManager.set(`${email}'s AuthenticationCode`, randomCode);
 
     const sendResult = await transport.sendMail({
       from: {
@@ -81,15 +88,15 @@ export class UserService {
         address: process.env.GMAIL_ID,
       },
       subject: '내 서비스 인증 메일',
-      to: [id],
+      to: [email],
       text: `The Authentication code is ${randomCode}`,
     });
     return sendResult.accepted.length > 0;
   }
 
   async checkCode({ email, code }) {
-    // const chk = await this.cacheManager.get(`${email}'s AuthenticationCode`);
-    // if (chk != code) throw new ConflictException('코드가 맞지 않습니다.');
+    const chk = await this.cacheManager.get(`${email}'s AuthenticationCode`);
+    if (chk != code) throw new ConflictException('코드가 맞지 않습니다.');
     return true;
   }
 
