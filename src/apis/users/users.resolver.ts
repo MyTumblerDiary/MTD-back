@@ -20,37 +20,27 @@ export class UserResolver {
     return await this.userService.create({ createUserInput });
   }
 
-  @UseGuards(GqlAuthAccessGuard)
+  //@UseGuards(GqlAuthAccessGuard)
   @Mutation(() => User, {
     description: '유저정보 수정',
   })
   async updateUser(
-    @Args('userId') userId: string,
+    @Args('userEmail') userEmail: string,
     @Args('updateUserInput') updateUserInput: UpdateUserInput,
   ) {
-    return await this.userService.updateUser({ userId, updateUserInput });
+    return await this.userService.updateUser({ userEmail, updateUserInput });
   }
 
-  @UseGuards(GqlAuthAccessGuard)
-  @Query(() => String)
-  fetchUser(
-    @CurrentUser() currentUser: User, //
-  ) {
-    console.log('fetchUser 실행완료');
-    console.log('유저정보:', currentUser);
-    return 'qqq';
+  @Mutation(() => Boolean)
+  deleteUser(@Args('userId') userId: string) {
+    this.userService.deleteUser({ userId });
   }
-
-  // @Query(() => String)
-  // async fetchUserPassword(@Args('email') email: string) {
-  //   return await this.userService.fetchUserPassword(email);
-  // }
 
   @Query(() => Boolean, {
     description: '이메일 보내기',
   })
-  async sendEmail(@Args('id') id: string): Promise<boolean> {
-    return await this.userService.sendEmail(id);
+  async sendEmail(@Args('email') email: string): Promise<boolean> {
+    return await this.userService.sendEmail(email);
   }
 
   @Query(() => Boolean, {
