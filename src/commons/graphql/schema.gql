@@ -14,8 +14,6 @@ type User {
 }
 
 type Query {
-  fetchUserPassword(email: String!): String!
-
   """이메일 보내기"""
   sendEmail(email: String!): Boolean!
 
