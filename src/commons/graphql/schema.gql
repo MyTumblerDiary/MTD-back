@@ -10,7 +10,7 @@ type User {
   email: String!
   password: String!
   nickname: String!
-  social: Boolean!
+  social: String!
 }
 
 type Query {

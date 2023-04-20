@@ -18,7 +18,7 @@ export class User extends CommonEntity {
   @Field(() => String)
   nickname: string;
 
-  @Column({ default: false })
-  @Field(() => Boolean)
-  social: boolean;
+  @Column({ default: '' })
+  @Field(() => String)
+  social: string;
 }

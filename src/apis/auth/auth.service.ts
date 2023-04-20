@@ -41,8 +41,10 @@ export class AuthService {
     if (!user) {
       throw new UnprocessableEntityException('이메일이 없습니다.');
     }
-    if (user.social == true)
-      throw new UnprocessableEntityException('소셜로그인한 이메일입니다.');
+    if (user.social)
+      throw new UnprocessableEntityException(
+        `${user.social} 소셜로그인한 이메일입니다.`,
+      );
     const isAuth = await bcrypt.compare(password, user.password);
     if (!isAuth)
       throw new UnprocessableEntityException('비밀번호가 틀렸습니다.');
