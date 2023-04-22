@@ -71,4 +71,41 @@ describe('UserService', () => {
       expect(isMatched).toBeTruthy();
     });
   });
+
+  describe('update', () => {
+    it('유효한 유저 email을 입력받아서 해당 유저의 정보를 수정하는지 확인', async () => {
+      const createUserInput = {
+        email: 'test@test.com',
+        password: 'test1234',
+        nickname: 'testuser',
+      };
+
+      // 1. 테스트용 유저 생성
+      const createdUser = await userService.create({
+        createUserInput,
+      });
+
+      // 2. 변경할 유저 정보
+      const updatedUserData = {
+        email: 'test@test.com',
+        password: 'test5678',
+        nickname: 'testuser_updated',
+      };
+      const updatePW = updatedUserData.password;
+      // 3. update 메서드 호출
+      const updatedUser = await userService.updateUser({
+        userEmail: createUserInput.email,
+        updateUserInput: updatedUserData,
+      });
+
+      // 4. 반환된 유저 정보가 변경된 정보와 일치하는지 확인
+      expect(updatedUser.nickname).toBe(updatedUserData.nickname);
+
+      // 5. bcrypt.compare 메서드를 사용해서 비밀번호를 검증
+      console.log(updatePW);
+      console.log(updatedUser.password);
+      const isMatched = await bcrypt.compare(updatePW, updatedUser.password);
+      expect(isMatched).toBeTruthy();
+    });
+  });
 });
