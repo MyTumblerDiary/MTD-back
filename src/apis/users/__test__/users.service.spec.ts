@@ -1,4 +1,4 @@
-import { ConflictException } from '@nestjs/common';
+import { CacheModule, ConflictException, CACHE_MANAGER } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
@@ -10,8 +10,7 @@ class MockUserRepository {
     {
       email: 'a@a.com',
       password: '0000',
-      name: '짱구',
-      age: 7,
+      nickname: '짱구',
     },
   ];
   findOne({ email }) {
@@ -19,9 +18,9 @@ class MockUserRepository {
     if (users.length) return users[0];
     return null;
   }
-  save({ email, password, name, age }) {
-    this.mydb.push({ email, password, name, age });
-    return { email, password, name, age };
+  save({ email, password, nickname }) {
+    this.mydb.push({ email, password, nickname });
+    return { email, password, nickname };
   }
 }
 
@@ -29,6 +28,7 @@ describe('UserService', () => {
   let userService: UserService;
   beforeEach(async () => {
     const userModule = await Test.createTestingModule({
+      imports: [CacheModule.register()],
       providers: [
         UserService,
         {
@@ -47,38 +47,28 @@ describe('UserService', () => {
         createUserInput: {
           email: 'a@a.com',
           password: '1234',
-          name: '철수',
-          age: 13,
+          nickname: '철수',
         },
       };
-      try {
-        await userService.create({ ...myData });
-      } catch (error) {
-        expect(error).toBeInstanceOf(ConflictException);
-      }
-      userService.create({ ...myData });
+      const result = await userService.checkEmail({
+        email: myData.createUserInput.email,
+      });
+      expect(result).toBeTruthy();
     });
     it('회원 등록 잘됐는지 검증!!', async () => {
       const myData = {
         createUserInput: {
           email: 'bbb@bbb.com',
           password: '1234',
-          name: '철수',
-          age: 13,
+          nickname: '철수',
         },
       };
-      const myResultData = {
-        createUserInput: {
-          email: 'bbb@bbb.com',
-          password: '1234',
-          name: '철수',
-          age: 13,
-        },
-      };
+      const originPW = myData.createUserInput.password;
       const result = await userService.create({ ...myData });
-      expect(result).toStrictEqual(result);
+      expect(result.email).toBe(myData.createUserInput.email);
+      expect(result.nickname).toBe(myData.createUserInput.nickname);
+      const isMatched = await bcrypt.compare(originPW, result.password);
+      expect(isMatched).toBeTruthy();
     });
   });
-
-  // describe('findOne', () => {});
 });
