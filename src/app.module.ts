@@ -1,18 +1,17 @@
-import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { CacheModule, Module } from '@nestjs/common';
+import { CacheModule, Logger, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { GraphQLModule } from '@nestjs/graphql';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import * as redisStore from 'cache-manager-redis-store';
+import { ClientOpts } from 'redis';
 import { AuthModule } from './apis/auth/auth.module';
 import { UserModule } from './apis/users/users.module';
+import { HttpExceptionFilter } from './commons/filter/http-exception.filter';
+import { GqlThrottlerGuard } from './commons/guards/gql.throttler.guard';
 import { configOptions } from './config/config';
 import { ormOption } from './config/typeorm.config';
 import { DynamicGqlModule } from './dynamic-gql.module';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';
-import { GqlThrottlerGuard } from './commons/guards/gql.throttler.guard';
-import { ClientOpts } from 'redis';
-import * as redisStore from 'cache-manager-redis-store';
 
 const ENV = process.env.NODE_ENV;
 
@@ -29,10 +28,9 @@ const ENV = process.env.NODE_ENV;
     }),
     CacheModule.register<ClientOpts>({
       store: redisStore,
-      url: 'redis://my-redis:6379',
       isGlobal: true,
-      // host: process.env.HOST,
-      // port: parseInt(process.env.REDIS_PORT),
+      host: process.env.HOST,
+      port: 6379,
       ttl: 120,
     }),
   ],
@@ -41,10 +39,15 @@ const ENV = process.env.NODE_ENV;
       provide: 'NODE_ENV',
       useValue: ENV,
     },
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: GqlThrottlerGuard,
-    // },
+    {
+      provide: APP_GUARD,
+      useClass: GqlThrottlerGuard,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
+    Logger,
   ],
 })
 export class AppModule {}

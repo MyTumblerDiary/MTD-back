@@ -1,20 +1,38 @@
 import {
   ArgumentsHost,
   Catch,
+  ContextType,
   ExceptionFilter,
   HttpException,
+  Injectable,
+  Logger,
 } from '@nestjs/common';
+import { ApolloError } from 'apollo-server-core';
 
-@Catch(HttpException)
+@Catch(Error)
+@Injectable()
 export class HttpExceptionFilter implements ExceptionFilter {
-  catch(exception: HttpException) {
-    const status = exception.getStatus();
-    const message = exception.message;
+  constructor(private readonly logger: Logger) {}
 
-    console.log('====================');
-    console.log('예외가 발생했어요!');
-    console.log('예외내용:', message);
-    console.log('예외코드', status);
-    console.log('====================');
+  catch(exception: unknown, host: ArgumentsHost) {
+    if (host.getType() === ('graphql' as ContextType)) {
+      if (exception instanceof ApolloError) {
+        this.logger.error(
+          exception.message,
+          JSON.stringify({
+            code: exception.extensions.code,
+            status: exception.extensions.exception.status,
+            message: exception.extensions.exception.message,
+          }),
+        );
+        throw exception;
+      } else if (exception instanceof HttpException) {
+        this.logger.error({
+          code: exception.getStatus(),
+          message: exception.message,
+        });
+        throw exception;
+      }
+    }
   }
 }
