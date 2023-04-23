@@ -11,7 +11,7 @@ import { ApolloError } from 'apollo-server-core';
 
 @Catch(Error)
 @Injectable()
-export class HttpExceptionFilter implements ExceptionFilter {
+export class GqlExceptionFilter implements ExceptionFilter {
   constructor(private readonly logger: Logger) {}
 
   catch(exception: unknown, host: ArgumentsHost) {
