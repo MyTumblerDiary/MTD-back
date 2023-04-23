@@ -40,14 +40,6 @@ export class StoresResolver {
     return await this.storesService.findOneById(id);
   }
 
-  @Query(() => Store, {
-    name: 'searchStore',
-    description: 'Find one store by name',
-  })
-  public async searchStore() {
-    return await this.storesService.findOneByName(name);
-  }
-
   @Mutation(() => Store, {
     name: 'updateStore',
     description: 'Update a store',
