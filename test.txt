@@ -1,0 +1,3 @@
+deploy test를 위한 text 파일입니다. 
+
+4번째 테스트: user name, email 추가
