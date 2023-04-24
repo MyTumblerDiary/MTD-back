@@ -1,6 +1,8 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { PaginationInput } from 'src/commons/dto/pagination.dto';
+import { PaginationInput } from 'src/commons/pagination/dto/pagination.dto';
 import { CreateStoreInput } from './dto/create.store.dto';
+import { OrderStoreInput } from './dto/order.store.dto';
+import { SearchStoreInput } from './dto/search.store.dto';
 import { UpdateStoreInput } from './dto/update.store.dto';
 import { Store } from './entities/store.entity';
 import { StoresService } from './stores.service';
@@ -27,9 +29,21 @@ export class StoresResolver {
     @Args('paginationInput', {
       nullable: true,
     })
-    paginationInput?: PaginationInput,
+    paginationInput: PaginationInput = new PaginationInput(),
+    @Args('searchStoreInput', {
+      nullable: true,
+    })
+    searchStoreInput: SearchStoreInput = new SearchStoreInput(),
+    @Args('orderStoreInput', {
+      nullable: true,
+    })
+    orderStoreInput: OrderStoreInput = new OrderStoreInput(),
   ) {
-    return await this.storesService.findAll(paginationInput);
+    return await this.storesService.findAll(
+      paginationInput,
+      searchStoreInput,
+      orderStoreInput,
+    );
   }
 
   @Query(() => Store, {

@@ -59,7 +59,7 @@ type Query {
   checkNickname(nickname: String!): Boolean!
 
   """Find all stores"""
-  stores(paginationInput: PaginationInput): [Store!]!
+  stores(paginationInput: PaginationInput, searchStoreInput: SearchStoreInput, orderStoreInput: OrderStoreInput): [Store!]!
 
   """Find one store by id"""
   store(id: String!): Store!
@@ -68,6 +68,41 @@ type Query {
 input PaginationInput {
   page: Float! = 1
   limit: Float! = 10
+}
+
+input SearchStoreInput {
+  """가게에서 검색할 기준 필드를 선택합니다. """
+  searchBy: StoreField = NAME
+
+  """검색할 값입니다. """
+  value: String = ""
+
+  """정렬 방식입니다. """
+  order: OrderDirection = DESC
+}
+
+"""Store Entity에 포함된 필드입니다."""
+enum StoreField {
+  ID
+  NAME
+  DISCOUNT_PRICE
+  STREET_NAME_ADDRESS
+  LOT_NUMBER_ADDRESS
+  DETAIL_ADDRESS
+  LATITUDE
+  LONGITUDE
+  IMAGE_FILE_KEY
+}
+
+"""Order direction"""
+enum OrderDirection {
+  ASC
+  DESC
+}
+
+input OrderStoreInput {
+  orderBy: StoreField = NAME
+  orderDirection: OrderDirection = DESC
 }
 
 type Mutation {
