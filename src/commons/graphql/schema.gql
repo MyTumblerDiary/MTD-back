@@ -5,12 +5,44 @@
 type User {
   id: String!
   createdAt: String!
-  updatedAt: String!
-  deletedAt: String!
+  updatedAt: String
+  deletedAt: String
   email: String!
   password: String!
   nickname: String!
   social: String!
+}
+
+"""가게 Entity"""
+type Store {
+  id: String!
+  createdAt: String!
+  updatedAt: String
+  deletedAt: String
+
+  """가게 이름입니다. """
+  name: String!
+
+  """해당 가게에서의 텀블러 할인 가격입니다. """
+  discountPrice: Int!
+
+  """가게의 도로명 주소입니다. """
+  streetNameAddess: String!
+
+  """가게의 지번 주소입니다. """
+  lotNumberAddress: String!
+
+  """가게의 상세 주소입니다. """
+  detailAddress: String!
+
+  """가게의 위도입니다. """
+  latitude: Float
+
+  """가게의 경도입니다. """
+  longitude: Float
+
+  """AWS S3 버킷에 저장되는 가게의 대표 이미지 파일키 입니다. """
+  imageFileKey: String
 }
 
 type Query {
@@ -25,6 +57,52 @@ type Query {
 
   """닉네임 중복 확인"""
   checkNickname(nickname: String!): Boolean!
+
+  """Find all stores"""
+  stores(paginationInput: PaginationInput, searchStoreInput: SearchStoreInput, orderStoreInput: OrderStoreInput): [Store!]!
+
+  """Find one store by id"""
+  store(id: String!): Store!
+}
+
+input PaginationInput {
+  page: Float! = 1
+  limit: Float! = 10
+}
+
+input SearchStoreInput {
+  """가게에서 검색할 기준 필드를 선택합니다. """
+  searchBy: StoreField = NAME
+
+  """검색할 값입니다. """
+  value: String = ""
+
+  """정렬 방식입니다. """
+  order: OrderDirection = DESC
+}
+
+"""Store Entity에 포함된 필드입니다."""
+enum StoreField {
+  ID
+  NAME
+  DISCOUNT_PRICE
+  STREET_NAME_ADDRESS
+  LOT_NUMBER_ADDRESS
+  DETAIL_ADDRESS
+  LATITUDE
+  LONGITUDE
+  IMAGE_FILE_KEY
+}
+
+"""Order direction"""
+enum OrderDirection {
+  ASC
+  DESC
+}
+
+input OrderStoreInput {
+  orderBy: StoreField = NAME
+  orderDirection: OrderDirection = DESC
 }
 
 type Mutation {
@@ -36,6 +114,15 @@ type Mutation {
   deleteUser(userId: String!): Boolean!
   login(email: String!, password: String!): String!
   restoreAccessToken: String!
+
+  """Create a store"""
+  createStore(createStoreInput: CreateStoreInput!): Store!
+
+  """Update a store"""
+  updateStore(updateStoreInput: UpdateStoreInput!): Store!
+
+  """Delete a store"""
+  deleteStore(id: String!): Boolean!
 }
 
 input CreateUserInput {
@@ -47,4 +134,56 @@ input CreateUserInput {
 input UpdateUserInput {
   password: String
   nickname: String
+}
+
+input CreateStoreInput {
+  """가게 이름입니다. """
+  name: String!
+
+  """해당 가게에서의 텀블러 할인 가격입니다. """
+  discountPrice: Int!
+
+  """가게의 도로명 주소입니다. """
+  streetNameAddess: String!
+
+  """가게의 지번 주소입니다. """
+  lotNumberAddress: String!
+
+  """가게의 상세 주소입니다. """
+  detailAddress: String!
+
+  """가게의 위도입니다. """
+  latitude: Float
+
+  """가게의 경도입니다. """
+  longitude: Float
+
+  """AWS S3 버킷에 저장되는 가게의 대표 이미지 파일키 입니다. """
+  imageFileKey: String
+}
+
+input UpdateStoreInput {
+  """가게 이름입니다. """
+  name: String
+
+  """해당 가게에서의 텀블러 할인 가격입니다. """
+  discountPrice: Int
+
+  """가게의 도로명 주소입니다. """
+  streetNameAddess: String
+
+  """가게의 지번 주소입니다. """
+  lotNumberAddress: String
+
+  """가게의 상세 주소입니다. """
+  detailAddress: String
+
+  """가게의 위도입니다. """
+  latitude: Float
+
+  """가게의 경도입니다. """
+  longitude: Float
+
+  """AWS S3 버킷에 저장되는 가게의 대표 이미지 파일키 입니다. """
+  imageFileKey: String
 }

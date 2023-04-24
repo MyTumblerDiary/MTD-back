@@ -6,8 +6,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import * as redisStore from 'cache-manager-redis-store';
 import { ClientOpts } from 'redis';
 import { AuthModule } from './apis/auth/auth.module';
+import { StoresModule } from './apis/stores/stores.module';
 import { UserModule } from './apis/users/users.module';
-import { HttpExceptionFilter } from './commons/filter/http-exception.filter';
+import { GqlExceptionFilter } from './commons/filter/gql-exception.filter';
 import { GqlThrottlerGuard } from './commons/guards/gql.throttler.guard';
 import { configOptions } from './config/config';
 import { ormOption } from './config/typeorm.config';
@@ -20,6 +21,7 @@ const ENV = process.env.NODE_ENV;
     ConfigModule.forRoot(configOptions),
     UserModule,
     AuthModule,
+    StoresModule,
     DynamicGqlModule.forRoot(),
     TypeOrmModule.forRoot(ormOption),
     ThrottlerModule.forRoot({
@@ -45,7 +47,7 @@ const ENV = process.env.NODE_ENV;
     },
     {
       provide: APP_FILTER,
-      useClass: HttpExceptionFilter,
+      useClass: GqlExceptionFilter,
     },
     Logger,
   ],
