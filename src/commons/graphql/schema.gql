@@ -2,6 +2,23 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+"""텀블러 기록 Entity"""
+type TumblerRecord {
+  id: String!
+  createdAt: String!
+  updatedAt: String
+  deletedAt: String
+
+  """텀블러 할인 금액"""
+  prices: Int!
+
+  """텀블러 이미지 파일 키"""
+  imageFileKey: String
+
+  """텀블러 기록을 가진 유저"""
+  user: User!
+}
+
 type User {
   id: String!
   createdAt: String!
@@ -11,6 +28,9 @@ type User {
   password: String!
   nickname: String!
   social: String!
+
+  """유저가 가지고 있는 텀블러 기록들"""
+  tumblerRecords: [TumblerRecord!]
 }
 
 """가게 Entity"""
