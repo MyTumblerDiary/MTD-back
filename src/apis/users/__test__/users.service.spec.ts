@@ -11,16 +11,29 @@ class MockUserRepository {
       email: 'a@a.com',
       password: '0000',
       nickname: '짱구',
+      deletedAt: null,
     },
   ];
   findOne({ email }) {
-    const users = this.mydb.filter((el) => el.email === email);
+    const users = this.mydb.filter(
+      (el) => el.email === email && el.deletedAt === null,
+    ); // soft delete를 적용하여 삭제된 유저는 조회되지 않도록 수정
     if (users.length) return users[0];
     return null;
   }
   save({ email, password, nickname }) {
-    this.mydb.push({ email, password, nickname });
+    this.mydb.push({ email, password, nickname, deletedAt: null });
     return { email, password, nickname };
+  }
+  softDelete({ email }) {
+    console.log(this.mydb);
+    const userIndex = this.mydb.findIndex(
+      (el) => el.email === email && el.deletedAt === null,
+    ); // soft delete를 적용하여 삭제된 유저는 삭제되지 않도록 수정
+    if (userIndex === -1) return false;
+
+    this.mydb[userIndex].deletedAt = new Date(); // soft delete를 적용하여 deletedAt 속성을 현재 시간으로 설정
+    return true;
   }
 }
 
@@ -102,10 +115,58 @@ describe('UserService', () => {
       expect(updatedUser.nickname).toBe(updatedUserData.nickname);
 
       // 5. bcrypt.compare 메서드를 사용해서 비밀번호를 검증
-      console.log(updatePW);
-      console.log(updatedUser.password);
       const isMatched = await bcrypt.compare(updatePW, updatedUser.password);
       expect(isMatched).toBeTruthy();
+    });
+  });
+
+  describe('deleteUser', () => {
+    it('유저가 성공적으로 삭제되는지 확인', async () => {
+      // 새로운 유저 생성
+      const createUserInput = {
+        email: 'test@example.com',
+        password: 'password',
+        nickname: 'testuser',
+      };
+      const createdUser = await userService.create({
+        createUserInput,
+      });
+
+      // 유저 삭제
+      const result = await userService.deleteUser({
+        userEmail: createdUser.email,
+      });
+      expect(result).toBe(true);
+
+      // 유저가 실제로 삭제되었는지 확인
+      const deletedUser = await userService.findOne({
+        email: createdUser.email,
+      });
+      expect(deletedUser).toBeNull();
+    });
+
+    it('유저가 이미 삭제된 경우 false 반환', async () => {
+      // 새로운 유저 생성
+      const createUserInput = {
+        email: 'test@example.com',
+        password: 'password',
+        nickname: 'testuser',
+      };
+      const createdUser = await userService.create({
+        createUserInput,
+      });
+
+      // 유저 삭제
+      const result1 = await userService.deleteUser({
+        userEmail: createdUser.email,
+      });
+      expect(result1).toBe(true);
+
+      // 이미 삭제된 유저 삭제 시도
+      const result2 = await userService.deleteUser({
+        userEmail: createdUser.email,
+      });
+      expect(result2).toBe(false);
     });
   });
 });
