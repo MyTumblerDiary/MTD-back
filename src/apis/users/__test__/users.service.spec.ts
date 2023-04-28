@@ -5,7 +5,7 @@ import { User } from '../entities/user.entity';
 import { UserService } from '../users.service';
 import * as bcrypt from 'bcrypt';
 
-class MockUserRepository {
+export class MockUserRepository {
   mydb = [
     {
       email: 'a@a.com',
@@ -26,7 +26,6 @@ class MockUserRepository {
     return { email, password, nickname };
   }
   softDelete({ email }) {
-    console.log(this.mydb);
     const userIndex = this.mydb.findIndex(
       (el) => el.email === email && el.deletedAt === null,
     ); // soft delete를 적용하여 삭제된 유저는 삭제되지 않도록 수정
