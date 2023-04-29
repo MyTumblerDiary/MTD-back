@@ -47,4 +47,33 @@ describe('UserResolver', () => {
       expect(createdUser.nickname).toEqual(input.nickname);
     });
   });
+
+  describe('updateUser', () => {
+    it('should update a user', async () => {
+      // 1. 테스트 데이터를 설정합니다.
+      const input = {
+        email: 'test@test.com',
+        password: 'test1234',
+        nickname: 'testuser',
+      };
+      const createdUser = await userResolver.createUser(input);
+
+      const updateInput = {
+        email: 'test@test.com',
+        password: 'test5678',
+        nickname: 'testuser_updated',
+      };
+      const updatePW = updateInput.password;
+      // 2. UserService의 updateUser 메서드를 호출합니다.
+      const updatedUser = await userResolver.updateUser(
+        updateInput.email,
+        updateInput,
+      );
+
+      // 3. 반환된 데이터를 테스트합니다.
+      const isMatched = await bcrypt.compare(updatePW, updatedUser.password);
+      expect(isMatched).toBeTruthy();
+      expect(updatedUser.nickname).toEqual(updateInput.nickname);
+    });
+  });
 });
