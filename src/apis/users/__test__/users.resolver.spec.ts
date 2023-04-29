@@ -76,4 +76,22 @@ describe('UserResolver', () => {
       expect(updatedUser.nickname).toEqual(updateInput.nickname);
     });
   });
+
+  describe('deleteUser', () => {
+    it('should delete a user', async () => {
+      // 1. 테스트 데이터를 설정합니다.
+      const input = {
+        email: 'test@test.com',
+        password: 'test1234',
+        nickname: 'testuser',
+      };
+      const createdUser = await userResolver.createUser(input);
+
+      // 2. Resolver 함수를 호출합니다.
+      const result = await userResolver.deleteUser(createdUser.email);
+
+      // 3. 반환된 데이터를 테스트합니다.
+      expect(result).toBe(true);
+    });
+  });
 });
