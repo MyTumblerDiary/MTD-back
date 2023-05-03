@@ -9,7 +9,6 @@ import * as bcrypt from 'bcrypt';
 
 describe('UserResolver', () => {
   let userResolver: UserResolver;
-  let userService: UserService;
   beforeEach(async () => {
     const userModule = await Test.createTestingModule({
       imports: [CacheModule.register()],
@@ -24,7 +23,6 @@ describe('UserResolver', () => {
     }).compile();
 
     userResolver = userModule.get<UserResolver>(UserResolver);
-    userService = userModule.get<UserService>(UserService);
   });
 
   describe('createUser', () => {
@@ -56,7 +54,7 @@ describe('UserResolver', () => {
         password: 'test1234',
         nickname: 'testuser',
       };
-      const createdUser = await userResolver.createUser(input);
+      await userResolver.createUser(input);
 
       const updateInput = {
         email: 'test@test.com',

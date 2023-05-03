@@ -25,8 +25,8 @@ const ENV = process.env.NODE_ENV;
     }),
     CacheModule.register<ClientOpts>({
       store: redisStore,
-      //url: 'redis://localhost:6379',
-      url: 'redis://my-redis:6379',
+      url: 'redis://localhost:6379',
+      //url: 'redis://my-redis:6379',
       isGlobal: true,
       // host: process.env.HOST,
       // port: parseInt(process.env.REDIS_PORT),
