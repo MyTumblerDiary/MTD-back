@@ -26,20 +26,22 @@ export class AuthService {
       { email: user.email, sub: user.id }, //
       { secret: 'myRefreshKey', expiresIn: '2w' },
     );
-    await res.setHeader('Set-Cookie', `refreshToken=${refreshToken}`);
+    await res.setHeader('Set-Cookie', `refreshToken=${refreshToken}; Path=/`);
   }
   async setAccessToken({ user, res }) {
     const accessToken = this.jwtService.sign(
       { email: user.email, sub: user.id }, //
       { secret: 'myAccessKey', expiresIn: '1h' },
     );
-    await res.setHeader('Set-Cookie', `accessToken=${accessToken}`);
+    await res.setHeader('Set-Cookie', `accessToken=${accessToken}; Path=/`);
     return accessToken;
   }
   async loginUser({ email, password, context }) {
     const user = await this.userService.findOne({ email });
     if (!user) {
-      throw new UnprocessableEntityException('이메일이 없습니다.');
+      throw new UnprocessableEntityException(
+        '해당 이메일이 등록되어 있지 않습니다.',
+      );
     }
     if (user.social)
       throw new UnprocessableEntityException(

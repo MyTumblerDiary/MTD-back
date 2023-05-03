@@ -32,8 +32,8 @@ export class UserResolver {
   }
 
   @Mutation(() => Boolean)
-  deleteUser(@Args('userId') userId: string) {
-    this.userService.deleteUser({ userId });
+  deleteUser(@Args('userEmail') userEmail: string) {
+    return this.userService.deleteUser({ userEmail });
   }
 
   @Query(() => Boolean, {

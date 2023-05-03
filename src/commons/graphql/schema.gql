@@ -131,7 +131,7 @@ type Mutation {
 
   """유저정보 수정"""
   updateUser(userEmail: String!, updateUserInput: UpdateUserInput!): User!
-  deleteUser(userId: String!): Boolean!
+  deleteUser(userEmail: String!): Boolean!
   login(email: String!, password: String!): String!
   restoreAccessToken: String!
 
