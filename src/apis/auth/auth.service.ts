@@ -11,6 +11,8 @@ import { Request, Response } from 'express';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import axios from 'axios';
+import * as qs from 'qs';
 
 @Injectable()
 export class AuthService {
@@ -71,5 +73,54 @@ export class AuthService {
     res.status(200).json({
       ok: true,
     });
+  }
+
+  async getKakaoAccessToken(code: string) {
+    const token = await axios({
+      //token
+      method: 'POST',
+      url: 'https://kauth.kakao.com/oauth/token',
+      headers: {
+        'content-type': 'application/x-www-form-urlencoded',
+      },
+      data: qs.stringify({
+        grant_type: 'authorization_code',
+        client_id: process.env.OAUTH_KAKAO_ID,
+        client_secret: process.env.OAUTH_KAKAO_SECRET,
+        redirect_uri: process.env.OAUTH_KAKAO_REDIRECT_URI,
+        code,
+      }),
+    });
+    return token.data.access_token;
+  }
+
+  async getUserByKakaoAccessToken({ accessToken }) {
+    const result = await axios.get('https://kapi.kakao.com/v2/user/me', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const data = result.data;
+    return data;
+  }
+
+  async kakaoLogin({ accessToken, context }) {
+    const profile = await this.getUserByKakaoAccessToken({
+      accessToken,
+    });
+    const user = await this.userService.findOne({
+      email: profile.kakao_account.email,
+    });
+    const hashedPassword = await bcrypt.hash(profile.id.toString(), 10);
+    if (!user) {
+      await this.userRepository.save({
+        email: profile.kakao_account.email,
+        password: hashedPassword,
+        nickname: profile.properties.nickname,
+        social: 'kakao',
+      });
+    }
+    await this.setRefreshToken({ user, res: context.res });
+    return await this.setAccessToken({ user, res: context.res });
   }
 }

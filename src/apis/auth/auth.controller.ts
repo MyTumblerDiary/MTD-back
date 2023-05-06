@@ -26,9 +26,9 @@ export class AuthController {
   //   return;
   // }
 
-  @Get('/login/kakao')
-  @UseGuards(AuthGuard('kakao'))
-  async loginKakaoCall(@Req() req: Request, @Res() res: Response) {
-    return await this.authService.social_login({ req, res });
-  }
+  // @Get('/login/kakao')
+  // @UseGuards(AuthGuard('kakao'))
+  // async loginKakaoCall(@Req() req: Request, @Res() res: Response) {
+  //   return await this.authService.social_login({ req, res });
+  // }
 }
