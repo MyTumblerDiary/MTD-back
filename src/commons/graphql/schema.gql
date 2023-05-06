@@ -2,42 +2,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-"""텀블러 기록 Entity"""
-type TumblerRecord {
-  id: String!
-  createdAt: String!
-  updatedAt: String
-  deletedAt: String
-
-  """텀블러 할인 금액"""
-  prices: Int!
-
-  """텀블러 이미지 파일 키"""
-  imageFileKey: String
-
-  """텀블러 기록을 가진 유저"""
-  user: User!
-}
-
-type User {
-  id: String!
-  createdAt: String!
-  updatedAt: String
-  deletedAt: String
-  email: String!
-  password: String!
-  nickname: String!
-  social: String!
-
-  """유저가 가지고 있는 텀블러 기록들"""
-  tumblerRecords: [TumblerRecord!]
-}
-
-type S3PresignedUrlOutput {
-  presignedUrl: String!
-  fileKey: String!
-}
-
 """가게 Entity"""
 type Store {
   id: String!
@@ -61,13 +25,64 @@ type Store {
   detailAddress: String!
 
   """가게의 위도입니다. """
-  latitude: Float
+  latitude: Float!
 
   """가게의 경도입니다. """
-  longitude: Float
+  longitude: Float!
 
   """AWS S3 버킷에 저장되는 가게의 대표 이미지 파일키 입니다. """
   imageFileKey: String
+
+  """가게의 텀블러 기록들입니다. """
+  tumblerRecords: [TumblerRecord!]
+}
+
+"""텀블러 기록 Entity"""
+type TumblerRecord {
+  id: String!
+  createdAt: String!
+  updatedAt: String
+  deletedAt: String
+
+  """텀블러 할인 금액"""
+  prices: Int!
+
+  """텀블러 기록 메모"""
+  memo: String
+
+  """텀블러 이미지 파일 키"""
+  imageFileKey: String
+
+  """텀블러 기록을 가진 유저"""
+  user: User!
+}
+
+"""유저 Entity"""
+type User {
+  id: String!
+  createdAt: String!
+  updatedAt: String
+  deletedAt: String
+
+  """이메일"""
+  email: String!
+
+  """비밀번호입니다. """
+  password: String
+
+  """닉네임은 최대 20자까지만 가능합니다. """
+  nickname: String
+
+  """"""
+  social: String!
+
+  """유저가 가지고 있는 텀블러 기록들입니다. """
+  tumblerRecords: [TumblerRecord!]
+}
+
+type S3PresignedUrlOutput {
+  presignedUrl: String!
+  fileKey: String!
 }
 
 type Query {
@@ -88,6 +103,12 @@ type Query {
 
   """Find one store by id"""
   store(id: String!): Store!
+
+  """유저의 모든 텀블러 기록을 모두 가져옵니다."""
+  tumblerRecords: [TumblerRecord!]!
+
+  """텀블러 기록을 하나 가져옵니다."""
+  tumblerRecord(id: String!): TumblerRecord!
 }
 
 input PaginationInput {
@@ -136,7 +157,7 @@ type Mutation {
 
   """유저정보 수정"""
   updateUser(userEmail: String!, updateUserInput: UpdateUserInput!): User!
-  deleteUser(userId: String!): Boolean!
+  deleteUser(userEmail: String!): Boolean!
   login(email: String!, password: String!): String!
   restoreAccessToken: String!
 
@@ -151,16 +172,33 @@ type Mutation {
 
   """Presigned URL을 받습니다."""
   getPresignedUrl(presignedUrlInput: S3PresignedUrlInput!): S3PresignedUrlOutput!
+
+  """텀블러 기록을 생성합니다."""
+  createTumblerRecord(createTumblerRecordInput: CreateTumblerRecordInput!): TumblerRecord!
+
+  """텀블러 기록을 수정합니다."""
+  updateTumblerRecord(id: String!, updateTumblerRecordInput: CreateTumblerRecordInput!): Boolean!
+
+  """텀블러 기록을 삭제합니다."""
+  deleteTumblerRecord(id: String!): Boolean!
 }
 
 input CreateUserInput {
+  """이메일"""
   email: String!
-  password: String!
-  nickname: String!
+
+  """비밀번호입니다. """
+  password: String
+
+  """닉네임은 최대 20자까지만 가능합니다. """
+  nickname: String
 }
 
 input UpdateUserInput {
+  """비밀번호입니다. """
   password: String
+
+  """닉네임은 최대 20자까지만 가능합니다. """
   nickname: String
 }
 
@@ -181,10 +219,10 @@ input CreateStoreInput {
   detailAddress: String!
 
   """가게의 위도입니다. """
-  latitude: Float
+  latitude: Float!
 
   """가게의 경도입니다. """
-  longitude: Float
+  longitude: Float!
 
   """AWS S3 버킷에 저장되는 가게의 대표 이미지 파일키 입니다. """
   imageFileKey: String
@@ -231,4 +269,15 @@ enum ImageType {
   TIFF
   BMP
   ICO
+}
+
+input CreateTumblerRecordInput {
+  """텀블러 할인 금액"""
+  prices: Int
+
+  """텀블러 기록 메모"""
+  memo: String
+
+  """텀블러 이미지 파일 키"""
+  imageFileKey: String
 }

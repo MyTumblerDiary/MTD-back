@@ -3,13 +3,13 @@ import { registerEnumType } from '@nestjs/graphql';
 export enum StoreField {
   ID = 'id',
   NAME = 'name',
-  DISCOUNT_PRICE = 'discountPrice',
-  STREET_NAME_ADDRESS = 'streetNameAddress',
-  LOT_NUMBER_ADDRESS = 'lotNumberAddress',
-  DETAIL_ADDRESS = 'detailAddress',
+  DISCOUNT_PRICE = 'discount_price',
+  STREET_NAME_ADDRESS = 'street_name_address',
+  LOT_NUMBER_ADDRESS = 'lot_number_address',
+  DETAIL_ADDRESS = 'detail_address',
   LATITUDE = 'latitude',
   LONGITUDE = 'longitude',
-  IMAGE_FILE_KEY = 'imageFileKey',
+  IMAGE_FILE_KEY = 'image_file_key',
 }
 
 registerEnumType(StoreField, {

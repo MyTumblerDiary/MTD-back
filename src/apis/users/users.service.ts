@@ -6,10 +6,10 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
+import { Cache } from 'cache-manager';
+import * as nodemailer from 'nodemailer';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import * as nodemailer from 'nodemailer';
-import { Cache } from 'cache-manager';
 @Injectable()
 export class UserService {
   constructor(
@@ -18,7 +18,11 @@ export class UserService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
-  async findOne({ email }) {
+  async findOne(id: string) {
+    return await this.userRepository.findOne({ where: { id } });
+  }
+
+  async findOneByEmail(email: string) {
     return await this.userRepository.findOne({ where: { email } });
   }
 
@@ -43,9 +47,10 @@ export class UserService {
     return await this.userRepository.save(newUser);
   }
 
-  async deleteUser({ userId }) {
-    const result = await this.userRepository.softDelete({ id: userId });
-    return result.affected ? true : false;
+  async deleteUser({ userEmail }) {
+    const result = await this.userRepository.softDelete({ email: userEmail });
+    //return result.affected ? true : false;
+    return result;
   }
 
   async fetchUserPassword(email: string) {

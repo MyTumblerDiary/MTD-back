@@ -4,7 +4,6 @@ import { UserService } from './users.service';
 
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthAccessGuard } from 'src/commons/auth/gql-auth.guard';
-import { CurrentUser } from 'src/commons/auth/gql-user.param';
 import { CreateUserInput } from './dto/createUsers.input';
 import { UpdateUserInput } from './dto/updateUsers.input';
 @Resolver()
@@ -20,7 +19,7 @@ export class UserResolver {
     return await this.userService.create({ createUserInput });
   }
 
-  //@UseGuards(GqlAuthAccessGuard)
+  @UseGuards(GqlAuthAccessGuard)
   @Mutation(() => User, {
     description: '유저정보 수정',
   })
@@ -32,8 +31,8 @@ export class UserResolver {
   }
 
   @Mutation(() => Boolean)
-  deleteUser(@Args('userId') userId: string) {
-    this.userService.deleteUser({ userId });
+  deleteUser(@Args('userEmail') userEmail: string) {
+    return this.userService.deleteUser({ userEmail });
   }
 
   @Query(() => Boolean, {

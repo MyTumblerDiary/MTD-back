@@ -20,20 +20,22 @@ export class AuthService {
       { email: user.email, sub: user.id }, //
       { secret: process.env.REFRESH_SECRET_KEY, expiresIn: '2w' },
     );
-    await res.setHeader('Set-Cookie', `refreshToken=${refreshToken}`);
+    await res.setHeader('Set-Cookie', `refreshToken=${refreshToken}; Path=/`);
   }
   async setAccessToken({ user, res }) {
     const accessToken = this.jwtService.sign(
       { email: user.email, sub: user.id }, //
       { secret: 'myAccessKey', expiresIn: '1h' },
     );
-    await res.setHeader('Set-Cookie', `accessToken=${accessToken}`);
+    await res.setHeader('Set-Cookie', `accessToken=${accessToken}; Path=/`);
     return accessToken;
   }
   async loginUser({ email, password, context }) {
-    const user = await this.userService.findOne({ email });
+    const user = await this.userService.findOneByEmail(email);
     if (!user) {
-      throw new UnprocessableEntityException('이메일이 없습니다.');
+      throw new UnprocessableEntityException(
+        '해당 이메일이 등록되어 있지 않습니다.',
+      );
     }
     if (user.social)
       throw new UnprocessableEntityException(
@@ -47,7 +49,7 @@ export class AuthService {
   }
 
   async social_login({ req, res }) {
-    let user = await this.userService.findOne({ email: req.user.email });
+    let user = await this.userService.findOneByEmail(req.user.email);
     const hashedPassword = await bcrypt.hash(req.user.password, 10);
 
     if (!user) {
