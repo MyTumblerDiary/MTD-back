@@ -33,6 +33,11 @@ type User {
   tumblerRecords: [TumblerRecord!]
 }
 
+type S3PresignedUrlOutput {
+  presignedUrl: String!
+  fileKey: String!
+}
+
 """가게 Entity"""
 type Store {
   id: String!
@@ -143,6 +148,9 @@ type Mutation {
 
   """Delete a store"""
   deleteStore(id: String!): Boolean!
+
+  """Presigned URL을 받습니다."""
+  getPresignedUrl(presignedUrlInput: S3PresignedUrlInput!): S3PresignedUrlOutput!
 }
 
 input CreateUserInput {
@@ -206,4 +214,21 @@ input UpdateStoreInput {
 
   """AWS S3 버킷에 저장되는 가게의 대표 이미지 파일키 입니다. """
   imageFileKey: String
+}
+
+input S3PresignedUrlInput {
+  fileName: String!
+  type: ImageType!
+}
+
+"""이미지 타입"""
+enum ImageType {
+  JPG
+  PNG
+  GIF
+  WEBP
+  SVG
+  TIFF
+  BMP
+  ICO
 }

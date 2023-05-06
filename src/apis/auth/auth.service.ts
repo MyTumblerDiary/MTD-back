@@ -1,16 +1,10 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import { UserService } from '../users/users.service';
-import { Request, Response } from 'express';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
-import { InjectRepository } from '@nestjs/typeorm';
+import { UserService } from '../users/users.service';
 
 @Injectable()
 export class AuthService {
@@ -24,7 +18,7 @@ export class AuthService {
   async setRefreshToken({ user, res }) {
     const refreshToken = this.jwtService.sign(
       { email: user.email, sub: user.id }, //
-      { secret: 'myRefreshKey', expiresIn: '2w' },
+      { secret: process.env.REFRESH_SECRET_KEY, expiresIn: '2w' },
     );
     await res.setHeader('Set-Cookie', `refreshToken=${refreshToken}`);
   }
@@ -65,7 +59,7 @@ export class AuthService {
       });
     }
     await this.setRefreshToken({ user, res });
-    const accessToken = await this.setAccessToken({ user, res });
+    await this.setAccessToken({ user, res });
     res.status(200).json({
       ok: true,
     });

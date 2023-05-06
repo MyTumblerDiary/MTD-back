@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import * as redisStore from 'cache-manager-redis-store';
 import { ClientOpts } from 'redis';
 import { AuthModule } from './apis/auth/auth.module';
+import { CloudAwsModule } from './apis/clouds/aws/cloud-aws.module';
 import { StoresModule } from './apis/stores/stores.module';
 import { UserModule } from './apis/users/users.module';
 import { GqlExceptionFilter } from './commons/filter/gql-exception.filter';
@@ -22,6 +23,7 @@ const ENV = process.env.NODE_ENV;
     UserModule,
     AuthModule,
     StoresModule,
+    CloudAwsModule,
     DynamicGqlModule.forRoot(),
     TypeOrmModule.forRoot(ormOption),
     ThrottlerModule.forRoot({
