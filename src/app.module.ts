@@ -7,6 +7,7 @@ import * as redisStore from 'cache-manager-redis-store';
 import { ClientOpts } from 'redis';
 import { AuthModule } from './apis/auth/auth.module';
 import { StoresModule } from './apis/stores/stores.module';
+import { TumblerRecordsModule } from './apis/tumbler-records/tumbler-records.module';
 import { UserModule } from './apis/users/users.module';
 import { GqlExceptionFilter } from './commons/filter/gql-exception.filter';
 import { GqlThrottlerGuard } from './commons/guards/gql.throttler.guard';
@@ -35,6 +36,7 @@ const ENV = process.env.NODE_ENV;
       port: 6379,
       ttl: 120,
     }),
+    TumblerRecordsModule,
   ],
   providers: [
     {
