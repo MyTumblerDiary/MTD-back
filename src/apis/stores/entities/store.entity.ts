@@ -36,7 +36,7 @@ export class Store extends CommonEntity {
     nullable: false,
     description: '가게의 도로명 주소입니다. ',
   })
-  streetNameAddess: string;
+  streetNameAddress: string;
 
   @Column({
     type: 'varchar',
