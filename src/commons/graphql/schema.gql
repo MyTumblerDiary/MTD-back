@@ -16,7 +16,7 @@ type Store {
   discountPrice: Int!
 
   """가게의 도로명 주소입니다. """
-  streetNameAddess: String!
+  streetNameAddress: String!
 
   """가게의 지번 주소입니다. """
   lotNumberAddress: String!
@@ -210,7 +210,7 @@ input CreateStoreInput {
   discountPrice: Int!
 
   """가게의 도로명 주소입니다. """
-  streetNameAddess: String!
+  streetNameAddress: String!
 
   """가게의 지번 주소입니다. """
   lotNumberAddress: String!
@@ -236,7 +236,7 @@ input UpdateStoreInput {
   discountPrice: Int
 
   """가게의 도로명 주소입니다. """
-  streetNameAddess: String
+  streetNameAddress: String
 
   """가게의 지번 주소입니다. """
   lotNumberAddress: String
