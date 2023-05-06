@@ -1,16 +1,10 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import { UserService } from '../users/users.service';
-import { Request, Response } from 'express';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
-import { InjectRepository } from '@nestjs/typeorm';
+import { UserService } from '../users/users.service';
 
 @Injectable()
 export class AuthService {
@@ -37,7 +31,7 @@ export class AuthService {
     return accessToken;
   }
   async loginUser({ email, password, context }) {
-    const user = await this.userService.findOne({ email });
+    const user = await this.userService.findOneByEmail(email);
     if (!user) {
       throw new UnprocessableEntityException('이메일이 없습니다.');
     }
@@ -53,7 +47,7 @@ export class AuthService {
   }
 
   async social_login({ req, res }) {
-    let user = await this.userService.findOne({ email: req.user.email });
+    let user = await this.userService.findOneByEmail(req.user.email);
     const hashedPassword = await bcrypt.hash(req.user.password, 10);
 
     if (!user) {
