@@ -18,17 +18,17 @@ export class CommonEntity {
   @Field(() => String, {
     nullable: false,
   })
-  createdAt: Date;
+  createdAt?: Date;
 
   @UpdateDateColumn()
   @Field(() => String, {
     nullable: true,
   })
-  updatedAt: Date;
+  updatedAt?: Date;
 
   @DeleteDateColumn()
   @Field(() => String, {
     nullable: true,
   })
-  deletedAt: Date;
+  deletedAt?: Date;
 }

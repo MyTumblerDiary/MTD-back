@@ -1,6 +1,7 @@
 import { Field, Float, InputType, Int, ObjectType } from '@nestjs/graphql';
+import { TumblerRecord } from 'src/apis/tumbler-records/entities/tumbler-record.entity';
 import { CommonEntity } from 'src/commons/entities/common.entity';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 
 @Entity()
 @InputType('StoreInputType', { isAbstract: true })
@@ -27,7 +28,9 @@ export class Store extends CommonEntity {
   discountPrice: number;
 
   @Column({
+    type: 'varchar',
     nullable: false,
+    length: 100,
   })
   @Field(() => String, {
     nullable: false,
@@ -36,7 +39,9 @@ export class Store extends CommonEntity {
   streetNameAddess: string;
 
   @Column({
+    type: 'varchar',
     nullable: false,
+    length: 100,
   })
   @Field(() => String, {
     nullable: false,
@@ -45,7 +50,9 @@ export class Store extends CommonEntity {
   lotNumberAddress: string;
 
   @Column({
+    type: 'varchar',
     nullable: false,
+    length: 100,
   })
   @Field(() => String, {
     nullable: false,
@@ -54,22 +61,22 @@ export class Store extends CommonEntity {
   detailAddress: string;
 
   @Column({
-    nullable: true,
+    nullable: false,
   })
   @Field(() => Float, {
-    nullable: true,
+    nullable: false,
     description: '가게의 위도입니다. ',
   })
-  latitude?: number;
+  latitude: number;
 
   @Column({
-    nullable: true,
+    nullable: false,
   })
   @Field(() => Float, {
-    nullable: true,
+    nullable: false,
     description: '가게의 경도입니다. ',
   })
-  longitude?: number;
+  longitude: number;
 
   @Column({
     nullable: true,
@@ -79,4 +86,11 @@ export class Store extends CommonEntity {
     description: 'AWS S3 버킷에 저장되는 가게의 대표 이미지 파일키 입니다. ',
   })
   imageFileKey?: string;
+
+  @OneToMany(() => TumblerRecord, (tumblerRecords) => tumblerRecords.store)
+  @Field(() => [TumblerRecord], {
+    nullable: true,
+    description: '가게의 텀블러 기록들입니다. ',
+  })
+  tumblerRecords?: TumblerRecord[];
 }
