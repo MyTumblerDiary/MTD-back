@@ -1,26 +1,45 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreatePrivateSpaceInput } from './dto/create-private-space.input';
 import { UpdatePrivateSpaceInput } from './dto/update-private-space.input';
+import { PrivateSpace } from './entities/private-space.entity';
 
 @Injectable()
 export class PrivateSpacesService {
-  create(createPrivateSpaceInput: CreatePrivateSpaceInput) {
-    return 'This action adds a new privateSpace';
+  constructor(
+    @InjectRepository(PrivateSpace)
+    private privateSpaceRepository: Repository<PrivateSpace>,
+  ) {}
+
+  async create(
+    createPrivateSpaceInput: CreatePrivateSpaceInput,
+  ): Promise<PrivateSpace> {
+    return this.privateSpaceRepository.save(
+      this.privateSpaceRepository.create(createPrivateSpaceInput),
+    );
   }
 
-  findAll() {
-    return `This action returns all privateSpaces`;
+  async findAll(): Promise<PrivateSpace[]> {
+    return this.privateSpaceRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} privateSpace`;
+  async findOne(id: string): Promise<PrivateSpace> {
+    return this.privateSpaceRepository.findOne({
+      where: { id },
+    });
   }
 
-  update(id: number, updatePrivateSpaceInput: UpdatePrivateSpaceInput) {
-    return `This action updates a #${id} privateSpace`;
+  async update(
+    id: string,
+    updatePrivateSpaceInput: UpdatePrivateSpaceInput,
+  ): Promise<PrivateSpace> {
+    await this.privateSpaceRepository.update({ id }, updatePrivateSpaceInput);
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} privateSpace`;
+  async remove(id: string): Promise<PrivateSpace> {
+    await this.privateSpaceRepository.delete({ id });
+    return this.findOne(id);
   }
 }
