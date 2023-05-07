@@ -112,7 +112,11 @@ export class AuthService {
       email: profile.kakao_account.email,
     });
     const hashedPassword = await bcrypt.hash(profile.id.toString(), 10);
-    if (!user) {
+    if (user) {
+      throw new UnprocessableEntityException(
+        `${user.email} 이메일로 이미 가입된 계정이 있습니다.`,
+      );
+    } else if (!user) {
       await this.userRepository.save({
         email: profile.kakao_account.email,
         password: hashedPassword,
