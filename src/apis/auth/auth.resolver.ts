@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, UseGuards } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Response } from 'express';
 import { GqlAuthRefreshGuard } from 'src/commons/auth/gql-auth.guard';
