@@ -5,7 +5,7 @@ import { Store } from '../entities/store.entity';
 export class CreateStoreInput extends PickType(Store, [
   'name',
   'discountPrice',
-  'streetNameAddess',
+  'streetNameAddress',
   'lotNumberAddress',
   'detailAddress',
   'latitude',

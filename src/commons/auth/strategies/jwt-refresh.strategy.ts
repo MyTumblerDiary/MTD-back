@@ -9,11 +9,10 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
         const refreshToken = cookie.replace('refreshToken=', '');
         return refreshToken;
       },
-      secretOrKey: 'myRefreshKey',
+      secretOrKey: process.env.REFRESH_SECRET_KEY,
     });
   }
   validate(payload) {
-    console.log(payload);
     return {
       email: payload.email,
       id: payload.sub,

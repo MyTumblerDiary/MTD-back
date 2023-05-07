@@ -1,18 +1,13 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import { UserService } from '../users/users.service';
-import { Request, Response } from 'express';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
 import * as qs from 'qs';
+import { UserService } from '../users/users.service';
 
 @Injectable()
 export class AuthService {
@@ -26,7 +21,7 @@ export class AuthService {
   async setRefreshToken({ user, res }) {
     const refreshToken = this.jwtService.sign(
       { email: user.email, sub: user.id }, //
-      { secret: 'myRefreshKey', expiresIn: '2w' },
+      { secret: process.env.REFRESH_SECRET_KEY, expiresIn: '2w' },
     );
     await res.setHeader('Set-Cookie', `refreshToken=${refreshToken}; Path=/`);
   }
@@ -39,7 +34,7 @@ export class AuthService {
     return accessToken;
   }
   async loginUser({ email, password, context }) {
-    const user = await this.userService.findOne({ email });
+    const user = await this.userService.findOneByEmail(email);
     if (!user) {
       throw new UnprocessableEntityException(
         '해당 이메일이 등록되어 있지 않습니다.',
@@ -57,7 +52,7 @@ export class AuthService {
   }
 
   async social_login({ req, res }) {
-    let user = await this.userService.findOne({ email: req.user.email });
+    let user = await this.userService.findOneByEmail(req.user.email);
     const hashedPassword = await bcrypt.hash(req.user.password, 10);
 
     if (!user) {
@@ -69,7 +64,7 @@ export class AuthService {
       });
     }
     await this.setRefreshToken({ user, res });
-    const accessToken = await this.setAccessToken({ user, res });
+    await this.setAccessToken({ user, res });
     res.status(200).json({
       ok: true,
     });

@@ -1,4 +1,8 @@
+import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { GqlAuthAccessGuard } from 'src/commons/auth/gql-auth.guard';
+import { CurrentUser } from 'src/commons/auth/gql-user.param';
+import { User } from '../users/entities/user.entity';
 import { CreateTumblerRecordInput } from './dto/create.tumbler-record.dto';
 import { TumblerRecord } from './entities/tumbler-record.entity';
 import { TumblerRecordsService } from './tumbler-records.service';
@@ -7,21 +11,29 @@ import { TumblerRecordsService } from './tumbler-records.service';
 export class TumblerRecordResolver {
   constructor(private readonly tumblerRecordsService: TumblerRecordsService) {}
 
+  @UseGuards(GqlAuthAccessGuard)
   @Mutation(() => TumblerRecord, {
     description: '텀블러 기록을 생성합니다.',
   })
   public async createTumblerRecord(
+    @CurrentUser('user') user: User,
     @Args('createTumblerRecordInput')
     createTumblerRecordInput: CreateTumblerRecordInput,
   ): Promise<TumblerRecord> {
-    return await this.tumblerRecordsService.create(createTumblerRecordInput);
+    return await this.tumblerRecordsService.create(
+      createTumblerRecordInput,
+      user,
+    );
   }
 
+  @UseGuards(GqlAuthAccessGuard)
   @Query(() => [TumblerRecord], {
-    description: '텀블러 기록을 모두 가져옵니다.',
+    description: '유저의 모든 텀블러 기록을 모두 가져옵니다.',
   })
-  public async tumblerRecords(): Promise<TumblerRecord[]> {
-    return await this.tumblerRecordsService.findAll();
+  public async tumblerRecords(
+    @CurrentUser('user') user: User,
+  ): Promise<TumblerRecord[]> {
+    return await this.tumblerRecordsService.findByUserId(user);
   }
 
   @Query(() => TumblerRecord, {
@@ -29,15 +41,6 @@ export class TumblerRecordResolver {
   })
   public async tumblerRecord(@Args('id') id: string): Promise<TumblerRecord> {
     return await this.tumblerRecordsService.findOne(id);
-  }
-
-  @Query(() => [TumblerRecord], {
-    description: '유저의 텀블러 기록을 모두 가져옵니다.',
-  })
-  public async tumblerRecordsByUserId(
-    @Args('userId') userId: string,
-  ): Promise<TumblerRecord[]> {
-    return await this.tumblerRecordsService.findByUserId(userId);
   }
 
   @Mutation(() => Boolean, {
