@@ -138,9 +138,7 @@ describe('UserService', () => {
       expect(result).toBe(true);
 
       // 유저가 실제로 삭제되었는지 확인
-      const deletedUser = await userService.findOne({
-        email: createdUser.email,
-      });
+      const deletedUser = await userService.findOneByEmail(createdUser.email);
       expect(deletedUser).toBeNull();
     });
 

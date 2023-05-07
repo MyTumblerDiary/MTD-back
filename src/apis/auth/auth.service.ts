@@ -4,7 +4,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
-import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
 import * as qs from 'qs';
 import { UserService } from '../users/users.service';
@@ -103,9 +102,9 @@ export class AuthService {
     const profile = await this.getUserByKakaoAccessToken({
       accessToken,
     });
-    const user = await this.userService.findOne({
-      email: profile.kakao_account.email,
-    });
+    const user = await this.userService.findOneByEmail(
+      profile.kakao_account.email,
+    );
     const hashedPassword = await bcrypt.hash(profile.id.toString(), 10);
     if (user) {
       throw new UnprocessableEntityException(
