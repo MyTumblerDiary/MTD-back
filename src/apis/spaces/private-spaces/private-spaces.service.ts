@@ -38,7 +38,7 @@ export class PrivateSpacesService {
     return this.findOne(id);
   }
 
-  async remove(id: string): Promise<PrivateSpace> {
+  async delete(id: string): Promise<PrivateSpace> {
     await this.privateSpaceRepository.delete({ id });
     return this.findOne(id);
   }

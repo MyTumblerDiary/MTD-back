@@ -8,11 +8,14 @@ import { UpdatePrivateSpaceInput } from './dto/update-private-space.input';
 import { PrivateSpace } from './entities/private-space.entity';
 import { PrivateSpacesService } from './private-spaces.service';
 
-@Resolver(() => PrivateSpace)
+@Resolver('PrivateSpace')
 export class PrivateSpacesResolver {
   constructor(private readonly privateSpacesService: PrivateSpacesService) {}
 
-  @Mutation(() => PrivateSpace)
+  @UseGuards(GqlAuthAccessGuard)
+  @Mutation(() => PrivateSpace, {
+    description: '개인 공간을 생성합니다.',
+  })
   createPrivateSpace(
     @Args('createPrivateSpaceInput')
     createPrivateSpaceInput: CreatePrivateSpaceInput,
@@ -20,18 +23,29 @@ export class PrivateSpacesResolver {
     return this.privateSpacesService.create(createPrivateSpaceInput);
   }
 
-  @Query(() => [PrivateSpace], { name: 'privateSpaces' })
-  findAll(): Promise<PrivateSpace[]> {
+  @UseGuards(GqlAuthAccessGuard)
+  @Query(() => [PrivateSpace], {
+    name: 'privateSpaces',
+    description: '개인 공간을 모두 가져옵니다.',
+  })
+  privateSpaces(): Promise<PrivateSpace[]> {
     return this.privateSpacesService.findAll();
   }
 
-  @Query(() => PrivateSpace, { name: 'privateSpace' })
-  findOne(@Args('id') id: string): Promise<PrivateSpace> {
+  @UseGuards(GqlAuthAccessGuard)
+  @Query(() => PrivateSpace, {
+    name: 'privateSpace',
+    description: '개인 공간을 하나 가져옵니다.',
+  })
+  privateSpace(@Args('id') id: string): Promise<PrivateSpace> {
     return this.privateSpacesService.findOne(id);
   }
 
   @UseGuards(GqlAuthAccessGuard)
-  @Mutation(() => PrivateSpace)
+  @Mutation(() => PrivateSpace, {
+    name: 'updatePrivateSpace',
+    description: '개인 공간을 수정합니다.',
+  })
   updatePrivateSpace(
     @CurrentUser('user') user: User,
     @Args('updatePrivateSpaceInput')
@@ -40,8 +54,12 @@ export class PrivateSpacesResolver {
     return this.privateSpacesService.update(user.id, updatePrivateSpaceInput);
   }
 
-  @Mutation(() => PrivateSpace)
-  removePrivateSpace(@Args('id') id: string): Promise<PrivateSpace> {
-    return this.privateSpacesService.remove(id);
+  @UseGuards(GqlAuthAccessGuard)
+  @Mutation(() => PrivateSpace, {
+    name: 'deletePrivateSpace',
+    description: '개인 공간을 삭제합니다.',
+  })
+  deletePrivateSpace(@Args('id') id: string): Promise<PrivateSpace> {
+    return this.privateSpacesService.delete(id);
   }
 }
