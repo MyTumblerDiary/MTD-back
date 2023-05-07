@@ -1,5 +1,6 @@
 import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
-import { Store } from 'src/apis/stores/entities/store.entity';
+import { PrivateSpace } from 'src/apis/spaces/private-spaces/entities/private-space.entity';
+import { Store } from 'src/apis/spaces/stores/entities/store.entity';
 import { User } from 'src/apis/users/entities/user.entity';
 import { CommonEntity } from 'src/commons/entities/common.entity';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
@@ -34,9 +35,29 @@ export class TumblerRecord extends CommonEntity {
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
   user: User;
 
+  @Field(() => Store, {
+    description: '텀블러를 사용한 매장',
+    nullable: true,
+  })
   @ManyToOne(() => Store, (store) => store.tumblerRecords, {
     onDelete: 'CASCADE',
+    nullable: true,
   })
   @JoinColumn({ name: 'store_id', referencedColumnName: 'id' })
   store: Store;
+
+  @Field(() => PrivateSpace, {
+    description: '텀블러를 사용한 개인 공간',
+    nullable: true,
+  })
+  @ManyToOne(
+    () => PrivateSpace,
+    (privateSpace) => privateSpace.tumblerRecords,
+    {
+      onDelete: 'CASCADE',
+      nullable: true,
+    },
+  )
+  @JoinColumn({ name: 'private_space_id', referencedColumnName: 'id' })
+  privateSpace: PrivateSpace;
 }

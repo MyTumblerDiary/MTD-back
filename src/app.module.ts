@@ -8,7 +8,7 @@ import { ClientOpts } from 'redis';
 import { AuthModule } from './apis/auth/auth.module';
 import { CloudAwsModule } from './apis/clouds/aws/cloud-aws.module';
 import { FranchisesModule } from './apis/franchises/franchises.module';
-import { StoresModule } from './apis/stores/stores.module';
+import { StoresModule } from './apis/spaces/stores/stores.module';
 import { TumblerRecordsModule } from './apis/tumbler-records/tumbler-records.module';
 import { UserModule } from './apis/users/users.module';
 import { GqlExceptionFilter } from './commons/filter/gql-exception.filter';

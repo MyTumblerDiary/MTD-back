@@ -7,7 +7,7 @@ import {
   S3PresignedUrlOutput,
 } from './dto/s3-presigned-url.dto';
 
-@Resolver()
+@Resolver('CloudAws')
 export class CloudAwsResolver {
   constructor(private readonly cloudAwsService: CloudAwsService) {}
 
