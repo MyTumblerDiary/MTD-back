@@ -98,6 +98,9 @@ type Query {
   """닉네임 중복 확인"""
   checkNickname(nickname: String!): Boolean!
 
+  """인가코드로 카카오 accesstoken 발급"""
+  getKakaoAccessToken(code: String!): String!
+
   """Find all stores"""
   stores(paginationInput: PaginationInput, searchStoreInput: SearchStoreInput, orderStoreInput: OrderStoreInput): [Store!]!
 
@@ -158,8 +161,15 @@ type Mutation {
   """유저정보 수정"""
   updateUser(userEmail: String!, updateUserInput: UpdateUserInput!): User!
   deleteUser(userEmail: String!): Boolean!
+
+  """로컬 로그인"""
   login(email: String!, password: String!): String!
+
+  """accesstoken 재발급"""
   restoreAccessToken: String!
+
+  """카카오 accessToken으로 로그인"""
+  kakaoLogin(accessToken: String!): String!
 
   """Create a store"""
   createStore(createStoreInput: CreateStoreInput!): Store!

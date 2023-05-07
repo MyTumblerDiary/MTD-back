@@ -1,4 +1,4 @@
-import { CacheModule, ConflictException, CACHE_MANAGER } from '@nestjs/common';
+import { CacheModule } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
@@ -93,7 +93,7 @@ describe('UserService', () => {
       };
 
       // 1. 테스트용 유저 생성
-      const createdUser = await userService.create({
+      await userService.create({
         createUserInput,
       });
 
@@ -138,9 +138,7 @@ describe('UserService', () => {
       expect(result).toBe(true);
 
       // 유저가 실제로 삭제되었는지 확인
-      const deletedUser = await userService.findOne({
-        email: createdUser.email,
-      });
+      const deletedUser = await userService.findOneByEmail(createdUser.email);
       expect(deletedUser).toBeNull();
     });
 
