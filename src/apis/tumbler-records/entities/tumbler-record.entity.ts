@@ -20,6 +20,12 @@ export class TumblerRecord extends CommonEntity {
   @Column({ type: 'text', nullable: true })
   imageFileKey: string;
 
+  @Field(() => String, {
+    description: '텀블러를 사용한 날짜입니다. 양식은 YYYY-MM-DD입니다. ',
+  })
+  @Column({ type: 'varchar', length: 10 })
+  usedAt: string;
+
   @Field(() => User, {
     description: '텀블러 기록을 가진 유저',
     nullable: false,
