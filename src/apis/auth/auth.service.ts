@@ -1,11 +1,12 @@
 import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
+import axios from 'axios';
 import * as bcrypt from 'bcrypt';
+import * as qs from 'qs';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
-import axios from 'axios';
-import * as qs from 'qs';
 import { UserService } from '../users/users.service';
 
 @Injectable()
@@ -15,6 +16,7 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
     private readonly userService: UserService,
     private readonly jwtService: JwtService, //
+    private readonly configService: ConfigService
   ) {}
 
   async setRefreshToken({ user, res }) {
@@ -27,7 +29,7 @@ export class AuthService {
   async setAccessToken({ user, res }) {
     const accessToken = this.jwtService.sign(
       { email: user.email, sub: user.id }, //
-      { secret: 'myAccessKey', expiresIn: '1h' },
+      { secret: this.configService.get('ACCESS_SECRET_KEY'), expiresIn: '1h' },
     );
     await res.setHeader('Set-Cookie', `accessToken=${accessToken}; Path=/`);
     return accessToken;
