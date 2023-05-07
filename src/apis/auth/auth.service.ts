@@ -106,7 +106,7 @@ export class AuthService {
       profile.kakao_account.email,
     );
     const hashedPassword = await bcrypt.hash(profile.id.toString(), 10);
-    if (user) {
+    if (user && user.social == '') {
       throw new UnprocessableEntityException(
         `${user.email} 이메일로 이미 가입된 계정이 있습니다.`,
       );
