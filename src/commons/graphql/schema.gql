@@ -2,6 +2,37 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type PrivateSpace {
+  id: String!
+  createdAt: String!
+  updatedAt: String
+  deletedAt: String
+
+  """개인 공간 이름입니다. """
+  name: String!
+
+  """개인 공간의 도로명 주소입니다. """
+  streetNameAddress: String!
+
+  """개인 공간의 지번 주소입니다. """
+  lotNumberAddress: String!
+
+  """개인 공간의 상세 주소입니다. """
+  detailAddress: String!
+
+  """개인 공간의 위도입니다. """
+  latitude: Float!
+
+  """개인 공간의 경도입니다. """
+  longitude: Float!
+
+  """AWS S3 버킷에 저장되는 개인 공간의 대표 이미지 파일키 입니다. """
+  imageFileKey: String
+
+  """개인 공간의 텀블러 기록들입니다. """
+  tumblerRecords: [TumblerRecord!]
+}
+
 """가게 Entity"""
 type Store {
   id: String!
@@ -58,6 +89,12 @@ type TumblerRecord {
 
   """텀블러 기록을 가진 유저"""
   user: User!
+
+  """텀블러를 사용한 매장"""
+  store: Store
+
+  """텀블러를 사용한 개인 공간"""
+  privateSpace: PrivateSpace
 }
 
 """유저 Entity"""
@@ -340,5 +377,8 @@ input CreateTumblerRecordInput {
   usedAt: String
 
   """텀블러를 사용한 가게입니다. """
-  storeId: String!
+  storeId: String
+
+  """텀블러를 사용한 개인 공간입니다. """
+  privateSpaceId: String
 }
