@@ -53,6 +53,9 @@ type TumblerRecord {
   """텀블러 이미지 파일 키"""
   imageFileKey: String
 
+  """텀블러를 사용한 날짜입니다. 양식은 YYYY-MM-DD입니다. """
+  usedAt: String!
+
   """텀블러 기록을 가진 유저"""
   user: User!
 }
@@ -85,6 +88,20 @@ type S3PresignedUrlOutput {
   fileKey: String!
 }
 
+"""가맹점 Entity"""
+type Franchise {
+  id: String!
+  createdAt: String!
+  updatedAt: String
+  deletedAt: String
+
+  """가맹점 이름입니다. """
+  name: String!
+
+  """가맹점 텀블러 할인 금액입니다. """
+  discountPrice: Int
+}
+
 type Query {
   """이메일 보내기"""
   sendEmail(email: String!): Boolean!
@@ -103,6 +120,12 @@ type Query {
 
   """Find one store by id"""
   store(id: String!): Store!
+
+  """모든 프렌차이즈를 조회합니다. """
+  franchises: [Franchise!]!
+
+  """id로 하나의 프렌차이즈를 조회합니다. """
+  franchise(id: String!): Franchise!
 
   """유저의 모든 텀블러 기록을 모두 가져옵니다."""
   tumblerRecords: [TumblerRecord!]!
@@ -176,6 +199,15 @@ type Mutation {
 
   """Delete a store"""
   deleteStore(id: String!): Boolean!
+
+  """프렌차이즈를 생성합니다. """
+  createFranchise(createFranhiseInput: CreateFranchiseInput!): Franchise!
+
+  """프렌차이즈를 수정합니다. """
+  updateFranchise(id: String!, updateFranchiseInput: UpdateFranchiseInput!): Franchise!
+
+  """프렌차이즈를 삭제합니다. """
+  deleteFranchise(id: String!): Franchise!
 
   """Presigned URL을 받습니다."""
   getPresignedUrl(presignedUrlInput: S3PresignedUrlInput!): S3PresignedUrlOutput!
@@ -261,6 +293,22 @@ input UpdateStoreInput {
   imageFileKey: String
 }
 
+input CreateFranchiseInput {
+  """가맹점 이름입니다. """
+  name: String!
+
+  """가맹점 텀블러 할인 금액입니다. """
+  discountPrice: Int
+}
+
+input UpdateFranchiseInput {
+  """가맹점 이름입니다. """
+  name: String
+
+  """가맹점 텀블러 할인 금액입니다. """
+  discountPrice: Int
+}
+
 input S3PresignedUrlInput {
   fileName: String!
   type: ImageType!
@@ -287,4 +335,10 @@ input CreateTumblerRecordInput {
 
   """텀블러 이미지 파일 키"""
   imageFileKey: String
+
+  """텀블러를 사용한 날짜입니다. 양식은 YYYY-MM-DD입니다. """
+  usedAt: String
+
+  """텀블러를 사용한 가게입니다. """
+  storeId: String!
 }

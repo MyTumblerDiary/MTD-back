@@ -7,6 +7,7 @@ import * as redisStore from 'cache-manager-redis-store';
 import { ClientOpts } from 'redis';
 import { AuthModule } from './apis/auth/auth.module';
 import { CloudAwsModule } from './apis/clouds/aws/cloud-aws.module';
+import { FranchisesModule } from './apis/franchises/franchises.module';
 import { StoresModule } from './apis/stores/stores.module';
 import { TumblerRecordsModule } from './apis/tumbler-records/tumbler-records.module';
 import { UserModule } from './apis/users/users.module';
@@ -24,6 +25,7 @@ const ENV = process.env.NODE_ENV;
     UserModule,
     AuthModule,
     StoresModule,
+    FranchisesModule,
     CloudAwsModule,
     DynamicGqlModule.forRoot(),
     TypeOrmModule.forRoot(ormOption),
