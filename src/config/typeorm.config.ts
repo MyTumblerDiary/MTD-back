@@ -1,7 +1,7 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
-import * as path from 'path';
 import * as dotenv from 'dotenv';
+import * as path from 'path';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
 const ENV = process.env.NODE_ENV;
 dotenv.config({
