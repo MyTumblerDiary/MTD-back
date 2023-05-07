@@ -32,20 +32,14 @@ export class AuthResolver {
     return this.authService.setAccessToken({ user: currentUser, res });
   }
 
-  @Query(() => String, {
-    description: '인가코드로 카카오 accesstoken 발급',
-  })
-  async getKakaoAccessToken(@Args('code') code: string) {
-    return await this.authService.getKakaoAccessToken(code);
-  }
-
   @Mutation(() => String, {
-    description: '카카오 accessToken으로 로그인',
+    description: '인가코드로 카카오 accesstoken 발급후 로그인',
   })
   async kakaoLogin(
-    @Args('accessToken') accessToken: string, //
+    @Args('code') code: string, //
     @Context() context: any,
   ) {
+    const accessToken = await this.authService.getKakaoAccessToken(code);
     return await this.authService.kakaoLogin({ accessToken, context });
   }
 }
