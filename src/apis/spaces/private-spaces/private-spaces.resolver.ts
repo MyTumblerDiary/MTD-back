@@ -2,7 +2,7 @@ import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { GqlAuthAccessGuard } from 'src/commons/auth/gql-auth.guard';
 import { CurrentUser } from 'src/commons/auth/gql-user.param';
-import { User } from '../users/entities/user.entity';
+import { User } from '../../users/entities/user.entity';
 import { CreatePrivateSpaceInput } from './dto/create-private-space.input';
 import { UpdatePrivateSpaceInput } from './dto/update-private-space.input';
 import { PrivateSpace } from './entities/private-space.entity';
