@@ -102,7 +102,7 @@ export class AuthService {
     const profile = await this.getUserByKakaoAccessToken({
       accessToken,
     });
-    const user = await this.userService.findOneByEmail(
+    let user = await this.userService.findOneByEmail(
       profile.kakao_account.email,
     );
     const hashedPassword = await bcrypt.hash(profile.id.toString(), 10);
@@ -111,7 +111,7 @@ export class AuthService {
         `${user.email} 이메일로 이미 가입된 계정이 있습니다.`,
       );
     } else if (!user) {
-      await this.userRepository.save({
+      user = await this.userRepository.save({
         email: profile.kakao_account.email,
         password: hashedPassword,
         nickname: profile.properties.nickname,
