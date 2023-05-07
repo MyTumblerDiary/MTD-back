@@ -97,7 +97,6 @@ export class AuthService {
     const data = result.data;
     return data;
   }
-
   async kakaoLogin({ accessToken, context }) {
     const profile = await this.getUserByKakaoAccessToken({
       accessToken,
@@ -106,10 +105,9 @@ export class AuthService {
       profile.kakao_account.email,
     );
     const hashedPassword = await bcrypt.hash(profile.id.toString(), 10);
-    if (user && user.social == '') {
-      throw new UnprocessableEntityException(
-        `${user.email} 이메일로 이미 가입된 계정이 있습니다.`,
-      );
+    if (user && user.social !== 'kakao') {
+      const errorMessage = `${user.email} 이메일로 이미 가입된 계정이 있습니다.`;
+      throw new UnprocessableEntityException(errorMessage, user.email);
     } else if (!user) {
       user = await this.userRepository.save({
         email: profile.kakao_account.email,
@@ -119,6 +117,8 @@ export class AuthService {
       });
     }
     await this.setRefreshToken({ user, res: context.res });
-    return await this.setAccessToken({ user, res: context.res });
+    return {
+      accessToken: await this.setAccessToken({ user, res: context.res }),
+    };
   }
 }
