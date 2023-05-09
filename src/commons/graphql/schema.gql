@@ -232,6 +232,9 @@ type Mutation {
   """인가코드로 카카오 accesstoken 발급후 로그인"""
   kakaoLogin(code: String!): LoginResponseDto!
 
+  """인가코드로 구글 accesstoken 발급후 로그인"""
+  googleLogin(code: String!): LoginResponseDto!
+
   """Create a store"""
   createStore(createStoreInput: CreateStoreInput!): Store!
 
