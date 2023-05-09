@@ -9,7 +9,6 @@ import { JwtGoogleStrategy } from 'src/commons/auth/strategies/jwt-social-google
 import { JwtKakaoStrategy } from 'src/commons/auth/strategies/jwt-social-kakao.strategy';
 import { User } from '../users/entities/user.entity';
 import { UserService } from '../users/users.service';
-import { AuthController } from './auth.controller';
 import { AuthResolver } from './auth.resolver';
 import { AuthService } from './auth.service';
 @Module({
@@ -32,9 +31,6 @@ import { AuthService } from './auth.service';
     AuthResolver,
     AuthService,
     UserService,
-  ],
-  controllers: [
-    AuthController, //
   ],
   exports: [AuthService],
 })

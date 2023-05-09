@@ -43,4 +43,15 @@ export class AuthResolver {
     const accessToken = await this.authService.getKakaoAccessToken(code);
     return await this.authService.kakaoLogin({ accessToken, context });
   }
+
+  @Mutation(() => LoginResponseDto, {
+    description: '인가코드로 구글 accesstoken 발급후 로그인',
+  })
+  async googleLogin(
+    @Args('code') code: string, //
+    @Context() context: any,
+  ): Promise<LoginResponseDto> {
+    const accessToken = await this.authService.getGoogleAccessToken(code);
+    return await this.authService.googleLogin({ accessToken, context });
+  }
 }
