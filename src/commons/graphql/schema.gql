@@ -76,7 +76,7 @@ type TumblerRecord {
   deletedAt: String
 
   """텀블러 할인 금액"""
-  prices: Int!
+  prices: Int
 
   """텀블러 기록 메모"""
   memo: String

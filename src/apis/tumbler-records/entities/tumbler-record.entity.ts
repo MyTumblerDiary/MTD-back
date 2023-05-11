@@ -9,31 +9,35 @@ import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 @InputType('TumblerRecordInputType', { isAbstract: true })
 @ObjectType({ description: '텀블러 기록 Entity' })
 export class TumblerRecord extends CommonEntity {
-  @Field(() => Int, { description: '텀블러 할인 금액', nullable: false })
-  @Column({ type: 'int' })
-  prices: number;
+  @Field(() => Int, { description: '텀블러 할인 금액', nullable: true })
+  @Column({ type: 'int', nullable: true })
+  prices?: number;
 
   @Field(() => String, { description: '텀블러 기록 메모', nullable: true })
   @Column({ type: 'text', nullable: true })
-  memo: string;
+  memo?: string;
 
   @Field(() => String, { description: '텀블러 이미지 파일 키', nullable: true })
   @Column({ type: 'text', nullable: true })
-  imageFileKey: string;
+  imageFileKey?: string;
 
   @Field(() => String, {
     description: '텀블러를 사용한 날짜입니다. 양식은 YYYY-MM-DD입니다. ',
+    nullable: false,
   })
-  @Column({ type: 'varchar', length: 10 })
-  usedAt: string;
+  @Column({ type: 'varchar', length: 10, nullable: false })
+  usedAt!: string;
 
   @Field(() => User, {
     description: '텀블러 기록을 가진 유저',
     nullable: false,
   })
-  @ManyToOne(() => User, (user) => user.tumblerRecords)
+  @ManyToOne(() => User, (user) => user.tumblerRecords, {
+    onDelete: 'CASCADE',
+    nullable: false,
+  })
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
-  user: User;
+  user!: User;
 
   @Field(() => Store, {
     description: '텀블러를 사용한 매장',
@@ -44,7 +48,7 @@ export class TumblerRecord extends CommonEntity {
     nullable: true,
   })
   @JoinColumn({ name: 'store_id', referencedColumnName: 'id' })
-  store: Store;
+  store?: Store;
 
   @Field(() => PrivateSpace, {
     description: '텀블러를 사용한 개인 공간',
@@ -59,5 +63,5 @@ export class TumblerRecord extends CommonEntity {
     },
   )
   @JoinColumn({ name: 'private_space_id', referencedColumnName: 'id' })
-  privateSpace: PrivateSpace;
+  privateSpace?: PrivateSpace;
 }
