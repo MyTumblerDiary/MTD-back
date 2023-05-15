@@ -4,6 +4,7 @@ import { IsEmail } from 'class-validator';
 import { TumblerRecord } from 'src/apis/tumbler-records/entities/tumbler-record.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
 import { CommonEntity } from '../../../commons/entities/common.entity';
+import { RefreshToken } from 'src/apis/auth/entities/refreshToken.entity';
 
 @InputType('UserInputType', { isAbstract: true })
 @Entity({ name: 'users' })
@@ -52,4 +53,7 @@ export class User extends CommonEntity {
   })
   @OneToMany(() => TumblerRecord, (tumblerRecord) => tumblerRecord.user)
   tumblerRecords?: TumblerRecord[];
+
+  @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
+  refreshTokens?: RefreshToken[];
 }

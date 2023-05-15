@@ -7,12 +7,15 @@ import { User } from '../users/entities/user.entity';
 import axios from 'axios';
 import * as qs from 'qs';
 import { UserService } from '../users/users.service';
+import { RefreshToken } from './entities/refreshToken.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(RefreshToken)
+    private readonly refreshtokenRepository: Repository<RefreshToken>,
     private readonly userService: UserService,
     private readonly jwtService: JwtService, //
   ) {}
@@ -22,7 +25,11 @@ export class AuthService {
       { email: user.email, sub: user.id }, //
       { secret: process.env.REFRESH_SECRET_KEY, expiresIn: '2w' },
     );
-    await res.setHeader('Set-Cookie', `refreshToken=${refreshToken}; Path=/`);
+    const hashedRefreshToken = await bcrypt.hash(refreshToken.toString(), 10);
+    await this.refreshtokenRepository.save({
+      refreshToken: hashedRefreshToken,
+      user,
+    });
   }
   async setAccessToken({ user, res }) {
     const accessToken = this.jwtService.sign(
