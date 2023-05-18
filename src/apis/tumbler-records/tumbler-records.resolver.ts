@@ -7,7 +7,7 @@ import { CreateTumblerRecordInput } from './dto/create.tumbler-record.dto';
 import { TumblerRecord } from './entities/tumbler-record.entity';
 import { TumblerRecordsService } from './tumbler-records.service';
 
-@Resolver()
+@Resolver('TumblerRecord')
 export class TumblerRecordResolver {
   constructor(private readonly tumblerRecordsService: TumblerRecordsService) {}
 

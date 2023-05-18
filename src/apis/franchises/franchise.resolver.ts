@@ -1,4 +1,6 @@
+import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { GqlAuthAccessGuard } from 'src/commons/auth/gql-auth.guard';
 import { CreateFranchiseInput } from './dto/create.franchise.dto';
 import { UpdateFranchiseInput } from './dto/update.franchise.dto';
 import { Franchise } from './entities/franchise.entity';
@@ -8,6 +10,7 @@ import { FranchisesService } from './franchises.service';
 export class FranchisesResolver {
   constructor(private readonly franchisesService: FranchisesService) {}
 
+  @UseGuards(GqlAuthAccessGuard)
   @Query(() => [Franchise], {
     name: 'franchises',
     description: '모든 프렌차이즈를 조회합니다. ',
@@ -16,6 +19,7 @@ export class FranchisesResolver {
     return await this.franchisesService.findAll();
   }
 
+  @UseGuards(GqlAuthAccessGuard)
   @Query(() => Franchise, {
     name: 'franchise',
     description: 'id로 하나의 프렌차이즈를 조회합니다. ',
@@ -24,6 +28,7 @@ export class FranchisesResolver {
     return await this.franchisesService.findOne(id);
   }
 
+  @UseGuards(GqlAuthAccessGuard)
   @Mutation(() => Franchise, {
     name: 'createFranchise',
     description: '프렌차이즈를 생성합니다. ',
@@ -45,6 +50,7 @@ export class FranchisesResolver {
     return await this.franchisesService.update(id, updateFranchiseInput);
   }
 
+  @UseGuards(GqlAuthAccessGuard)
   @Mutation(() => Franchise, {
     name: 'deleteFranchise',
     description: '프렌차이즈를 삭제합니다. ',

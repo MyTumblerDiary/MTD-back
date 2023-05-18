@@ -52,25 +52,6 @@ export class AuthService {
     return await this.setAccessToken({ user, res: context.res });
   }
 
-  async social_login({ req, res }) {
-    let user = await this.userService.findOneByEmail(req.user.email);
-    const hashedPassword = await bcrypt.hash(req.user.password, 10);
-
-    if (!user) {
-      user = await this.userRepository.save({
-        email: req.user.email,
-        password: hashedPassword,
-        nickname: req.user.nickname,
-        social: req.user.social,
-      });
-    }
-    await this.setRefreshToken({ user, res });
-    await this.setAccessToken({ user, res });
-    res.status(200).json({
-      ok: true,
-    });
-  }
-
   async getKakaoAccessToken(code: string) {
     const token = await axios({
       //token
@@ -99,7 +80,6 @@ export class AuthService {
     const data = result.data;
     return data;
   }
-
   async kakaoLogin({ accessToken, context }) {
     const profile = await this.getUserByKakaoAccessToken({
       accessToken,
@@ -108,10 +88,9 @@ export class AuthService {
       profile.kakao_account.email,
     );
     const hashedPassword = await bcrypt.hash(profile.id.toString(), 10);
-    if (user && user.social == '') {
-      throw new UnprocessableEntityException(
-        `${user.email} 이메일로 이미 가입된 계정이 있습니다.`,
-      );
+    if (user && user.social !== 'kakao') {
+      const errorMessage = `${user.email} 이메일로 이미 가입된 계정이 있습니다.`;
+      throw new UnprocessableEntityException(errorMessage, user.email);
     } else if (!user) {
       user = await this.userRepository.save({
         email: profile.kakao_account.email,
@@ -121,6 +100,63 @@ export class AuthService {
       });
     }
     await this.setRefreshToken({ user, res: context.res });
-    return await this.setAccessToken({ user, res: context.res });
+    return {
+      accessToken: await this.setAccessToken({ user, res: context.res }),
+    };
+  }
+
+  async getGoogleAccessToken(code: string): Promise<string> {
+    const data = qs.stringify({
+      grant_type: 'authorization_code',
+      client_id: process.env.OAUTH_GOOGLE_ID,
+      client_secret: process.env.OAUTH_GOOGLE_SECRET,
+      redirect_uri: process.env.OAUTH_GOOGLE_CALLBACK,
+      code: decodeURIComponent(code),
+    });
+
+    const response = await axios.post(
+      'https://oauth2.googleapis.com/token',
+      data,
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      },
+    );
+    return response.data.access_token;
+  }
+
+  async getUserByGoogleAccessToken(accessToken) {
+    const result = await axios.get(
+      `https://www.googleapis.com/oauth2/v3/userinfo`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+    const data = result.data;
+    return data;
+  }
+
+  async googleLogin({ accessToken, context }) {
+    const profile = await this.getUserByGoogleAccessToken(accessToken);
+    let user = await this.userService.findOneByEmail(profile.email);
+    const hashedPassword = await bcrypt.hash(profile.sub.toString(), 10);
+    if (user && user.social !== 'google') {
+      const errorMessage = `${user.email} 이메일로 이미 가입된 계정이 있습니다.`;
+      throw new UnprocessableEntityException(errorMessage, user.email);
+    } else if (!user) {
+      user = await this.userRepository.save({
+        email: profile.email,
+        password: hashedPassword,
+        nickname: profile.email.split('@')[0],
+        social: 'google',
+      });
+    }
+    await this.setRefreshToken({ user, res: context.res });
+    return {
+      accessToken: await this.setAccessToken({ user, res: context.res }),
+    };
   }
 }
