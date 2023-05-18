@@ -82,6 +82,7 @@ type User {
 
 type LoginResponseDto {
   accessToken: String!
+  refreshToken: String!
 }
 
 type S3PresignedUrlOutput {
@@ -164,7 +165,7 @@ type Mutation {
   deleteUser(userEmail: String!): Boolean!
 
   """로컬 로그인"""
-  login(email: String!, password: String!): String!
+  login(email: String!, password: String!): LoginResponseDto!
 
   """accesstoken 재발급"""
   restoreAccessToken: String!
@@ -174,6 +175,7 @@ type Mutation {
 
   """인가코드로 구글 accesstoken 발급후 로그인"""
   googleLogin(code: String!): LoginResponseDto!
+  logout: String!
 
   """Create a store"""
   createStore(createStoreInput: CreateStoreInput!): Store!

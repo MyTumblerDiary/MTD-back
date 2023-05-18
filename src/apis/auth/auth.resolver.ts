@@ -1,24 +1,32 @@
-import { UseGuards } from '@nestjs/common';
+import {
+  CACHE_MANAGER,
+  Inject,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Response } from 'express';
 import { GqlAuthRefreshGuard } from 'src/commons/auth/gql-auth.guard';
 import { CurrentUser } from 'src/commons/auth/gql-user.param';
 import { AuthService } from './auth.service';
 import { LoginResponseDto } from './dto/auth.output.dto';
+import jwt from 'jsonwebtoken';
+import { Cache } from 'cache-manager';
 @Resolver()
 export class AuthResolver {
   constructor(
     private readonly authService: AuthService, //
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
-  @Mutation(() => String, {
+  @Mutation(() => LoginResponseDto, {
     description: '로컬 로그인',
   })
   async login(
     @Args('email') email: string, //
     @Args('password') password: string,
     @Context() context: any,
-  ): Promise<string> {
+  ): Promise<LoginResponseDto> {
     return this.authService.loginUser({ email, password, context });
   }
 
@@ -28,9 +36,12 @@ export class AuthResolver {
   })
   restoreAccessToken(
     @CurrentUser() currentUser: any, //
-    res: Response,
+    @Context() context: any,
   ): Promise<string> {
-    return this.authService.setAccessToken({ user: currentUser, res });
+    return this.authService.setAccessToken({
+      user: currentUser,
+      res: context.res,
+    });
   }
 
   @Mutation(() => LoginResponseDto, {
@@ -53,5 +64,34 @@ export class AuthResolver {
   ): Promise<LoginResponseDto> {
     const accessToken = await this.authService.getGoogleAccessToken(code);
     return await this.authService.googleLogin({ accessToken, context });
+  }
+
+  @Mutation(() => String)
+  async logout(@Context() context: any) {
+    const access = context.req.rawHeaders
+      .filter((ele) => {
+        return ele.match(/Bearer/);
+      })[0]
+      .split(' ')[1];
+    console.log('access:', access);
+
+    const refresh = context.req.rawHeaders
+      .filter((ele) => {
+        return ele.match(/Bearer/);
+      })[0]
+      .split(' ')[2];
+    console.log('refresh:', refresh);
+
+    // try {
+    //   jwt.verify(access, process.env.ACCESS_SECRET_KEY);
+    //   jwt.verify(refresh, process.env.REFRESH_SECRET_KEY);
+    // } catch {
+    //   throw new UnauthorizedException();
+    // }
+
+    await this.cacheManager.set(access, 'accessToken', { ttl: 120 });
+    await this.cacheManager.set(refresh, 'refreshToken', { ttl: 120 });
+
+    return '로그아웃에 성공했습니다';
   }
 }

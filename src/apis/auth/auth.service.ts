@@ -20,6 +20,14 @@ export class AuthService {
     private readonly jwtService: JwtService, //
   ) {}
 
+  async findRefreshTokenByUserId(
+    userId: string,
+  ): Promise<RefreshToken | undefined> {
+    return this.refreshtokenRepository.findOne({
+      where: { user: { id: userId } },
+    });
+  }
+
   async setRefreshToken({ user, res }) {
     const refreshToken = this.jwtService.sign(
       { email: user.email, sub: user.id }, //
@@ -30,6 +38,7 @@ export class AuthService {
       refreshToken: hashedRefreshToken,
       user,
     });
+    return refreshToken;
   }
   async setAccessToken({ user, res }) {
     const accessToken = this.jwtService.sign(
@@ -54,7 +63,10 @@ export class AuthService {
     if (!isAuth)
       throw new UnprocessableEntityException('비밀번호가 틀렸습니다.');
     await this.setRefreshToken({ user, res: context.res });
-    return await this.setAccessToken({ user, res: context.res });
+    return {
+      accessToken: await this.setAccessToken({ user, res: context.res }),
+      refreshToken: await this.setRefreshToken({ user, res: context.res }),
+    };
   }
 
   async getKakaoAccessToken(code: string) {
@@ -104,9 +116,9 @@ export class AuthService {
         social: 'kakao',
       });
     }
-    await this.setRefreshToken({ user, res: context.res });
     return {
       accessToken: await this.setAccessToken({ user, res: context.res }),
+      refreshToken: await this.setRefreshToken({ user, res: context.res }),
     };
   }
 
@@ -159,9 +171,9 @@ export class AuthService {
         social: 'google',
       });
     }
-    await this.setRefreshToken({ user, res: context.res });
     return {
       accessToken: await this.setAccessToken({ user, res: context.res }),
+      refreshToken: await this.setRefreshToken({ user, res: context.res }),
     };
   }
 }
