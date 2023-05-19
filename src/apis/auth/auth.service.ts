@@ -7,16 +7,17 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
+import axios from 'axios';
 import * as bcrypt from 'bcrypt';
+import * as qs from 'qs';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
-import axios from 'axios';
-import * as qs from 'qs';
 import { UserService } from '../users/users.service';
 import { RefreshToken } from './entities/refreshToken.entity';
 import * as jwt from 'jsonwebtoken';
 import { Cache } from 'cache-manager';
 import { LogoutInput } from './dto/logout.auth.dto';
+import { ConfigService } from 'aws-sdk';
 
 @Injectable()
 export class AuthService {
@@ -28,6 +29,7 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly jwtService: JwtService, //
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly configService: ConfigService,
   ) {}
 
   async findRefreshTokenByUserId(

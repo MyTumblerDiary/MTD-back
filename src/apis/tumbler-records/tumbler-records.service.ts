@@ -18,7 +18,6 @@ export class TumblerRecordsService {
     createTumblerRecordInput: CreateTumblerRecordInput,
     user: User,
   ) {
-    console.log(user);
     const newTumblerRecord = this.tumblerRecordsRepository.create({
       ...createTumblerRecordInput,
       user,
