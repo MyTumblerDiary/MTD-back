@@ -38,7 +38,7 @@ export class AuthService {
     });
   }
 
-  async setRefreshToken({ user, res }) {
+  async setRefreshToken({ user }) {
     const refreshToken = this.jwtService.sign(
       { email: user.email, sub: user.id }, //
       { secret: process.env.REFRESH_SECRET_KEY, expiresIn: '2w' },
@@ -50,12 +50,11 @@ export class AuthService {
     });
     return refreshToken;
   }
-  async setAccessToken({ user, res }) {
+  async setAccessToken({ user }) {
     const accessToken = this.jwtService.sign(
       { email: user.email, sub: user.id }, //
       { secret: process.env.ACCESS_SECRET_KEY, expiresIn: '1h' },
     );
-    await res.setHeader('Set-Cookie', `accessToken=${accessToken}; Path=/`);
     return accessToken;
   }
   async loginUser({ email, password, context }) {
@@ -72,16 +71,15 @@ export class AuthService {
     const isAuth = await bcrypt.compare(password, user.password);
     if (!isAuth)
       throw new UnprocessableEntityException('비밀번호가 틀렸습니다.');
-    await this.setRefreshToken({ user, res: context.res });
+    await this.setRefreshToken({ user });
     return {
-      accessToken: await this.setAccessToken({ user, res: context.res }),
-      refreshToken: await this.setRefreshToken({ user, res: context.res }),
+      accessToken: await this.setAccessToken({ user }),
+      refreshToken: await this.setRefreshToken({ user }),
     };
   }
 
   async getKakaoAccessToken(code: string) {
     const token = await axios({
-      //token
       method: 'POST',
       url: 'https://kauth.kakao.com/oauth/token',
       headers: {
@@ -107,7 +105,7 @@ export class AuthService {
     const data = result.data;
     return data;
   }
-  async kakaoLogin({ accessToken, context }) {
+  async kakaoLogin({ accessToken }) {
     const profile = await this.getUserByKakaoAccessToken({
       accessToken,
     });
@@ -127,8 +125,8 @@ export class AuthService {
       });
     }
     return {
-      accessToken: await this.setAccessToken({ user, res: context.res }),
-      refreshToken: await this.setRefreshToken({ user, res: context.res }),
+      accessToken: await this.setAccessToken({ user }),
+      refreshToken: await this.setRefreshToken({ user }),
     };
   }
 
@@ -166,7 +164,7 @@ export class AuthService {
     return data;
   }
 
-  async googleLogin({ accessToken, context }) {
+  async googleLogin({ accessToken }) {
     const profile = await this.getUserByGoogleAccessToken(accessToken);
     let user = await this.userService.findOneByEmail(profile.email);
     const hashedPassword = await bcrypt.hash(profile.sub.toString(), 10);
@@ -182,8 +180,8 @@ export class AuthService {
       });
     }
     return {
-      accessToken: await this.setAccessToken({ user, res: context.res }),
-      refreshToken: await this.setRefreshToken({ user, res: context.res }),
+      accessToken: await this.setAccessToken({ user }),
+      refreshToken: await this.setRefreshToken({ user }),
     };
   }
 

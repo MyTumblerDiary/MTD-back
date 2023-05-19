@@ -28,11 +28,9 @@ export class AuthResolver {
   })
   restoreAccessToken(
     @CurrentUser() currentUser: any, //
-    @Context() context: any,
   ): Promise<string> {
     return this.authService.setAccessToken({
       user: currentUser,
-      res: context.res,
     });
   }
 
@@ -41,10 +39,9 @@ export class AuthResolver {
   })
   async kakaoLogin(
     @Args('code') code: string, //
-    @Context() context: any,
   ): Promise<LoginResponseDto> {
     const accessToken = await this.authService.getKakaoAccessToken(code);
-    return await this.authService.kakaoLogin({ accessToken, context });
+    return await this.authService.kakaoLogin({ accessToken });
   }
 
   @Mutation(() => LoginResponseDto, {
@@ -52,10 +49,9 @@ export class AuthResolver {
   })
   async googleLogin(
     @Args('code') code: string, //
-    @Context() context: any,
   ): Promise<LoginResponseDto> {
     const accessToken = await this.authService.getGoogleAccessToken(code);
-    return await this.authService.googleLogin({ accessToken, context });
+    return await this.authService.googleLogin({ accessToken });
   }
 
   @Mutation(() => String, {
