@@ -15,9 +15,8 @@ export class AuthResolver {
   async login(
     @Args('email') email: string,
     @Args('password') password: string,
-    @Context() context: any,
   ): Promise<LoginResponseDto> {
-    return this.authService.loginUser({ email, password, context });
+    return this.authService.loginUser({ email, password });
   }
 
   @UseGuards(GqlAuthRefreshGuard)
