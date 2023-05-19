@@ -27,7 +27,7 @@ export class AuthService {
     @InjectRepository(RefreshToken)
     private readonly refreshtokenRepository: Repository<RefreshToken>,
     private readonly userService: UserService,
-    private readonly jwtService: JwtService, //
+    private readonly jwtService: JwtService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly configService: ConfigService,
   ) {}
@@ -42,7 +42,7 @@ export class AuthService {
 
   async setRefreshToken({ user }) {
     const refreshToken = this.jwtService.sign(
-      { email: user.email, sub: user.id }, //
+      { email: user.email, sub: user.id },
       { secret: process.env.REFRESH_SECRET_KEY, expiresIn: '2w' },
     );
     const hashedRefreshToken = await bcrypt.hash(refreshToken.toString(), 10);
@@ -54,12 +54,12 @@ export class AuthService {
   }
   async setAccessToken({ user }) {
     const accessToken = this.jwtService.sign(
-      { email: user.email, sub: user.id }, //
+      { email: user.email, sub: user.id },
       { secret: process.env.ACCESS_SECRET_KEY, expiresIn: '1h' },
     );
     return accessToken;
   }
-  async loginUser({ email, password, context }) {
+  async loginUser({ email, password }) {
     const user = await this.userService.findOneByEmail(email);
     if (!user) {
       throw new UnprocessableEntityException(
