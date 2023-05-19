@@ -1,22 +1,14 @@
-import {
-  CACHE_MANAGER,
-  Inject,
-  UnauthorizedException,
-  UseGuards,
-} from '@nestjs/common';
-import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { Response } from 'express';
+import { UseGuards } from '@nestjs/common';
+import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
 import { GqlAuthRefreshGuard } from 'src/commons/auth/gql-auth.guard';
 import { CurrentUser } from 'src/commons/auth/gql-user.param';
 import { AuthService } from './auth.service';
 import { LoginResponseDto } from './dto/auth.output.dto';
-import jwt from 'jsonwebtoken';
-import { Cache } from 'cache-manager';
+import { LogoutInput } from './dto/logout.auth.dto';
 @Resolver()
 export class AuthResolver {
   constructor(
     private readonly authService: AuthService, //
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   @Mutation(() => LoginResponseDto, {
@@ -66,32 +58,10 @@ export class AuthResolver {
     return await this.authService.googleLogin({ accessToken, context });
   }
 
-  @Mutation(() => String)
-  async logout(@Context() context: any) {
-    const access = context.req.rawHeaders
-      .filter((ele) => {
-        return ele.match(/Bearer/);
-      })[0]
-      .split(' ')[1];
-    console.log('access:', access);
-
-    const refresh = context.req.rawHeaders
-      .filter((ele) => {
-        return ele.match(/Bearer/);
-      })[0]
-      .split(' ')[2];
-    console.log('refresh:', refresh);
-
-    // try {
-    //   jwt.verify(access, process.env.ACCESS_SECRET_KEY);
-    //   jwt.verify(refresh, process.env.REFRESH_SECRET_KEY);
-    // } catch {
-    //   throw new UnauthorizedException();
-    // }
-
-    await this.cacheManager.set(access, 'accessToken', { ttl: 120 });
-    await this.cacheManager.set(refresh, 'refreshToken', { ttl: 120 });
-
-    return '로그아웃에 성공했습니다';
+  @Mutation(() => String, {
+    description: '로그아웃',
+  })
+  async logout(@Args('logoutInput') logoutInput: LogoutInput): Promise<string> {
+    return await this.authService.logout(logoutInput);
   }
 }

@@ -1,7 +1,7 @@
 import { ObjectType, Field, InputType } from '@nestjs/graphql';
 
-@ObjectType()
-export class LoginResponseDto {
+@InputType()
+export class LogoutInput {
   @Field()
   accessToken: string;
 

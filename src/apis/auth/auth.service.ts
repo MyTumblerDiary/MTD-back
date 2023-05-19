@@ -1,4 +1,10 @@
-import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import {
+  CACHE_MANAGER,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
@@ -8,6 +14,9 @@ import axios from 'axios';
 import * as qs from 'qs';
 import { UserService } from '../users/users.service';
 import { RefreshToken } from './entities/refreshToken.entity';
+import * as jwt from 'jsonwebtoken';
+import { Cache } from 'cache-manager';
+import { LogoutInput } from './dto/logout.auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -18,6 +27,7 @@ export class AuthService {
     private readonly refreshtokenRepository: Repository<RefreshToken>,
     private readonly userService: UserService,
     private readonly jwtService: JwtService, //
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async findRefreshTokenByUserId(
@@ -43,7 +53,7 @@ export class AuthService {
   async setAccessToken({ user, res }) {
     const accessToken = this.jwtService.sign(
       { email: user.email, sub: user.id }, //
-      { secret: 'myAccessKey', expiresIn: '1h' },
+      { secret: process.env.ACCESS_SECRET_KEY, expiresIn: '1h' },
     );
     await res.setHeader('Set-Cookie', `accessToken=${accessToken}; Path=/`);
     return accessToken;
@@ -175,5 +185,20 @@ export class AuthService {
       accessToken: await this.setAccessToken({ user, res: context.res }),
       refreshToken: await this.setRefreshToken({ user, res: context.res }),
     };
+  }
+
+  async logout(logoutInput: LogoutInput) {
+    const { accessToken, refreshToken } = logoutInput;
+    try {
+      jwt.verify(accessToken, process.env.ACCESS_SECRET_KEY);
+      jwt.verify(refreshToken, process.env.REFRESH_SECRET_KEY);
+    } catch (error) {
+      throw new UnauthorizedException();
+    }
+
+    await this.cacheManager.set(accessToken, 'accessToken', { ttl: 120 });
+    await this.cacheManager.set(refreshToken, 'refreshToken', { ttl: 120 });
+
+    return '로그아웃에 성공했습니다';
   }
 }

@@ -175,7 +175,9 @@ type Mutation {
 
   """인가코드로 구글 accesstoken 발급후 로그인"""
   googleLogin(code: String!): LoginResponseDto!
-  logout: String!
+
+  """로그아웃"""
+  logout(logoutInput: LogoutInput!): String!
 
   """Create a store"""
   createStore(createStoreInput: CreateStoreInput!): Store!
@@ -216,6 +218,11 @@ input UpdateUserInput {
 
   """닉네임은 최대 20자까지만 가능합니다. """
   nickname: String
+}
+
+input LogoutInput {
+  accessToken: String!
+  refreshToken: String!
 }
 
 input CreateStoreInput {
