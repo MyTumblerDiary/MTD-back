@@ -30,26 +30,11 @@ export class UserResolver {
     return await this.userService.updateUser({ userEmail, updateUserInput });
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Boolean, {
+    description: '유저정보 삭제',
+  })
   deleteUser(@Args('userEmail') userEmail: string) {
     return this.userService.deleteUser({ userEmail });
-  }
-
-  @Query(() => Boolean, {
-    description: '이메일 보내기',
-  })
-  async sendEmail(@Args('email') email: string): Promise<boolean> {
-    return await this.userService.sendEmail(email);
-  }
-
-  @Query(() => Boolean, {
-    description: '이메일인증 코드 확인',
-  })
-  async checkcode(
-    @Args('email') email: string,
-    @Args('code') code: string,
-  ): Promise<boolean> {
-    return await this.userService.checkCode({ email, code });
   }
 
   @Query(() => Boolean, {

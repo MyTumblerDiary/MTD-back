@@ -29,7 +29,6 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
-    private readonly configService: ConfigService,
   ) {}
 
   async findRefreshTokenByUserId(

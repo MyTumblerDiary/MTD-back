@@ -10,12 +10,13 @@ import { Cache } from 'cache-manager';
 import * as nodemailer from 'nodemailer';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
+import { EmailService } from '../emails/email.service';
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>, //
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache, //private readonly emailService: EmailService,
   ) {}
 
   async findOne(id: string) {
@@ -57,52 +58,6 @@ export class UserService {
     const user = await this.userRepository.findOne({ where: { email } });
     if (!user) throw new ConflictException('존재하지 않는 이메일입니다');
     return 1;
-  }
-
-  async sendEmail(email: string): Promise<boolean> {
-    //const user = await this.userRepository.findOne({ where: { id } });
-
-    const getRandomCode = (min, max) => {
-      min = Math.ceil(min);
-      max = Math.floor(max);
-      return Math.floor(Math.random() * (max - min)) + min;
-    };
-
-    const randomCode = getRandomCode(111111, 999999);
-
-    const transport = nodemailer.createTransport({
-      service: 'Gmail',
-      secure: true,
-      auth: {
-        type: 'OAuth2',
-        user: process.env.GMAIL_ID,
-        clientId: process.env.GMAIL_CLIENT_ID,
-        clientSecret: process.env.GMAIL_CLIENT_SECRET,
-        refreshToken: process.env.GMAIL_REFRESH_TOKEN,
-      },
-    });
-
-    if (randomCode) {
-      await this.cacheManager.get(`${email}'s AuthenticationCode`);
-    }
-    await this.cacheManager.set(`${email}'s AuthenticationCode`, randomCode);
-
-    const sendResult = await transport.sendMail({
-      from: {
-        name: '인증관리자',
-        address: process.env.GMAIL_ID,
-      },
-      subject: '내 서비스 인증 메일',
-      to: [email],
-      text: `The Authentication code is ${randomCode}`,
-    });
-    return sendResult.accepted.length > 0;
-  }
-
-  async checkCode({ email, code }) {
-    const chk = await this.cacheManager.get(`${email}'s AuthenticationCode`);
-    if (chk != code) throw new ConflictException('코드가 맞지 않습니다.');
-    return true;
   }
 
   async checkEmail({ email }) {
