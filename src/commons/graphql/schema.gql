@@ -145,12 +145,6 @@ type Franchise {
 }
 
 type Query {
-  """이메일 보내기"""
-  sendEmail(email: String!): Boolean!
-
-  """이메일인증 코드 확인"""
-  checkcode(email: String!, code: String!): Boolean!
-
   """중복 이메일 확인"""
   checkEmail(email: String!): Boolean!
 
@@ -180,6 +174,12 @@ type Query {
 
   """텀블러 기록을 하나 가져옵니다."""
   tumblerRecord(id: String!): TumblerRecord!
+
+  """회원가입 이메일 보내기"""
+  createUserEmail(email: String!): Boolean!
+
+  """이메일인증 코드 확인"""
+  checkcode(email: String!, code: String!): Boolean!
 }
 
 input PaginationInput {
@@ -228,6 +228,8 @@ type Mutation {
 
   """유저정보 수정"""
   updateUser(userEmail: String!, updateUserInput: UpdateUserInput!): User!
+
+  """유저정보 삭제"""
   deleteUser(userEmail: String!): Boolean!
 
   """로컬 로그인"""

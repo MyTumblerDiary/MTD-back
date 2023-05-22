@@ -17,6 +17,7 @@ import { GqlThrottlerGuard } from './commons/guards/gql.throttler.guard';
 import { configOptions } from './config/config';
 import { ormOption } from './config/typeorm.config';
 import { DynamicGqlModule } from './dynamic-gql.module';
+import { EmailModule } from './apis/emails/email.module';
 
 const ENV = process.env.NODE_ENV;
 
@@ -39,10 +40,11 @@ const ENV = process.env.NODE_ENV;
       store: redisStore,
       isGlobal: true,
       host: process.env.REDIS_HOST,
-      port: process.env.REDIS_PORT,
+      port: parseInt(process.env.REDIS_PORT),
       ttl: 120,
     }),
     TumblerRecordsModule,
+    EmailModule,
   ],
   providers: [
     {
