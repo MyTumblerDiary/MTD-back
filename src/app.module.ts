@@ -38,8 +38,8 @@ const ENV = process.env.NODE_ENV;
     CacheModule.register<ClientOpts>({
       store: redisStore,
       isGlobal: true,
-      host: process.env.HOST,
-      port: 6379,
+      host: process.env.REDIS_HOST,
+      port: process.env.REDIS_PORT,
       ttl: 120,
     }),
     TumblerRecordsModule,

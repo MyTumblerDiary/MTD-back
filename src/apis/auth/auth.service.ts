@@ -1,5 +1,10 @@
-import { Injectable, UnprocessableEntityException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import {
+  CACHE_MANAGER,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
@@ -8,33 +13,53 @@ import * as qs from 'qs';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { UserService } from '../users/users.service';
+import { RefreshToken } from './entities/refreshToken.entity';
+import * as jwt from 'jsonwebtoken';
+import { Cache } from 'cache-manager';
+import { LogoutInput } from './dto/logout.auth.dto';
+import { ConfigService } from 'aws-sdk';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(RefreshToken)
+    private readonly refreshtokenRepository: Repository<RefreshToken>,
     private readonly userService: UserService,
-    private readonly jwtService: JwtService, //
-    private readonly configService: ConfigService
+    private readonly jwtService: JwtService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly configService: ConfigService,
   ) {}
 
-  async setRefreshToken({ user, res }) {
+  async findRefreshTokenByUserId(
+    userId: string,
+  ): Promise<RefreshToken | undefined> {
+    return this.refreshtokenRepository.findOne({
+      where: { user: { id: userId } },
+    });
+  }
+
+  async setRefreshToken({ user }) {
     const refreshToken = this.jwtService.sign(
-      { email: user.email, sub: user.id }, //
+      { email: user.email, sub: user.id },
       { secret: process.env.REFRESH_SECRET_KEY, expiresIn: '2w' },
     );
-    await res.setHeader('Set-Cookie', `refreshToken=${refreshToken}; Path=/`);
+    const hashedRefreshToken = await bcrypt.hash(refreshToken.toString(), 10);
+    await this.refreshtokenRepository.save({
+      refreshToken: hashedRefreshToken,
+      user,
+    });
+    return refreshToken;
   }
-  async setAccessToken({ user, res }) {
+  async setAccessToken({ user }) {
     const accessToken = this.jwtService.sign(
-      { email: user.email, sub: user.id }, //
-      { secret: this.configService.get('ACCESS_SECRET_KEY'), expiresIn: '1h' },
+      { email: user.email, sub: user.id },
+      { secret: process.env.ACCESS_SECRET_KEY, expiresIn: '1h' },
     );
-    await res.setHeader('Set-Cookie', `accessToken=${accessToken}; Path=/`);
     return accessToken;
   }
-  async loginUser({ email, password, context }) {
+  async loginUser({ email, password }) {
     const user = await this.userService.findOneByEmail(email);
     if (!user) {
       throw new UnprocessableEntityException(
@@ -48,13 +73,15 @@ export class AuthService {
     const isAuth = await bcrypt.compare(password, user.password);
     if (!isAuth)
       throw new UnprocessableEntityException('비밀번호가 틀렸습니다.');
-    await this.setRefreshToken({ user, res: context.res });
-    return await this.setAccessToken({ user, res: context.res });
+    await this.setRefreshToken({ user });
+    return {
+      accessToken: await this.setAccessToken({ user }),
+      refreshToken: await this.setRefreshToken({ user }),
+    };
   }
 
   async getKakaoAccessToken(code: string) {
     const token = await axios({
-      //token
       method: 'POST',
       url: 'https://kauth.kakao.com/oauth/token',
       headers: {
@@ -80,7 +107,7 @@ export class AuthService {
     const data = result.data;
     return data;
   }
-  async kakaoLogin({ accessToken, context }) {
+  async kakaoLogin({ accessToken }) {
     const profile = await this.getUserByKakaoAccessToken({
       accessToken,
     });
@@ -99,9 +126,9 @@ export class AuthService {
         social: 'kakao',
       });
     }
-    await this.setRefreshToken({ user, res: context.res });
     return {
-      accessToken: await this.setAccessToken({ user, res: context.res }),
+      accessToken: await this.setAccessToken({ user }),
+      refreshToken: await this.setRefreshToken({ user }),
     };
   }
 
@@ -139,7 +166,7 @@ export class AuthService {
     return data;
   }
 
-  async googleLogin({ accessToken, context }) {
+  async googleLogin({ accessToken }) {
     const profile = await this.getUserByGoogleAccessToken(accessToken);
     let user = await this.userService.findOneByEmail(profile.email);
     const hashedPassword = await bcrypt.hash(profile.sub.toString(), 10);
@@ -154,9 +181,24 @@ export class AuthService {
         social: 'google',
       });
     }
-    await this.setRefreshToken({ user, res: context.res });
     return {
-      accessToken: await this.setAccessToken({ user, res: context.res }),
+      accessToken: await this.setAccessToken({ user }),
+      refreshToken: await this.setRefreshToken({ user }),
     };
+  }
+
+  async logout(logoutInput: LogoutInput) {
+    const { accessToken, refreshToken } = logoutInput;
+    try {
+      jwt.verify(accessToken, process.env.ACCESS_SECRET_KEY);
+      jwt.verify(refreshToken, process.env.REFRESH_SECRET_KEY);
+    } catch (error) {
+      throw new UnauthorizedException();
+    }
+
+    await this.cacheManager.set(accessToken, 'accessToken', { ttl: 120 });
+    await this.cacheManager.set(refreshToken, 'refreshToken', { ttl: 120 });
+
+    return '로그아웃에 성공했습니다';
   }
 }

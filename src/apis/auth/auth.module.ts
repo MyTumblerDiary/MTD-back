@@ -11,6 +11,7 @@ import { User } from '../users/entities/user.entity';
 import { UserService } from '../users/users.service';
 import { AuthResolver } from './auth.resolver';
 import { AuthService } from './auth.service';
+import { RefreshToken } from './entities/refreshToken.entity';
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt-access' }),
@@ -20,7 +21,7 @@ import { AuthService } from './auth.service';
         secret: configService.get<string>('ACCESS_SECRET_KEY'),
       }),
     }),
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, RefreshToken]),
   ],
 
   providers: [
