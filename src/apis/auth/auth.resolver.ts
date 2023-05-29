@@ -1,5 +1,5 @@
 import { UseGuards } from '@nestjs/common';
-import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { GqlAuthRefreshGuard } from 'src/commons/auth/gql-auth.guard';
 import { CurrentUser } from 'src/commons/auth/gql-user.param';
 import { AuthService } from './auth.service';
@@ -43,6 +43,14 @@ export class AuthResolver {
   async googleLogin(@Args('code') code: string): Promise<LoginResponseDto> {
     const accessToken = await this.authService.getGoogleAccessToken(code);
     return await this.authService.googleLogin({ accessToken });
+  }
+
+  @Mutation(() => LoginResponseDto, {
+    description: 'apple 인가코드로 accesstoken 발급',
+  })
+  async appleLogin(@Args('code') code: string): Promise<LoginResponseDto> {
+    const idToken = await this.authService.getAppleAccessToken(code);
+    return await this.authService.appleLogin({ idToken });
   }
 
   @Mutation(() => String, {

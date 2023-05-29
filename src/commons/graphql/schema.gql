@@ -244,6 +244,9 @@ type Mutation {
   """인가코드로 구글 accesstoken 발급후 로그인"""
   googleLogin(code: String!): LoginResponseDto!
 
+  """apple 인가코드로 accesstoken 발급"""
+  appleLogin(code: String!): LoginResponseDto!
+
   """로그아웃"""
   logout(logoutInput: LogoutInput!): String!
 

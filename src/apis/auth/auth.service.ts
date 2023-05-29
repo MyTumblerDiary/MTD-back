@@ -17,7 +17,8 @@ import { RefreshToken } from './entities/refreshToken.entity';
 import * as jwt from 'jsonwebtoken';
 import { Cache } from 'cache-manager';
 import { LogoutInput } from './dto/logout.auth.dto';
-import { ConfigService } from 'aws-sdk';
+import AppleSignIn from 'apple-signin-auth';
+import { JwtPayload } from 'jsonwebtoken';
 
 @Injectable()
 export class AuthService {
@@ -199,5 +200,46 @@ export class AuthService {
     await this.cacheManager.set(refreshToken, 'refreshToken', { ttl: 120 });
 
     return '로그아웃에 성공했습니다';
+  }
+
+  async getAppleAccessToken(code: string) {
+    const clientSecret = AppleSignIn.getClientSecret({
+      clientID: process.env.OAUTH_APPLE_CLIENT_ID,
+      teamID: process.env.OAUTH_APPLE_TEAM_ID,
+      privateKeyPath: process.env.OAUTH_APPLE_SECRETKRY_PATH,
+      keyIdentifier: process.env.OAUTH_APPLE_KEY_ID,
+    });
+    const options = {
+      clientID: process.env.OAUTH_APPLE_CLIENT_ID,
+      redirectUri: process.env.OAUTH_APPLE_REDIRECT_URI,
+      clientSecret: clientSecret,
+    };
+    const tokenResponse = await AppleSignIn.getAuthorizationToken(
+      code,
+      options,
+    );
+    return tokenResponse.id_token;
+  }
+
+  async appleLogin({ idToken }) {
+    const decodedToken = jwt.decode(idToken) as JwtPayload;
+    let user = await this.userService.findOneByEmail(decodedToken.email);
+    const hashedPassword = await bcrypt.hash(decodedToken.sub.toString(), 10);
+    if (user && user.social !== 'google') {
+      const errorMessage = `${user.email} 이메일로 이미 가입된 계정이 있습니다.`;
+      throw new UnprocessableEntityException(errorMessage, user.email);
+    } else if (!user) {
+      user = await this.userRepository.save({
+        email: decodedToken.email,
+        password: hashedPassword,
+        nickname: decodedToken.email.split('@')[0],
+        social: 'apple',
+      });
+    }
+
+    return {
+      accessToken: await this.setAccessToken({ user }),
+      refreshToken: await this.setRefreshToken({ user }),
+    };
   }
 }
