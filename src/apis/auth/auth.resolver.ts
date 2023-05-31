@@ -5,6 +5,7 @@ import { CurrentUser } from 'src/commons/auth/gql-user.param';
 import { AuthService } from './auth.service';
 import { LoginResponseDto } from './dto/auth.output.dto';
 import { LogoutInput } from './dto/logout.auth.dto';
+import { LoginInputDto } from './dto/login.input.dto';
 @Resolver()
 export class AuthResolver {
   constructor(private readonly authService: AuthService) {}
@@ -13,10 +14,9 @@ export class AuthResolver {
     description: '로컬 로그인',
   })
   async login(
-    @Args('email') email: string,
-    @Args('password') password: string,
+    @Args('loginInput') loginInput: LoginInputDto,
   ): Promise<LoginResponseDto> {
-    return this.authService.loginUser({ email, password });
+    return this.authService.loginUser(loginInput);
   }
 
   @UseGuards(GqlAuthRefreshGuard)
@@ -34,7 +34,7 @@ export class AuthResolver {
   })
   async kakaoLogin(@Args('code') code: string): Promise<LoginResponseDto> {
     const accessToken = await this.authService.getKakaoAccessToken(code);
-    return await this.authService.kakaoLogin({ accessToken });
+    return await this.authService.kakaoLogin(accessToken);
   }
 
   @Mutation(() => LoginResponseDto, {
@@ -42,7 +42,7 @@ export class AuthResolver {
   })
   async googleLogin(@Args('code') code: string): Promise<LoginResponseDto> {
     const accessToken = await this.authService.getGoogleAccessToken(code);
-    return await this.authService.googleLogin({ accessToken });
+    return await this.authService.googleLogin(accessToken);
   }
 
   @Mutation(() => LoginResponseDto, {
@@ -50,7 +50,7 @@ export class AuthResolver {
   })
   async appleLogin(@Args('code') code: string): Promise<LoginResponseDto> {
     const idToken = await this.authService.getAppleAccessToken(code);
-    return await this.authService.appleLogin({ idToken });
+    return await this.authService.appleLogin(idToken);
   }
 
   @Mutation(() => String, {

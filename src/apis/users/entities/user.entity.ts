@@ -5,6 +5,7 @@ import { TumblerRecord } from 'src/apis/tumbler-records/entities/tumbler-record.
 import { Column, Entity, OneToMany } from 'typeorm';
 import { CommonEntity } from '../../../commons/entities/common.entity';
 import { RefreshToken } from 'src/apis/auth/entities/refreshToken.entity';
+import { SocialLoginType } from 'src/apis/auth/interfaces/social.interface';
 
 @InputType('UserInputType', { isAbstract: true })
 @Entity({ name: 'users' })
@@ -41,11 +42,11 @@ export class User extends CommonEntity {
   })
   nickname?: string;
 
-  @Column({ default: null, nullable: true })
+  @Column({ default: 'local', nullable: true })
   @Field(() => String, {
-    description: '',
+    description: 'local, google, kakao, apple 중 하나입니다. ',
   })
-  social?: string;
+  social?: SocialLoginType;
 
   @Field(() => [TumblerRecord], {
     description: '유저가 가지고 있는 텀블러 기록들입니다. ',

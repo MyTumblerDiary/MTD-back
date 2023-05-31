@@ -113,7 +113,7 @@ type User {
   """닉네임은 최대 20자까지만 가능합니다. """
   nickname: String
 
-  """"""
+  """local, google, kakao, apple 중 하나입니다. """
   social: String!
 
   """유저가 가지고 있는 텀블러 기록들입니다. """
@@ -233,7 +233,7 @@ type Mutation {
   deleteUser(userEmail: String!): Boolean!
 
   """로컬 로그인"""
-  login(email: String!, password: String!): LoginResponseDto!
+  login(loginInput: LoginInputDto!): LoginResponseDto!
 
   """accesstoken 재발급"""
   restoreAccessToken: String!
@@ -307,6 +307,11 @@ input UpdateUserInput {
 
   """닉네임은 최대 20자까지만 가능합니다. """
   nickname: String
+}
+
+input LoginInputDto {
+  email: String!
+  password: String!
 }
 
 input LogoutInput {
