@@ -1,17 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, UpdateResult } from 'typeorm';
+import { StoresService } from '../spaces/stores/stores.service';
 import { User } from '../users/entities/user.entity';
-import { UserService } from '../users/users.service';
 import { CreateTumblerRecordInput } from './dto/create.tumbler-record.dto';
 import { TumblerRecord } from './entities/tumbler-record.entity';
+import CreateTumblerRecordTransaction from './transactions/create.tumbler-record.transaction';
+import { CreateTumblerRecordTransactionInput } from './transactions/dto/create.tumbler-record.transaction.dto';
 
 @Injectable()
 export class TumblerRecordsService {
   constructor(
     @InjectRepository(TumblerRecord)
     private readonly tumblerRecordsRepository: Repository<TumblerRecord>,
-    private readonly userService: UserService,
+    private readonly createTransaction: CreateTumblerRecordTransaction,
+    private readonly storesService: StoresService,
   ) {}
 
   public async create(
@@ -22,11 +25,26 @@ export class TumblerRecordsService {
       ...createTumblerRecordInput,
       user,
     });
-    const tumblerRecord = await this.tumblerRecordsRepository.save(
-      newTumblerRecord,
-    );
-    const aasas = await this.findOne(tumblerRecord.id, ['user']);
-    return aasas;
+    return await this.tumblerRecordsRepository.save(newTumblerRecord);
+  }
+
+  public async createWithStoreId(
+    createTumblerRecordInput: CreateTumblerRecordInput,
+    user: User,
+  ) {
+    if (!createTumblerRecordInput.storeId) {
+      throw new Error('storeId가 없습니다.');
+    }
+    await this.storesService.findOneById(createTumblerRecordInput.storeId);
+    return await this.create(createTumblerRecordInput, user);
+  }
+
+  public async createWithTransaction(
+    input: CreateTumblerRecordTransactionInput,
+    user: User,
+  ) {
+    input.user = user;
+    return await this.createTransaction.run(input);
   }
 
   public async findAll(relations?: string[]): Promise<TumblerRecord[]> {

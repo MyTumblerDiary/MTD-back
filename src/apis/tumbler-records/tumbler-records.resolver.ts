@@ -5,6 +5,7 @@ import { CurrentUser } from 'src/commons/auth/gql-user.param';
 import { User } from '../users/entities/user.entity';
 import { CreateTumblerRecordInput } from './dto/create.tumbler-record.dto';
 import { TumblerRecord } from './entities/tumbler-record.entity';
+import { CreateTumblerRecordTransactionInput } from './transactions/dto/create.tumbler-record.transaction.dto';
 import { TumblerRecordsService } from './tumbler-records.service';
 
 @Resolver('TumblerRecord')
@@ -13,17 +14,38 @@ export class TumblerRecordResolver {
 
   @UseGuards(GqlAuthAccessGuard)
   @Mutation(() => TumblerRecord, {
-    description: '텀블러 기록을 생성합니다.',
+    description: '이미 존재하는 공간에 대한 텀블러 기록을 생성합니다. ',
   })
-  public async createTumblerRecord(
+  public async createTumblerRecordWithStoreId(
     @CurrentUser('user') user: User,
-    @Args('createTumblerRecordInput')
-    createTumblerRecordInput: CreateTumblerRecordInput,
+    @Args('input')
+    input: CreateTumblerRecordInput,
   ): Promise<TumblerRecord> {
-    return await this.tumblerRecordsService.create(
-      createTumblerRecordInput,
-      user,
-    );
+    return await this.tumblerRecordsService.createWithStoreId(input, user);
+  }
+
+  @UseGuards(GqlAuthAccessGuard)
+  @Mutation(() => TumblerRecord, {
+    description: '새로운 공간에 대한 텀블러 기록을 생성합니다. ',
+  })
+  public async createTumblerRecordWithCreateStore(
+    @CurrentUser('user') user: User,
+    @Args('input')
+    input: CreateTumblerRecordTransactionInput,
+  ): Promise<TumblerRecord> {
+    return await this.tumblerRecordsService.createWithTransaction(input, user);
+  }
+
+  @UseGuards(GqlAuthAccessGuard)
+  @Mutation(() => TumblerRecord, {
+    description: '개인 공간에성틔 텀블러 기록을 생성합니다. ',
+  })
+  public async createTumblerRecordOnPrivateSpace(
+    @CurrentUser('user') user: User,
+    @Args('input')
+    input: CreateTumblerRecordInput,
+  ) {
+    return await this.tumblerRecordsService.create(input, user);
   }
 
   @UseGuards(GqlAuthAccessGuard)

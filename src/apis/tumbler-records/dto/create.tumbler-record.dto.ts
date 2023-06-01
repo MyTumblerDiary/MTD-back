@@ -10,10 +10,4 @@ export class CreateTumblerRecordInput extends PartialType(
     nullable: true,
   })
   storeId?: string;
-
-  @Field(() => String, {
-    description: '텀블러를 사용한 개인 공간입니다. ',
-    nullable: true,
-  })
-  privateSpaceId?: string;
 }
