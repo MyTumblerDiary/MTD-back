@@ -56,7 +56,7 @@ export class AuthResolver {
   @Mutation(() => String, {
     description: '로그아웃',
   })
-  async logout(@Args('logoutInput') logoutInput: LogoutInput): Promise<string> {
-    return await this.authService.logout(logoutInput);
+  async logout(@Args('accessCode') accessCode: string): Promise<string> {
+    return await this.authService.logout(accessCode);
   }
 }

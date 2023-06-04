@@ -175,8 +175,8 @@ type Query {
   """텀블러 기록을 하나 가져옵니다."""
   tumblerRecord(id: String!): TumblerRecord!
 
-  """회원가입 이메일 보내기"""
-  createUserEmail(email: String!): Boolean!
+  """이메일 인증코드 보내기"""
+  createUserEmail(email: String!): String!
 
   """이메일인증 코드 확인"""
   checkcode(email: String!, code: String!): Boolean!
@@ -248,7 +248,7 @@ type Mutation {
   appleLogin(code: String!): LoginResponseDto!
 
   """로그아웃"""
-  logout(logoutInput: LogoutInput!): String!
+  logout(accessCode: String!): String!
 
   """Create a store"""
   createStore(createStoreInput: CreateStoreInput!): Store!
@@ -307,16 +307,12 @@ input UpdateUserInput {
 
   """닉네임은 최대 20자까지만 가능합니다. """
   nickname: String
+  currentPassword: String
 }
 
 input LoginInputDto {
   email: String!
   password: String!
-}
-
-input LogoutInput {
-  accessToken: String!
-  refreshToken: String!
 }
 
 input CreateStoreInput {

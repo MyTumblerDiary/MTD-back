@@ -19,7 +19,7 @@ export class UserResolver {
     return await this.userService.create({ createUserInput });
   }
 
-  @UseGuards(GqlAuthAccessGuard)
+  //@UseGuards(GqlAuthAccessGuard)
   @Mutation(() => User, {
     description: '유저정보 수정',
   })

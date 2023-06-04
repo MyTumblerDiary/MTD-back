@@ -8,12 +8,19 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { SES } from 'aws-sdk';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from '../users/entities/user.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class EmailService {
   private readonly ses: SES;
 
-  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {
+  constructor(
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) {
     this.ses = new SES({
       region: process.env.AWS_SES_API_REGION,
       accessKeyId: process.env.AWS_SES_API_ACCESS_KEY_ID,
@@ -21,7 +28,7 @@ export class EmailService {
     });
   }
 
-  async sendEmail(to: string, subject: string, body: string): Promise<boolean> {
+  async sendEmail(to: string, subject: string, body: string): Promise<string> {
     try {
       await this.ses
         .sendEmail({
@@ -42,7 +49,7 @@ export class EmailService {
         })
         .promise();
 
-      return true;
+      return 'Successfully sent email';
     } catch (error) {
       console.error(error);
       throw new Error('Failed to send email');
@@ -60,8 +67,9 @@ export class EmailService {
     }
   }
 
-  async createUserSendEmail(email: string): Promise<boolean> {
-    //const user = await this.userRepository.findOne({ where: { id } });
+  async createUserSendEmail(email: string): Promise<string> {
+    const user = await this.userRepository.findOne({ where: { email } });
+    if (!user) throw new ConflictException('존재하지 않는 이메일입니다');
     await this.verifyEmailAddress(email);
     const getRandomCode = (min, max) => {
       min = Math.ceil(min);
@@ -70,7 +78,7 @@ export class EmailService {
     };
 
     const randomCode = getRandomCode(111111, 999999);
-    const subject = '회원가입 인증메일입니다.';
+    const subject = 'MTD 인증메일입니다.';
 
     if (randomCode) {
       await this.cacheManager.get(`${email}'s AuthenticationCode`);

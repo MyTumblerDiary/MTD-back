@@ -16,7 +16,7 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>, //
-    @Inject(CACHE_MANAGER) private cacheManager: Cache, //private readonly emailService: EmailService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async findOne(id: string) {
@@ -39,11 +39,39 @@ export class UserService {
     const user = await this.userRepository.findOne({
       where: { email: userEmail },
     });
-    updateUserInput.password = await bcrypt.hash(updateUserInput.password, 10);
+    if (updateUserInput.nickname) {
+      const isNicknameAvailable = await this.checkNickname({
+        nickname: updateUserInput.nickname,
+      });
+
+      if (!isNicknameAvailable) {
+        throw new ConflictException('이미 등록된 닉네임입니다.');
+      }
+    }
+
+    if (updateUserInput.password) {
+      const isCurrentPasswordValid = await bcrypt.compare(
+        updateUserInput.currentPassword,
+        user.password,
+      );
+
+      if (!isCurrentPasswordValid) {
+        throw new ConflictException('현재 비밀번호가 올바르지 않습니다.');
+      } else if (updateUserInput.password === updateUserInput.currentPassword) {
+        throw new ConflictException(
+          '현재 비밀번호와 다른 비밀번호를 입력해주세요.',
+        );
+      }
+
+      updateUserInput.password = await bcrypt.hash(
+        updateUserInput.password,
+        10,
+      );
+    }
+    const { currentPassword, ...updatedFields } = updateUserInput;
     const newUser = {
       ...user,
-      email: userEmail,
-      ...updateUserInput,
+      ...updatedFields,
     };
     return await this.userRepository.save(newUser);
   }
@@ -52,12 +80,6 @@ export class UserService {
     const result = await this.userRepository.softDelete({ email: userEmail });
     //return result.affected ? true : false;
     return result;
-  }
-
-  async fetchUserPassword(email: string) {
-    const user = await this.userRepository.findOne({ where: { email } });
-    if (!user) throw new ConflictException('존재하지 않는 이메일입니다');
-    return 1;
   }
 
   async checkEmail({ email }) {
