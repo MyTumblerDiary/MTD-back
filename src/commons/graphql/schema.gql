@@ -2,37 +2,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type PrivateSpace {
-  id: String!
-  createdAt: String!
-  updatedAt: String
-  deletedAt: String
-
-  """개인 공간 이름입니다. """
-  name: String!
-
-  """개인 공간의 도로명 주소입니다. """
-  streetNameAddress: String!
-
-  """개인 공간의 지번 주소입니다. """
-  lotNumberAddress: String!
-
-  """개인 공간의 상세 주소입니다. """
-  detailAddress: String!
-
-  """개인 공간의 위도입니다. """
-  latitude: Float!
-
-  """개인 공간의 경도입니다. """
-  longitude: Float!
-
-  """AWS S3 버킷에 저장되는 개인 공간의 대표 이미지 파일키 입니다. """
-  imageFileKey: String
-
-  """개인 공간의 텀블러 기록들입니다. """
-  tumblerRecords: [TumblerRecord!]
-}
-
 """가게 Entity"""
 type Store {
   id: String!
@@ -87,14 +56,20 @@ type TumblerRecord {
   """텀블러를 사용한 날짜입니다. 양식은 YYYY-MM-DD입니다. """
   usedAt: String!
 
+  """텀블러를 사용한 장소의 타입입니다. """
+  placeType: PlaceType
+
   """텀블러 기록을 가진 유저"""
   user: User!
 
   """텀블러를 사용한 매장"""
   store: Store
+}
 
-  """텀블러를 사용한 개인 공간"""
-  privateSpace: PrivateSpace
+"""텀블러를 사용한 장소의 타입입니다. """
+enum PlaceType {
+  STORE
+  PRIVATE
 }
 
 """유저 Entity"""
@@ -163,14 +138,11 @@ type Query {
   """id로 하나의 프렌차이즈를 조회합니다. """
   franchise(id: String!): Franchise!
 
-  """개인 공간을 모두 가져옵니다."""
-  privateSpaces: [PrivateSpace!]!
-
-  """개인 공간을 하나 가져옵니다."""
-  privateSpace(id: String!): PrivateSpace!
-
-  """유저의 모든 텀블러 기록을 모두 가져옵니다."""
-  tumblerRecords: [TumblerRecord!]!
+  """
+  유저의 모든 텀블러 사용 기록과 누적 할인 금액, 할인 횟수를 가져옵니다.
+      이때, 검색 필터를 적용하면 검색된 텀블러 기록만 가져옵니다.
+  """
+  tumblerRecords(searchTumblerRecordInput: SearchTumblerRecordInput!): [TumblerRecord!]!
 
   """텀블러 기록을 하나 가져옵니다."""
   tumblerRecord(id: String!): TumblerRecord!
@@ -222,6 +194,17 @@ input OrderStoreInput {
   orderDirection: OrderDirection = DESC
 }
 
+input SearchTumblerRecordInput {
+  """검색할 필드입니다. TumblerRecord Entity에 포함된 필드만 검색 가능합니다."""
+  searchBy: String = "id"
+
+  """검색할 값입니다. """
+  value: String = ""
+
+  """정렬 방식입니다. """
+  order: OrderDirection = DESC
+}
+
 type Mutation {
   """회원가입"""
   createUser(createUserInput: CreateUserInput!): User!
@@ -268,20 +251,17 @@ type Mutation {
   """프렌차이즈를 삭제합니다. """
   deleteFranchise(id: String!): Franchise!
 
-  """개인 공간을 생성합니다."""
-  createPrivateSpace(createPrivateSpaceInput: CreatePrivateSpaceInput!): PrivateSpace!
-
-  """개인 공간을 수정합니다."""
-  updatePrivateSpace(updatePrivateSpaceInput: UpdatePrivateSpaceInput!): PrivateSpace!
-
-  """개인 공간을 삭제합니다."""
-  deletePrivateSpace(id: String!): PrivateSpace!
-
   """Presigned URL을 받습니다."""
   getPresignedUrl(presignedUrlInput: S3PresignedUrlInput!): S3PresignedUrlOutput!
 
-  """텀블러 기록을 생성합니다."""
-  createTumblerRecord(createTumblerRecordInput: CreateTumblerRecordInput!): TumblerRecord!
+  """이미 존재하는 공간에 대한 텀블러 기록을 생성합니다. """
+  createTumblerRecordWithStoreId(input: CreateTumblerRecordInput!): TumblerRecord!
+
+  """새로운 공간에 대한 텀블러 기록을 생성합니다. """
+  createTumblerRecordWithCreateStore(input: CreateTumblerRecordTransactionInput!): TumblerRecord!
+
+  """개인 공간에서의 텀블러 기록을 생성합니다. """
+  createTumblerRecordOnPrivateSpace(input: CreateTumblerRecordOnPrivateSpaceInput!): TumblerRecord!
 
   """텀블러 기록을 수정합니다."""
   updateTumblerRecord(id: String!, updateTumblerRecordInput: CreateTumblerRecordInput!): Boolean!
@@ -383,46 +363,6 @@ input UpdateFranchiseInput {
   discountPrice: Int
 }
 
-input CreatePrivateSpaceInput {
-  """개인 공간 이름입니다. """
-  name: String!
-
-  """개인 공간의 도로명 주소입니다. """
-  streetNameAddress: String!
-
-  """개인 공간의 지번 주소입니다. """
-  lotNumberAddress: String!
-
-  """개인 공간의 상세 주소입니다. """
-  detailAddress: String!
-
-  """개인 공간의 위도입니다. """
-  latitude: Float!
-
-  """개인 공간의 경도입니다. """
-  longitude: Float!
-}
-
-input UpdatePrivateSpaceInput {
-  """개인 공간 이름입니다. """
-  name: String
-
-  """개인 공간의 도로명 주소입니다. """
-  streetNameAddress: String
-
-  """개인 공간의 지번 주소입니다. """
-  lotNumberAddress: String
-
-  """개인 공간의 상세 주소입니다. """
-  detailAddress: String
-
-  """개인 공간의 위도입니다. """
-  latitude: Float
-
-  """개인 공간의 경도입니다. """
-  longitude: Float
-}
-
 input S3PresignedUrlInput {
   fileName: String!
   type: ImageType!
@@ -455,7 +395,102 @@ input CreateTumblerRecordInput {
 
   """텀블러를 사용한 가게입니다. """
   storeId: String
+}
 
-  """텀블러를 사용한 개인 공간입니다. """
-  privateSpaceId: String
+input CreateTumblerRecordTransactionInput {
+  """텀블러 기록을 생성을 위한 Input data입니다. """
+  createTumblerRecordInput: CreateTumblerRecordInput!
+
+  """공간 생성을 위한 Input data입니다. """
+  createStoreInput: CreateStoreInput!
+
+  """유저 정보입니다. """
+  user: UserInputType!
+}
+
+input UserInputType {
+  """이메일"""
+  email: String!
+
+  """비밀번호입니다. """
+  password: String
+
+  """닉네임은 최대 20자까지만 가능합니다. """
+  nickname: String
+
+  """"""
+  social: String!
+
+  """유저가 가지고 있는 텀블러 기록들입니다. """
+  tumblerRecords: [TumblerRecordInputType!]
+}
+
+input TumblerRecordInputType {
+  """텀블러 할인 금액"""
+  prices: Int
+
+  """텀블러 기록 메모"""
+  memo: String
+
+  """텀블러 이미지 파일 키"""
+  imageFileKey: String
+
+  """텀블러를 사용한 날짜입니다. 양식은 YYYY-MM-DD입니다. """
+  usedAt: String!
+
+  """텀블러를 사용한 장소의 타입입니다. """
+  placeType: PlaceType
+
+  """텀블러 기록을 가진 유저"""
+  user: UserInputType!
+
+  """텀블러를 사용한 매장"""
+  store: StoreInputType
+}
+
+input StoreInputType {
+  """가게 이름입니다. """
+  name: String!
+
+  """해당 가게에서의 텀블러 할인 가격입니다. """
+  discountPrice: Int!
+
+  """가게의 도로명 주소입니다. """
+  streetNameAddress: String!
+
+  """가게의 지번 주소입니다. """
+  lotNumberAddress: String!
+
+  """가게의 상세 주소입니다. """
+  detailAddress: String!
+
+  """가게의 위도입니다. """
+  latitude: Float!
+
+  """가게의 경도입니다. """
+  longitude: Float!
+
+  """AWS S3 버킷에 저장되는 가게의 대표 이미지 파일키 입니다. """
+  imageFileKey: String
+
+  """가게의 텀블러 기록들입니다. """
+  tumblerRecords: [TumblerRecordInputType!]
+}
+
+"""새로운 공간에 대한 텀블러 기록을 생성할 때 사용되는 Input Type"""
+input CreateTumblerRecordOnPrivateSpaceInput {
+  """텀블러 할인 금액"""
+  prices: Int
+
+  """텀블러 기록 메모"""
+  memo: String
+
+  """텀블러 이미지 파일 키"""
+  imageFileKey: String
+
+  """텀블러를 사용한 날짜입니다. 양식은 YYYY-MM-DD입니다. """
+  usedAt: String!
+
+  """텀블러를 사용한 장소의 타입입니다. """
+  placeType: PlaceType
 }

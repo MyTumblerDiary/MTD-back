@@ -37,11 +37,15 @@ export class StoresService {
   }
 
   public async findOneById(id: string): Promise<Store> {
-    return await this.storeRepository.findOne({
-      where: {
-        id,
-      },
-    });
+    try {
+      return await this.storeRepository.findOneOrFail({
+        where: {
+          id,
+        },
+      });
+    } catch (error) {
+      throw new Error('존재하지 않는 공간입니다.');
+    }
   }
 
   public async update(input: UpdateStoreInput): Promise<Store> {

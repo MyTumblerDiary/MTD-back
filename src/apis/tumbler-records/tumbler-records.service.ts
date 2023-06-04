@@ -1,32 +1,52 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, UpdateResult } from 'typeorm';
+import { StoresService } from '../spaces/stores/stores.service';
 import { User } from '../users/entities/user.entity';
-import { UserService } from '../users/users.service';
 import { CreateTumblerRecordInput } from './dto/create.tumbler-record.dto';
+import { SearchTumblerRecordInput } from './dto/search.tumbler-record.dto';
+import { TumblerRecordsOutput } from './dto/tumbler-record.dto';
 import { TumblerRecord } from './entities/tumbler-record.entity';
+import CreateTumblerRecordTransaction from './transactions/create.tumbler-record.transaction';
+import { CreateTumblerRecordTransactionInput } from './transactions/dto/create.tumbler-record.transaction.dto';
 
 @Injectable()
 export class TumblerRecordsService {
   constructor(
     @InjectRepository(TumblerRecord)
     private readonly tumblerRecordsRepository: Repository<TumblerRecord>,
-    private readonly userService: UserService,
+    private readonly createTransaction: CreateTumblerRecordTransaction,
+    private readonly storesService: StoresService,
   ) {}
 
   public async create(
     createTumblerRecordInput: CreateTumblerRecordInput,
     user: User,
-  ) {
+  ): Promise<TumblerRecord> {
     const newTumblerRecord = this.tumblerRecordsRepository.create({
       ...createTumblerRecordInput,
       user,
     });
-    const tumblerRecord = await this.tumblerRecordsRepository.save(
-      newTumblerRecord,
-    );
-    const aasas = await this.findOne(tumblerRecord.id, ['user']);
-    return aasas;
+    return await this.tumblerRecordsRepository.save(newTumblerRecord);
+  }
+
+  public async createWithStoreId(
+    createTumblerRecordInput: CreateTumblerRecordInput,
+    user: User,
+  ): Promise<TumblerRecord> {
+    if (!createTumblerRecordInput.storeId) {
+      throw new Error('storeId가 없습니다.');
+    }
+    await this.storesService.findOneById(createTumblerRecordInput.storeId);
+    return await this.create(createTumblerRecordInput, user);
+  }
+
+  public async createWithTransaction(
+    input: CreateTumblerRecordTransactionInput,
+    user: User,
+  ): Promise<TumblerRecord> {
+    input.user = user;
+    return await this.createTransaction.run(input);
   }
 
   public async findAll(relations?: string[]): Promise<TumblerRecord[]> {
@@ -45,14 +65,50 @@ export class TumblerRecordsService {
     });
   }
 
-  public async findByUserId({ id }: User): Promise<TumblerRecord[]> {
-    return await this.tumblerRecordsRepository.find({
-      where: {
-        user: {
-          id,
-        },
-      },
+  public async findByUserId(
+    { id }: User,
+    searchTumblerRecordInput: SearchTumblerRecordInput,
+  ): Promise<TumblerRecordsOutput> {
+    const searchedTumbler: TumblerRecord[] = await this.search(
+      searchTumblerRecordInput,
+    );
+
+    const filteredDiscount: number = searchedTumbler.reduce(
+      (acc, cur) => acc + (cur.prices || 0),
+      0,
+    );
+
+    const filteredTumbler: number = searchedTumbler.length;
+
+    const tumblers: TumblerRecord[] = await this.tumblerRecordsRepository.find({
+      where: { user: { id } },
+      relations: ['user'],
     });
+
+    const totalDiscount: number = tumblers.reduce(
+      (acc, cur) => acc + (cur.prices || 0),
+      0,
+    );
+
+    const totalUsedTumbler: number = tumblers.length;
+
+    return {
+      tumblerRecords: tumblers,
+      totalDiscount,
+      totalUsedTumbler,
+      filteredTumbler,
+      filteredDiscount,
+    };
+  }
+
+  public async search(
+    searchTumblerRecordInput: SearchTumblerRecordInput,
+  ): Promise<TumblerRecord[]> {
+    const { searchBy, value } = searchTumblerRecordInput;
+    const tumblerRecords = await this.tumblerRecordsRepository.find({
+      where: { [searchBy]: value },
+    });
+    return tumblerRecords;
   }
 
   public async update(

@@ -2,7 +2,9 @@ import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { CommonEntity } from 'src/commons/entities/common.entity';
 import { Column, Entity } from 'typeorm';
 
-@Entity()
+@Entity({
+  name: 'franchises',
+})
 @InputType('FranchiseInputType', { isAbstract: true })
 @ObjectType({ description: '가맹점 Entity' })
 export class Franchise extends CommonEntity {
