@@ -12,7 +12,6 @@ import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 export enum PlaceType {
   STORE = 'STORE',
-  FRANCHISE = 'FRANCHISE',
   PRIVATE = 'PRIVATE',
 }
 
@@ -26,7 +25,7 @@ registerEnumType(PlaceType, {
 })
 @InputType('TumblerRecordInputType', { isAbstract: true })
 @ObjectType({ description: '텀블러 기록 Entity' })
-export class TumblerRecord extends CommonEntity {
+export class TumblerRecord extends CommonEntity implements TumblerRecord {
   @Field(() => Int, { description: '텀블러 할인 금액', nullable: true })
   @Column({ type: 'int', nullable: true })
   prices?: number;

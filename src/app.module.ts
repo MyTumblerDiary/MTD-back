@@ -7,8 +7,8 @@ import * as redisStore from 'cache-manager-redis-store';
 import { ClientOpts } from 'redis';
 import { AuthModule } from './apis/auth/auth.module';
 import { CloudAwsModule } from './apis/clouds/aws/cloud-aws.module';
+import { EmailModule } from './apis/emails/email.module';
 import { FranchisesModule } from './apis/franchises/franchises.module';
-import { PrivateSpacesModule } from './apis/spaces/private-spaces/private-spaces.module';
 import { StoresModule } from './apis/spaces/stores/stores.module';
 import { TumblerRecordsModule } from './apis/tumbler-records/tumbler-records.module';
 import { UserModule } from './apis/users/users.module';
@@ -17,7 +17,6 @@ import { GqlThrottlerGuard } from './commons/guards/gql.throttler.guard';
 import { configOptions } from './config/config';
 import { ormOption } from './config/typeorm.config';
 import { DynamicGqlModule } from './dynamic-gql.module';
-import { EmailModule } from './apis/emails/email.module';
 
 const ENV = process.env.NODE_ENV;
 
@@ -27,7 +26,6 @@ const ENV = process.env.NODE_ENV;
     UserModule,
     AuthModule,
     StoresModule,
-    PrivateSpacesModule,
     FranchisesModule,
     CloudAwsModule,
     DynamicGqlModule.forRoot(),

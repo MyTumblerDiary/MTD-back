@@ -69,7 +69,6 @@ type TumblerRecord {
 """텀블러를 사용한 장소의 타입입니다. """
 enum PlaceType {
   STORE
-  FRANCHISE
   PRIVATE
 }
 
@@ -120,19 +119,6 @@ type Franchise {
   discountPrice: Int
 }
 
-type PrivateSpace {
-  id: String!
-  createdAt: String!
-  updatedAt: String
-  deletedAt: String
-
-  """개인 공간 이름입니다. """
-  name: String!
-
-  """AWS S3 버킷에 저장되는 개인 공간의 대표 이미지 파일키 입니다. """
-  imageFileKey: String
-}
-
 type Query {
   """중복 이메일 확인"""
   checkEmail(email: String!): Boolean!
@@ -152,14 +138,11 @@ type Query {
   """id로 하나의 프렌차이즈를 조회합니다. """
   franchise(id: String!): Franchise!
 
-  """개인 공간을 모두 가져옵니다."""
-  privateSpaces: [PrivateSpace!]!
-
-  """개인 공간을 하나 가져옵니다."""
-  privateSpace(id: String!): PrivateSpace!
-
-  """유저의 모든 텀블러 기록을 모두 가져옵니다."""
-  tumblerRecords: [TumblerRecord!]!
+  """
+  유저의 모든 텀블러 사용 기록과 누적 할인 금액, 할인 횟수를 가져옵니다.
+      이때, 검색 필터를 적용하면 검색된 텀블러 기록만 가져옵니다.
+  """
+  tumblerRecords(searchTumblerRecordInput: SearchTumblerRecordInput!): [TumblerRecord!]!
 
   """텀블러 기록을 하나 가져옵니다."""
   tumblerRecord(id: String!): TumblerRecord!
@@ -211,6 +194,17 @@ input OrderStoreInput {
   orderDirection: OrderDirection = DESC
 }
 
+input SearchTumblerRecordInput {
+  """검색할 필드입니다. TumblerRecord Entity에 포함된 필드만 검색 가능합니다."""
+  searchBy: String = "id"
+
+  """검색할 값입니다. """
+  value: String = ""
+
+  """정렬 방식입니다. """
+  order: OrderDirection = DESC
+}
+
 type Mutation {
   """회원가입"""
   createUser(createUserInput: CreateUserInput!): User!
@@ -254,15 +248,6 @@ type Mutation {
   """프렌차이즈를 삭제합니다. """
   deleteFranchise(id: String!): Franchise!
 
-  """개인 공간을 생성합니다."""
-  createPrivateSpace(createPrivateSpaceInput: CreatePrivateSpaceInput!): PrivateSpace!
-
-  """개인 공간을 수정합니다."""
-  updatePrivateSpace(updatePrivateSpaceInput: UpdatePrivateSpaceInput!): PrivateSpace!
-
-  """개인 공간을 삭제합니다."""
-  deletePrivateSpace(id: String!): PrivateSpace!
-
   """Presigned URL을 받습니다."""
   getPresignedUrl(presignedUrlInput: S3PresignedUrlInput!): S3PresignedUrlOutput!
 
@@ -272,8 +257,8 @@ type Mutation {
   """새로운 공간에 대한 텀블러 기록을 생성합니다. """
   createTumblerRecordWithCreateStore(input: CreateTumblerRecordTransactionInput!): TumblerRecord!
 
-  """개인 공간에성틔 텀블러 기록을 생성합니다. """
-  createTumblerRecordOnPrivateSpace(input: CreateTumblerRecordInput!): TumblerRecord!
+  """개인 공간에서의 텀블러 기록을 생성합니다. """
+  createTumblerRecordOnPrivateSpace(input: CreateTumblerRecordOnPrivateSpaceInput!): TumblerRecord!
 
   """텀블러 기록을 수정합니다."""
   updateTumblerRecord(id: String!, updateTumblerRecordInput: CreateTumblerRecordInput!): Boolean!
@@ -372,16 +357,6 @@ input UpdateFranchiseInput {
 
   """가맹점 텀블러 할인 금액입니다. """
   discountPrice: Int
-}
-
-input CreatePrivateSpaceInput {
-  """개인 공간 이름입니다. """
-  name: String!
-}
-
-input UpdatePrivateSpaceInput {
-  """개인 공간 이름입니다. """
-  name: String
 }
 
 input S3PresignedUrlInput {
@@ -496,4 +471,22 @@ input StoreInputType {
 
   """가게의 텀블러 기록들입니다. """
   tumblerRecords: [TumblerRecordInputType!]
+}
+
+"""새로운 공간에 대한 텀블러 기록을 생성할 때 사용되는 Input Type"""
+input CreateTumblerRecordOnPrivateSpaceInput {
+  """텀블러 할인 금액"""
+  prices: Int
+
+  """텀블러 기록 메모"""
+  memo: String
+
+  """텀블러 이미지 파일 키"""
+  imageFileKey: String
+
+  """텀블러를 사용한 날짜입니다. 양식은 YYYY-MM-DD입니다. """
+  usedAt: String!
+
+  """텀블러를 사용한 장소의 타입입니다. """
+  placeType: PlaceType
 }

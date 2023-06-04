@@ -11,3 +11,11 @@ export class CreateTumblerRecordInput extends PartialType(
   })
   storeId?: string;
 }
+
+@InputType({
+  description: '새로운 공간에 대한 텀블러 기록을 생성할 때 사용되는 Input Type',
+})
+export class CreateTumblerRecordOnPrivateSpaceInput extends PickType(
+  TumblerRecord,
+  ['imageFileKey', 'prices', 'memo', 'usedAt', 'placeType'],
+) {}

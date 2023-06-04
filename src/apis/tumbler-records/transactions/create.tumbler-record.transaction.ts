@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Store } from 'src/apis/spaces/stores/entities/store.entity';
 import { BaseTransaction } from 'src/commons/transactions/base-transaction';
 import { DataSource, EntityManager } from 'typeorm';
-import { TumblerRecord } from '../entities/tumbler-record.entity';
+import { PlaceType, TumblerRecord } from '../entities/tumbler-record.entity';
 import { CreateTumblerRecordTransactionInput } from './dto/create.tumbler-record.transaction.dto';
 
 @Injectable()
@@ -27,6 +27,7 @@ export default class CreateTumblerRecordTransaction extends BaseTransaction<
       manager.create(TumblerRecord, {
         ...data.createTumblerRecordInput,
         user: data.user,
+        placeType: PlaceType.STORE,
         store,
       }),
     );

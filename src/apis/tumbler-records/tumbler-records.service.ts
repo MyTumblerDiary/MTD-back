@@ -4,6 +4,8 @@ import { Repository, UpdateResult } from 'typeorm';
 import { StoresService } from '../spaces/stores/stores.service';
 import { User } from '../users/entities/user.entity';
 import { CreateTumblerRecordInput } from './dto/create.tumbler-record.dto';
+import { SearchTumblerRecordInput } from './dto/search.tumbler-record.dto';
+import { TumblerRecordsOutput } from './dto/tumbler-record.dto';
 import { TumblerRecord } from './entities/tumbler-record.entity';
 import CreateTumblerRecordTransaction from './transactions/create.tumbler-record.transaction';
 import { CreateTumblerRecordTransactionInput } from './transactions/dto/create.tumbler-record.transaction.dto';
@@ -20,7 +22,7 @@ export class TumblerRecordsService {
   public async create(
     createTumblerRecordInput: CreateTumblerRecordInput,
     user: User,
-  ) {
+  ): Promise<TumblerRecord> {
     const newTumblerRecord = this.tumblerRecordsRepository.create({
       ...createTumblerRecordInput,
       user,
@@ -31,7 +33,7 @@ export class TumblerRecordsService {
   public async createWithStoreId(
     createTumblerRecordInput: CreateTumblerRecordInput,
     user: User,
-  ) {
+  ): Promise<TumblerRecord> {
     if (!createTumblerRecordInput.storeId) {
       throw new Error('storeId가 없습니다.');
     }
@@ -42,7 +44,7 @@ export class TumblerRecordsService {
   public async createWithTransaction(
     input: CreateTumblerRecordTransactionInput,
     user: User,
-  ) {
+  ): Promise<TumblerRecord> {
     input.user = user;
     return await this.createTransaction.run(input);
   }
@@ -63,14 +65,50 @@ export class TumblerRecordsService {
     });
   }
 
-  public async findByUserId({ id }: User): Promise<TumblerRecord[]> {
-    return await this.tumblerRecordsRepository.find({
-      where: {
-        user: {
-          id,
-        },
-      },
+  public async findByUserId(
+    { id }: User,
+    searchTumblerRecordInput: SearchTumblerRecordInput,
+  ): Promise<TumblerRecordsOutput> {
+    const searchedTumbler: TumblerRecord[] = await this.search(
+      searchTumblerRecordInput,
+    );
+
+    const filteredDiscount: number = searchedTumbler.reduce(
+      (acc, cur) => acc + (cur.prices || 0),
+      0,
+    );
+
+    const filteredTumbler: number = searchedTumbler.length;
+
+    const tumblers: TumblerRecord[] = await this.tumblerRecordsRepository.find({
+      where: { user: { id } },
+      relations: ['user'],
     });
+
+    const totalDiscount: number = tumblers.reduce(
+      (acc, cur) => acc + (cur.prices || 0),
+      0,
+    );
+
+    const totalUsedTumbler: number = tumblers.length;
+
+    return {
+      tumblerRecords: tumblers,
+      totalDiscount,
+      totalUsedTumbler,
+      filteredTumbler,
+      filteredDiscount,
+    };
+  }
+
+  public async search(
+    searchTumblerRecordInput: SearchTumblerRecordInput,
+  ): Promise<TumblerRecord[]> {
+    const { searchBy, value } = searchTumblerRecordInput;
+    const tumblerRecords = await this.tumblerRecordsRepository.find({
+      where: { [searchBy]: value },
+    });
+    return tumblerRecords;
   }
 
   public async update(
