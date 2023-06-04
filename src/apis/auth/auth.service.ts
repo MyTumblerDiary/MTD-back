@@ -197,17 +197,16 @@ export class AuthService {
     };
   }
 
-  async logout(logoutInput: LogoutInput): Promise<string> {
-    const { accessToken, refreshToken } = logoutInput;
+  async logout(accessToken: string): Promise<string> {
     try {
       jwt.verify(accessToken, process.env.ACCESS_SECRET_KEY);
-      jwt.verify(refreshToken, process.env.REFRESH_SECRET_KEY);
+      //jwt.verify(refreshToken, process.env.REFRESH_SECRET_KEY);
     } catch (error) {
       throw new UnauthorizedException();
     }
 
     await this.cacheManager.set(accessToken, 'accessToken', { ttl: 120 });
-    await this.cacheManager.set(refreshToken, 'refreshToken', { ttl: 120 });
+    // await this.cacheManager.set(refreshToken, 'refreshToken', { ttl: 120 });
 
     return '로그아웃에 성공했습니다';
   }
