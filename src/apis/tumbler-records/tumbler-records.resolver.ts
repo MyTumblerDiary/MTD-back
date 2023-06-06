@@ -56,7 +56,7 @@ export class TumblerRecordResolver {
   @UseGuards(GqlAuthAccessGuard)
   @Query(() => TumblerRecordsOutput, {
     description: `유저의 모든 텀블러 사용 기록과 누적 할인 금액, 할인 횟수를 가져옵니다.
-    이때, 검색 필터를 적용하면 검색된 텀블러 기록만 가져옵니다.`,
+    이때, 검색 필터를 적용하면 검색된 텀블러 기록만 가져옵니다. `,
   })
   public async tumblerRecords(
     @CurrentUser('user') user: User,
