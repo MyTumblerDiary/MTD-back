@@ -56,5 +56,4 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: 22
           script: |
-            cd /home/ubuntu/MTD-back
-            docker-compose restart mtd-back_my-backend_1
+            docker restart mtd-back_my-backend_1
