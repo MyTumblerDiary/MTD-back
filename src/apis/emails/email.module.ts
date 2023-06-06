@@ -1,4 +1,4 @@
-import { CacheModule, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { EmailService } from './email.service';
 import { EmailResolver } from './email.resolver';
 import { UserService } from '../users/users.service';

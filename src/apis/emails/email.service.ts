@@ -1,5 +1,3 @@
-import * as aws from '@aws-sdk/client-ses';
-import * as nodemailer from 'nodemailer';
 import { Cache } from 'cache-manager';
 import {
   CACHE_MANAGER,

@@ -16,7 +16,6 @@ import { UserService } from '../users/users.service';
 import { RefreshToken } from './entities/refreshToken.entity';
 import * as jwt from 'jsonwebtoken';
 import { Cache } from 'cache-manager';
-import { LogoutInput } from './dto/logout.auth.dto';
 import AppleSignIn from 'apple-signin-auth';
 import { JwtPayload } from 'jsonwebtoken';
 import { LoginResponseDto } from './dto/auth.output.dto';
