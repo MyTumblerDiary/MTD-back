@@ -4,7 +4,7 @@ import { TumblerRecord } from '../entities/tumbler-record.entity';
 @ObjectType()
 export class TumblerRecordsOutput {
   @Field(() => [TumblerRecord], {
-    description: '유저의 모든 텀블러 기록을 모두 가져옵니다.',
+    description: '유저의 모든 텀블러 기록을 가져옵니다.',
   })
   tumblerRecords: TumblerRecord[];
 

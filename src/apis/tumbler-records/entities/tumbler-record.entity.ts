@@ -10,11 +10,6 @@ import { User } from 'src/apis/users/entities/user.entity';
 import { CommonEntity } from 'src/commons/entities/common.entity';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
-export enum PlaceType {
-  STORE = 'STORE',
-  PRIVATE = 'PRIVATE',
-}
-
 registerEnumType(PlaceType, {
   name: 'PlaceType',
   description: '텀블러를 사용한 장소의 타입입니다. ',
@@ -45,14 +40,15 @@ export class TumblerRecord extends CommonEntity implements TumblerRecord {
   @Column({ type: 'varchar', length: 10, nullable: false })
   usedAt!: string;
 
-  @Field(() => PlaceType, {
+  @Field(() => String, {
     description: '텀블러를 사용한 장소의 타입입니다. ',
     nullable: true,
   })
   @Column({
-    default: PlaceType.PRIVATE,
+    type: 'varchar',
+    length: 40,
   })
-  placeType: PlaceType;
+  placeType: string;
 
   @Field(() => User, {
     description: '텀블러 기록을 가진 유저',
