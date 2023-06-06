@@ -1,11 +1,11 @@
 import { UseGuards } from '@nestjs/common';
-import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
 import { GqlAuthRefreshGuard } from 'src/commons/auth/gql-auth.guard';
 import { CurrentUser } from 'src/commons/auth/gql-user.param';
 import { AuthService } from './auth.service';
 import { LoginResponseDto } from './dto/auth.output.dto';
-import { LogoutInput } from './dto/logout.auth.dto';
 import { LoginInputDto } from './dto/login.input.dto';
+import { GqlAuthAccessGuard } from 'src/commons/auth/gql-auth.guard';
 @Resolver()
 export class AuthResolver {
   constructor(private readonly authService: AuthService) {}
@@ -53,10 +53,11 @@ export class AuthResolver {
     return await this.authService.appleLogin(idToken);
   }
 
+  @UseGuards(GqlAuthAccessGuard)
   @Mutation(() => String, {
     description: '로그아웃',
   })
-  async logout(@Args('accessCode') accessCode: string): Promise<string> {
-    return await this.authService.logout(accessCode);
+  async logout(@Context() context): Promise<string> {
+    return await this.authService.logout({ context });
   }
 }

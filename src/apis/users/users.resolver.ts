@@ -6,6 +6,7 @@ import { UseGuards } from '@nestjs/common';
 import { GqlAuthAccessGuard } from 'src/commons/auth/gql-auth.guard';
 import { CreateUserInput } from './dto/createUsers.input';
 import { UpdateUserInput } from './dto/updateUsers.input';
+import { CurrentUser } from 'src/commons/auth/gql-user.param';
 @Resolver('User')
 export class UserResolver {
   constructor(
@@ -19,22 +20,26 @@ export class UserResolver {
     return await this.userService.create({ createUserInput });
   }
 
-  //@UseGuards(GqlAuthAccessGuard)
+  @UseGuards(GqlAuthAccessGuard)
   @Mutation(() => User, {
     description: '유저정보 수정',
   })
   async updateUser(
-    @Args('userEmail') userEmail: string,
+    @CurrentUser() currentUser: any,
     @Args('updateUserInput') updateUserInput: UpdateUserInput,
   ) {
-    return await this.userService.updateUser({ userEmail, updateUserInput });
+    return await this.userService.updateUser({
+      user: currentUser,
+      updateUserInput,
+    });
   }
 
+  @UseGuards(GqlAuthAccessGuard)
   @Mutation(() => Boolean, {
     description: '유저정보 삭제',
   })
-  deleteUser(@Args('userEmail') userEmail: string) {
-    return this.userService.deleteUser({ userEmail });
+  deleteUser(@CurrentUser() currentUser: any) {
+    return this.userService.deleteUser({ user: currentUser });
   }
 
   @Query(() => Boolean, {
@@ -49,5 +54,15 @@ export class UserResolver {
   })
   async checkNickname(@Args('nickname') nickname: string): Promise<boolean> {
     return await this.userService.checkNickname({ nickname });
+  }
+
+  @Mutation(() => User, {
+    description: '이메일 인증후 비밀번호 수정하기',
+  })
+  async resetPassword(
+    @Args('userEmail') userEmail: string,
+    @Args('password') password: string,
+  ) {
+    return await this.userService.resetPassword({ userEmail, password });
   }
 }

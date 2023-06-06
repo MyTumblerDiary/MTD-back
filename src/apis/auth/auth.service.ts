@@ -197,7 +197,11 @@ export class AuthService {
     };
   }
 
-  async logout(accessToken: string): Promise<string> {
+  async logout({ context }): Promise<string> {
+    const accessToken = context.req.headers.authorization.replace(
+      'Bearer ',
+      '',
+    );
     try {
       jwt.verify(accessToken, process.env.ACCESS_SECRET_KEY);
       //jwt.verify(refreshToken, process.env.REFRESH_SECRET_KEY);

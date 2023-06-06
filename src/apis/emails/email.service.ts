@@ -98,4 +98,13 @@ export class EmailService {
     if (chk != code) throw new ConflictException('코드가 맞지 않습니다.');
     return true;
   }
+
+  async resetPassword({ email }) {
+    const user = await this.userRepository.findOne({ where: { email } });
+    if (user && user.social !== 'local')
+      throw new ConflictException(
+        '소셜 로그인 유저는 비밀번호를 변경할 수 없습니다.',
+      );
+    return this.createUserSendEmail(email);
+  }
 }
