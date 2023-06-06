@@ -1,4 +1,4 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Query, Resolver } from '@nestjs/graphql';
 import { EmailService } from './email.service';
 
 @Resolver()
@@ -7,10 +7,10 @@ export class EmailResolver {
     private readonly emailService: EmailService, //
   ) {}
 
-  @Query(() => Boolean, {
-    description: '회원가입 이메일 보내기',
+  @Query(() => String, {
+    description: '이메일 인증코드 보내기',
   })
-  async createUserEmail(@Args('email') email: string): Promise<boolean> {
+  async createUserEmail(@Args('email') email: string): Promise<string> {
     return await this.emailService.createUserSendEmail(email);
   }
 
