@@ -48,3 +48,13 @@ jobs:
           target: /home/ubuntu/MTD-back
           port: 22
           shell: bash
+      - name: Restart the Docker container
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.ELASTIC_IP }}
+          username: ubuntu
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          script: |
+            cd /home/ubuntu/MTD-back
+            docker-compose restart mtd-back_my-backend_1
