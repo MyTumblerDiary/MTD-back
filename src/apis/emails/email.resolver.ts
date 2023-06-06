@@ -23,4 +23,11 @@ export class EmailResolver {
   ): Promise<boolean> {
     return await this.emailService.checkCode({ email, code });
   }
+
+  @Query(() => String, {
+    description: '비밀번호 재설정 이메일 보내기',
+  })
+  async resetPasswordEmail(@Args('email') email: string): Promise<string> {
+    return await this.emailService.resetPassword({ email });
+  }
 }

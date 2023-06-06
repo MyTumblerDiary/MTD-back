@@ -7,19 +7,19 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import AppleSignIn from 'apple-signin-auth';
 import axios from 'axios';
 import * as bcrypt from 'bcrypt';
-import { Cache } from 'cache-manager';
-import * as jwt from 'jsonwebtoken';
-import { JwtPayload } from 'jsonwebtoken';
 import * as qs from 'qs';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { UserService } from '../users/users.service';
+import { RefreshToken } from './entities/refreshToken.entity';
+import * as jwt from 'jsonwebtoken';
+import { Cache } from 'cache-manager';
+import AppleSignIn from 'apple-signin-auth';
+import { JwtPayload } from 'jsonwebtoken';
 import { LoginResponseDto } from './dto/auth.output.dto';
 import { LoginInputDto } from './dto/login.input.dto';
-import { RefreshToken } from './entities/refreshToken.entity';
 
 @Injectable()
 export class AuthService {
@@ -196,7 +196,11 @@ export class AuthService {
     };
   }
 
-  async logout(accessToken: string): Promise<string> {
+  async logout({ context }): Promise<string> {
+    const accessToken = context.req.headers.authorization.replace(
+      'Bearer ',
+      '',
+    );
     try {
       jwt.verify(accessToken, process.env.ACCESS_SECRET_KEY);
       //jwt.verify(refreshToken, process.env.REFRESH_SECRET_KEY);

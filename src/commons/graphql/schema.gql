@@ -163,6 +163,9 @@ type Query {
 
   """이메일인증 코드 확인"""
   checkcode(email: String!, code: String!): Boolean!
+
+  """비밀번호 재설정 이메일 보내기"""
+  resetPasswordEmail(email: String!): String!
 }
 
 input PaginationInput {
@@ -221,10 +224,13 @@ type Mutation {
   createUser(createUserInput: CreateUserInput!): User!
 
   """유저정보 수정"""
-  updateUser(userEmail: String!, updateUserInput: UpdateUserInput!): User!
+  updateUser(updateUserInput: UpdateUserInput!): User!
 
   """유저정보 삭제"""
-  deleteUser(userEmail: String!): Boolean!
+  deleteUser: Boolean!
+
+  """이메일 인증후 비밀번호 수정하기"""
+  resetPassword(userEmail: String!, password: String!): User!
 
   """로컬 로그인"""
   login(loginInput: LoginInputDto!): LoginResponseDto!
@@ -242,7 +248,7 @@ type Mutation {
   appleLogin(code: String!): LoginResponseDto!
 
   """로그아웃"""
-  logout(accessCode: String!): String!
+  logout: String!
 
   """Create a store"""
   createStore(createStoreInput: CreateStoreInput!): Store!

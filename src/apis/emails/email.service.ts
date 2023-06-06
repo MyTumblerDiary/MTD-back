@@ -1,5 +1,3 @@
-import * as aws from '@aws-sdk/client-ses';
-import * as nodemailer from 'nodemailer';
 import { Cache } from 'cache-manager';
 import {
   CACHE_MANAGER,
@@ -97,5 +95,14 @@ export class EmailService {
     const chk = await this.cacheManager.get(`${email}'s AuthenticationCode`);
     if (chk != code) throw new ConflictException('코드가 맞지 않습니다.');
     return true;
+  }
+
+  async resetPassword({ email }) {
+    const user = await this.userRepository.findOne({ where: { email } });
+    if (user && user.social !== 'local')
+      throw new ConflictException(
+        '소셜 로그인 유저는 비밀번호를 변경할 수 없습니다.',
+      );
+    return this.createUserSendEmail(email);
   }
 }
