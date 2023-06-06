@@ -17,5 +17,5 @@ export class CreateTumblerRecordInput extends PartialType(
 })
 export class CreateTumblerRecordOnPrivateSpaceInput extends PickType(
   TumblerRecord,
-  ['imageFileKey', 'prices', 'memo', 'usedAt', 'placeType'],
+  ['imageFileKey', 'memo', 'usedAt', 'placeType'],
 ) {}
