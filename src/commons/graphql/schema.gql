@@ -57,19 +57,13 @@ type TumblerRecord {
   usedAt: String!
 
   """텀블러를 사용한 장소의 타입입니다. """
-  placeType: PlaceType
+  placeType: String
 
   """텀블러 기록을 가진 유저"""
   user: User!
 
   """텀블러를 사용한 매장"""
   store: Store
-}
-
-"""텀블러를 사용한 장소의 타입입니다. """
-enum PlaceType {
-  STORE
-  PRIVATE
 }
 
 """유저 Entity"""
@@ -119,6 +113,23 @@ type Franchise {
   discountPrice: Int
 }
 
+type TumblerRecordsOutput {
+  """유저의 모든 텀블러 기록을 가져옵니다."""
+  tumblerRecords: [TumblerRecord!]!
+
+  """유저가 지금까지 할인 받은 총 금액을 가져옵니다."""
+  totalDiscount: Float!
+
+  """유저의 텀블러 기록 개수를 가져옵니다."""
+  totalUsedTumbler: Float!
+
+  """검색 필터를 적용한 텀블러 기록의 개수를 가져옵니다."""
+  filteredTumbler: Float
+
+  """검색 필터를 적용한 텀블러 기록의 총 할인 금액을 가져옵니다."""
+  filteredDiscount: Float
+}
+
 type Query {
   """중복 이메일 확인"""
   checkEmail(email: String!): Boolean!
@@ -142,7 +153,7 @@ type Query {
   유저의 모든 텀블러 사용 기록과 누적 할인 금액, 할인 횟수를 가져옵니다.
       이때, 검색 필터를 적용하면 검색된 텀블러 기록만 가져옵니다.
   """
-  tumblerRecords(searchTumblerRecordInput: SearchTumblerRecordInput!): [TumblerRecord!]!
+  tumblerRecords(searchTumblerRecordInput: SearchTumblerRecordInput!): TumblerRecordsOutput!
 
   """텀블러 기록을 하나 가져옵니다."""
   tumblerRecord(id: String!): TumblerRecord!
@@ -418,7 +429,7 @@ input UserInputType {
   """닉네임은 최대 20자까지만 가능합니다. """
   nickname: String
 
-  """"""
+  """local, google, kakao, apple 중 하나입니다. """
   social: String!
 
   """유저가 가지고 있는 텀블러 기록들입니다. """
@@ -439,7 +450,7 @@ input TumblerRecordInputType {
   usedAt: String!
 
   """텀블러를 사용한 장소의 타입입니다. """
-  placeType: PlaceType
+  placeType: String
 
   """텀블러 기록을 가진 유저"""
   user: UserInputType!
@@ -479,9 +490,6 @@ input StoreInputType {
 
 """새로운 공간에 대한 텀블러 기록을 생성할 때 사용되는 Input Type"""
 input CreateTumblerRecordOnPrivateSpaceInput {
-  """텀블러 할인 금액"""
-  prices: Int
-
   """텀블러 기록 메모"""
   memo: String
 
@@ -492,5 +500,5 @@ input CreateTumblerRecordOnPrivateSpaceInput {
   usedAt: String!
 
   """텀블러를 사용한 장소의 타입입니다. """
-  placeType: PlaceType
+  placeType: String
 }
