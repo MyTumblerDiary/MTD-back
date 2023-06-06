@@ -33,7 +33,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.SSH_KEY }}
           port: 22
-          shell: bash
+
           script: |
             cd /home/ubuntu/MTD-back
             git remote set-url origin git@github.com:MyTumblerDiary/MTD-back.git
@@ -47,4 +47,13 @@ jobs:
           source: ./
           target: /home/ubuntu/MTD-back
           port: 22
-          shell: bash
+
+      - name: Restart the Docker container
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.ELASTIC_IP }}
+          username: ubuntu
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          script: |
+            docker restart mtd-back_my-backend_1

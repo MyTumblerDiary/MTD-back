@@ -7,8 +7,12 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
+import AppleSignIn from 'apple-signin-auth';
 import axios from 'axios';
 import * as bcrypt from 'bcrypt';
+import { Cache } from 'cache-manager';
+import * as jwt from 'jsonwebtoken';
+import { JwtPayload } from 'jsonwebtoken';
 import * as qs from 'qs';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';

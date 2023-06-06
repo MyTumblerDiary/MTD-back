@@ -3,7 +3,9 @@ import { TumblerRecord } from 'src/apis/tumbler-records/entities/tumbler-record.
 import { CommonEntity } from 'src/commons/entities/common.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
 
-@Entity()
+@Entity({
+  name: 'stores',
+})
 @InputType('StoreInputType', { isAbstract: true })
 @ObjectType({ description: '가게 Entity' })
 export class Store extends CommonEntity {
