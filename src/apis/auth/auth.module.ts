@@ -7,13 +7,13 @@ import { JwtAccessStrategy } from 'src/commons/auth/strategies/jwt-access.strate
 import { JwtRefreshStrategy } from 'src/commons/auth/strategies/jwt-refresh.strategy';
 import { JwtGoogleStrategy } from 'src/commons/auth/strategies/jwt-social-google.strategy';
 import { JwtKakaoStrategy } from 'src/commons/auth/strategies/jwt-social-kakao.strategy';
-import { User } from '../users/entities/user.entity';
-import { UserService } from '../users/users.service';
+import { UserModule } from '../users/users.module';
 import { AuthResolver } from './auth.resolver';
 import { AuthService } from './auth.service';
 import { RefreshToken } from './entities/refreshToken.entity';
 @Module({
   imports: [
+    UserModule,
     PassportModule.register({ defaultStrategy: 'jwt-access' }),
     JwtModule.registerAsync({
       inject: [ConfigService],
@@ -21,7 +21,7 @@ import { RefreshToken } from './entities/refreshToken.entity';
         secret: configService.get<string>('ACCESS_SECRET_KEY'),
       }),
     }),
-    TypeOrmModule.forFeature([User, RefreshToken]),
+    TypeOrmModule.forFeature([RefreshToken]),
   ],
 
   providers: [
@@ -31,7 +31,6 @@ import { RefreshToken } from './entities/refreshToken.entity';
     JwtKakaoStrategy,
     AuthResolver,
     AuthService,
-    UserService,
   ],
   exports: [AuthService],
 })

@@ -1,11 +1,16 @@
-import { UseGuards } from '@nestjs/common';
-import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
-import { GqlAuthRefreshGuard } from 'src/commons/auth/gql-auth.guard';
+import { Req, UseGuards } from '@nestjs/common';
+import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { Request } from 'express';
+import {
+  GqlAuthAccessGuard,
+  GqlAuthRefreshGuard,
+} from 'src/commons/auth/gql-auth.guard';
 import { CurrentUser } from 'src/commons/auth/gql-user.param';
+import { User } from '../users/entities/user.entity';
 import { AuthService } from './auth.service';
 import { LoginResponseDto } from './dto/auth.output.dto';
 import { LoginInputDto } from './dto/login.input.dto';
-import { GqlAuthAccessGuard } from 'src/commons/auth/gql-auth.guard';
+
 @Resolver()
 export class AuthResolver {
   constructor(private readonly authService: AuthService) {}
@@ -23,10 +28,8 @@ export class AuthResolver {
   @Mutation(() => String, {
     description: 'accesstoken 재발급',
   })
-  restoreAccessToken(@CurrentUser() currentUser: any): Promise<string> {
-    return this.authService.setAccessToken({
-      user: currentUser,
-    });
+  restoreAccessToken(@CurrentUser('user') user: User): Promise<string> {
+    return this.authService.setAccessToken(user);
   }
 
   @Mutation(() => LoginResponseDto, {
@@ -57,7 +60,7 @@ export class AuthResolver {
   @Mutation(() => String, {
     description: '로그아웃',
   })
-  async logout(@Context() context): Promise<string> {
-    return await this.authService.logout({ context });
+  async logout(@Req() req: Request): Promise<string> {
+    return await this.authService.logout(req);
   }
 }
