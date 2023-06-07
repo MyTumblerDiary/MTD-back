@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, UpdateResult } from 'typeorm';
-import { StoresService } from '../spaces/stores/stores.service';
+import { StoresService } from '../stores/stores.service';
 import { User } from '../users/entities/user.entity';
 import { CreateTumblerRecordInput } from './dto/create.tumbler-record.dto';
 import { SearchTumblerRecordInput } from './dto/search.tumbler-record.dto';

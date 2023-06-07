@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { StoresModule } from '../spaces/stores/stores.module';
+import { StoresModule } from '../stores/stores.module';
 import { UserModule } from '../users/users.module';
 import { TumblerRecord } from './entities/tumbler-record.entity';
 import CreateTumblerRecordTransaction from './transactions/create.tumbler-record.transaction';

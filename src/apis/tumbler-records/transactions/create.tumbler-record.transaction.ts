@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Store } from 'src/apis/spaces/stores/entities/store.entity';
+import { Store } from 'src/apis/stores/entities/store.entity';
 import { BaseTransaction } from 'src/commons/transactions/base-transaction';
 import { DataSource, EntityManager } from 'typeorm';
 import { TumblerRecord } from '../entities/tumbler-record.entity';
