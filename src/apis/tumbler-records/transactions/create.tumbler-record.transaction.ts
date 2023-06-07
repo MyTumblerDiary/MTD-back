@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { Franchise } from 'src/apis/franchises/entities/franchise.entity';
+import { CreateStoreInput } from 'src/apis/stores/dto/create.store.dto';
 import { Store } from 'src/apis/stores/entities/store.entity';
 import { BaseTransaction } from 'src/commons/transactions/base-transaction';
 import { DataSource, EntityManager } from 'typeorm';
@@ -22,6 +24,8 @@ export default class CreateTumblerRecordTransaction extends BaseTransaction<
       manager.create(Store, data.createStoreInput),
     );
 
+    await this.checkExistFranchise(manager, data.createStoreInput);
+
     const tumblerRecord = await manager.save(
       TumblerRecord,
       manager.create(TumblerRecord, {
@@ -31,7 +35,34 @@ export default class CreateTumblerRecordTransaction extends BaseTransaction<
         store,
       }),
     );
+    return manager.findOneOrFail(TumblerRecord, {
+      where: {
+        id: tumblerRecord.id,
+      },
+      relations: {
+        store: {
+          franchise: true,
+        },
+        user: true,
+      },
+    });
+  }
 
-    return tumblerRecord;
+  private async checkExistFranchise(
+    manager: EntityManager,
+    createStoreInput: CreateStoreInput,
+  ): Promise<void> {
+    if (!createStoreInput?.franchiseId) {
+      return;
+    }
+    try {
+      await manager.findOneOrFail(Franchise, {
+        where: {
+          id: createStoreInput.franchiseId,
+        },
+      });
+    } catch (error) {
+      throw new Error('존재하지 않는 프랜차이즈입니다.');
+    }
   }
 }
