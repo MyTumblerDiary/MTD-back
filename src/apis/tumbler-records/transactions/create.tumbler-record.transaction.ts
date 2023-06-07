@@ -24,7 +24,14 @@ export default class CreateTumblerRecordTransaction extends BaseTransaction<
       manager.create(Store, data.createStoreInput),
     );
 
-    await this.checkExistFranchise(manager, data.createStoreInput);
+    const franchise = await this.checkExistFranchise(
+      manager,
+      data.createStoreInput,
+    );
+
+    if (franchise) {
+      data.createStoreInput.discountPrice = franchise.discountPrice;
+    }
 
     const tumblerRecord = await manager.save(
       TumblerRecord,
@@ -51,12 +58,12 @@ export default class CreateTumblerRecordTransaction extends BaseTransaction<
   private async checkExistFranchise(
     manager: EntityManager,
     createStoreInput: CreateStoreInput,
-  ): Promise<void> {
+  ): Promise<Franchise | null> {
     if (!createStoreInput?.franchiseId) {
       return;
     }
     try {
-      await manager.findOneOrFail(Franchise, {
+      return manager.findOneOrFail(Franchise, {
         where: {
           id: createStoreInput.franchiseId,
         },
