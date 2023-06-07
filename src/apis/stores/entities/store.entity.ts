@@ -64,6 +64,7 @@ export class Store extends CommonEntity {
 
   @Column({
     nullable: false,
+    type: 'float',
   })
   @Field(() => Float, {
     nullable: false,
@@ -73,6 +74,7 @@ export class Store extends CommonEntity {
 
   @Column({
     nullable: false,
+    type: 'float',
   })
   @Field(() => Float, {
     nullable: false,
