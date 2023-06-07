@@ -1,14 +1,15 @@
-import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy } from 'passport-jwt';
 import {
   CACHE_MANAGER,
   Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AuthService } from '../../../apis/auth/auth.service';
+import { PassportStrategy } from '@nestjs/passport';
 import * as bcrypt from 'bcrypt';
 import { Cache } from 'cache-manager';
+import { Request } from 'express';
+import { ExtractJwt, Strategy } from 'passport-jwt';
+import { AuthService } from '../../../apis/auth/auth.service';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
@@ -24,7 +25,7 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
       passReqToCallback: true,
     });
   }
-  async validate(req, payload) {
+  async validate(req: Request, payload: { email: string; sub: string }) {
     const { email, sub } = payload;
     const refreshToken = req.rawHeaders
       .filter((ele) => {
