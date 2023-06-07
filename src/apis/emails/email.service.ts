@@ -1,25 +1,34 @@
+import { Cache } from 'cache-manager';
 import {
   CACHE_MANAGER,
   ConflictException,
   Inject,
   Injectable,
 } from '@nestjs/common';
-import { Cache } from 'cache-manager';
-import { CloudAwsService } from '../clouds/aws/cloud-aws.service';
-import { UserService } from '../users/users.service';
+import { SES } from 'aws-sdk';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from '../users/entities/user.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class EmailService {
+  private readonly ses: SES;
+
   constructor(
-    private readonly userService: UserService,
-    private readonly cloudAwsService: CloudAwsService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
-  ) {}
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) {
+    this.ses = new SES({
+      region: process.env.AWS_SES_API_REGION,
+      accessKeyId: process.env.AWS_SES_API_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SES_API_SECRET_ACCESS_KEY,
+    });
+  }
 
   async sendEmail(to: string, subject: string, body: string): Promise<string> {
     try {
-      await this.cloudAwsService
-        .ses()
+      await this.ses
         .sendEmail({
           Source: 'mytumblerdiary@gmail.com', // SES에서 검증된 이메일 주소
           Destination: {
@@ -45,12 +54,9 @@ export class EmailService {
     }
   }
 
-  async verifyEmailAddress(email: string): Promise<void> {
+  async verifyEmailAddress(email: string) {
     try {
-      await this.cloudAwsService
-        .ses()
-        .verifyEmailIdentity({ EmailAddress: email })
-        .promise();
+      await this.ses.verifyEmailIdentity({ EmailAddress: email }).promise();
       console.log(`Email address ${email} has been verified.`);
     } catch (error) {
       console.error(
@@ -60,10 +66,10 @@ export class EmailService {
   }
 
   async createUserSendEmail(email: string): Promise<string> {
-    const user = await this.userService.findOneByEmail(email);
+    const user = await this.userRepository.findOne({ where: { email } });
     if (!user) throw new ConflictException('존재하지 않는 이메일입니다');
     await this.verifyEmailAddress(email);
-    const getRandomCode = (min: number, max: number) => {
+    const getRandomCode = (min, max) => {
       min = Math.ceil(min);
       max = Math.floor(max);
       return Math.floor(Math.random() * (max - min)) + min;
@@ -85,20 +91,14 @@ export class EmailService {
     return sendResult;
   }
 
-  async checkCode({
-    email,
-    code,
-  }: {
-    email: string;
-    code: string;
-  }): Promise<boolean> {
+  async checkCode({ email, code }) {
     const chk = await this.cacheManager.get(`${email}'s AuthenticationCode`);
     if (chk != code) throw new ConflictException('코드가 맞지 않습니다.');
     return true;
   }
 
-  async resetPassword({ email }: { email: string }): Promise<string> {
-    const user = await this.userService.findOneByEmail(email);
+  async resetPassword({ email }) {
+    const user = await this.userRepository.findOne({ where: { email } });
     if (user && user.social !== 'local')
       throw new ConflictException(
         '소셜 로그인 유저는 비밀번호를 변경할 수 없습니다.',

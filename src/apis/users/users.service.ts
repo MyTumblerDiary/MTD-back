@@ -1,15 +1,20 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  CACHE_MANAGER,
+  ConflictException,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
+import { Cache } from 'cache-manager';
 import { Repository } from 'typeorm';
-import { CreateUserInput } from './dto/createUsers.input';
-import { UpdateUserInput } from './dto/updateUsers.input';
 import { User } from './entities/user.entity';
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>, //
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async findOne(id: string) {
@@ -20,7 +25,7 @@ export class UserService {
     return await this.userRepository.findOne({ where: { email } });
   }
 
-  async create(createUserInput: CreateUserInput) {
+  async create({ createUserInput }) {
     createUserInput.password = await bcrypt.hash(createUserInput.password, 10);
     const result = await this.userRepository.save({
       ...createUserInput,
@@ -28,7 +33,7 @@ export class UserService {
     return result;
   }
 
-  async updateUser(user: User, updateUserInput: UpdateUserInput) {
+  async updateUser({ user, updateUserInput }) {
     const userInfo = await this.userRepository.findOne({
       where: { email: user.email },
     });
@@ -38,7 +43,7 @@ export class UserService {
           '현재 닉네임과 다른 닉네임을 입력해주세요.',
         );
       } else {
-        await this.checkNickname(updateUserInput.nickname);
+        await this.checkNickname({ nickname: updateUserInput.nickname });
       }
     }
     if (updateUserInput.password) {
@@ -67,24 +72,24 @@ export class UserService {
     return await this.userRepository.save(newUser);
   }
 
-  async deleteUser(user: User) {
+  async deleteUser({ user }) {
     const result = await this.userRepository.softDelete({ email: user.email });
     return result.affected ? true : false;
   }
 
-  async checkEmail(email: string) {
+  async checkEmail({ email }) {
     const user = await this.userRepository.findOne({ where: { email } });
     if (user) throw new ConflictException('이미 등록된 이메일 입니다.');
     return true;
   }
 
-  async checkNickname(nickname: string) {
+  async checkNickname({ nickname }) {
     const user = await this.userRepository.findOne({ where: { nickname } });
     if (user) throw new ConflictException('이미 등록된 닉네임 입니다.');
     return true;
   }
 
-  async resetPassword(userEmail: string, password: string) {
+  async resetPassword({ userEmail, password }) {
     const user = await this.userRepository.findOne({
       where: { email: userEmail },
     });
