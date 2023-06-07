@@ -113,6 +113,23 @@ type Franchise {
   discountPrice: Int
 }
 
+type StoresOutput {
+  """가게 목록"""
+  stores: [Store!]!
+
+  """가게 목록의 총 개수"""
+  totalCount: Int!
+
+  """검색된 가게 목록의 총 페이지 수(검색하지 않으면 총 페이지 수)"""
+  pagesCount: Int!
+
+  """검색된 가게의 수"""
+  searchedCount: Int!
+
+  """현재 페이지"""
+  currentPage: Int!
+}
+
 type TumblerRecordsOutput {
   """유저의 모든 텀블러 기록을 가져옵니다."""
   tumblerRecords: [TumblerRecord!]!
@@ -138,7 +155,7 @@ type Query {
   checkNickname(nickname: String!): Boolean!
 
   """Find all stores"""
-  stores(paginationInput: PaginationInput, searchStoreInput: SearchStoreInput, orderStoreInput: OrderStoreInput): [Store!]!
+  stores(paginationInput: PaginationInput, searchStoreInput: SearchStoreInput, orderStoreInput: OrderStoreInput): StoresOutput!
 
   """Find one store by id"""
   store(id: String!): Store!
