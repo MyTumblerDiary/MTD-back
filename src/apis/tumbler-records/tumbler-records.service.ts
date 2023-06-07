@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, UpdateResult } from 'typeorm';
+import { Store } from '../stores/entities/store.entity';
 import { StoresService } from '../stores/stores.service';
 import { User } from '../users/entities/user.entity';
 import { CreateTumblerRecordInput } from './dto/create.tumbler-record.dto';
@@ -8,7 +9,10 @@ import { SearchTumblerRecordInput } from './dto/search.tumbler-record.dto';
 import { TumblerRecordsOutput } from './dto/tumbler-record.dto';
 import { TumblerRecord } from './entities/tumbler-record.entity';
 import CreateTumblerRecordTransaction from './transactions/create.tumbler-record.transaction';
-import { CreateTumblerRecordTransactionInput } from './transactions/dto/create.tumbler-record.transaction.dto';
+import {
+  CreateTumblerRecordTransactionInput,
+  CreateTumblerRecordWithCreateStoreInput,
+} from './transactions/dto/create.tumbler-record.transaction.dto';
 
 @Injectable()
 export class TumblerRecordsService {
@@ -42,11 +46,16 @@ export class TumblerRecordsService {
   }
 
   public async createWithTransaction(
-    input: CreateTumblerRecordTransactionInput,
+    input: CreateTumblerRecordWithCreateStoreInput,
     user: User,
   ): Promise<TumblerRecord> {
-    input.user = user;
-    return await this.createTransaction.run(input);
+    const transactionInput: CreateTumblerRecordTransactionInput = {
+      createTumblerRecordInput: input.createTumblerRecordInput,
+      createStoreInput: input.createStoreInput,
+      user,
+    };
+
+    return await this.createTransaction.run(transactionInput);
   }
 
   public async findAll(relations?: string[]): Promise<TumblerRecord[]> {
@@ -74,7 +83,7 @@ export class TumblerRecordsService {
     );
 
     const filteredDiscount: number = searchedTumbler.reduce(
-      (acc, cur) => acc + (cur.prices || 0),
+      (acc: number, cur: TumblerRecord) => acc + (cur.prices || 0),
       0,
     );
 
@@ -92,6 +101,17 @@ export class TumblerRecordsService {
 
     const totalUsedTumbler: number = tumblers.length;
 
+    const mostVisitedStore: TumblerRecord[] =
+      await this.tumblerRecordsRepository
+        .createQueryBuilder('tumblerRecord')
+        .select('tumblerRecord.storeId')
+        .addSelect('COUNT(tumblerRecord.storeId)', 'count')
+        .where('tumblerRecord.userId = :id', { id })
+        .groupBy('tumblerRecord.storeId')
+        .orderBy('count', 'DESC')
+        .limit(1)
+        .getRawMany();
+
     return {
       tumblerRecords: tumblers,
       totalDiscount,
@@ -99,6 +119,20 @@ export class TumblerRecordsService {
       filteredTumbler,
       filteredDiscount,
     };
+  }
+
+  public async mostVisitedStore({ id }: User, limit = 1): Promise<Store[]> {
+    const mostVisitedStoreIds: string[] = await this.tumblerRecordsRepository
+      .createQueryBuilder('tumblerRecord')
+      .select('tumblerRecord.storeId')
+      .addSelect('COUNT(tumblerRecord.storeId)', 'count')
+      .where('tumblerRecord.userId = :id', { id })
+      .groupBy('tumblerRecord.storeId')
+      .orderBy('count', 'DESC')
+      .limit(1)
+      .getRawMany();
+
+    return this.storesService.findManyByIds(mostVisitedStoreIds);
   }
 
   public async search(

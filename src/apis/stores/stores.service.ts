@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationInput } from 'src/commons/pagination/dto/pagination.dto';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { In, Repository, SelectQueryBuilder } from 'typeorm';
 import { CreateStoreInput } from './dto/create.store.dto';
 import { OrderStoreInput } from './dto/order.store.dto';
 import { SearchStoreInput } from './dto/search.store.dto';
@@ -59,6 +59,14 @@ export class StoresService {
     } catch (error) {
       throw new Error('존재하지 않는 공간입니다.');
     }
+  }
+
+  public async findManyByIds(ids: string[]): Promise<Store[]> {
+    return await this.storeRepository.find({
+      where: {
+        id: In(ids),
+      },
+    });
   }
 
   public async update(input: UpdateStoreInput): Promise<Store> {

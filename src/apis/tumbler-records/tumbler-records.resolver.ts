@@ -2,6 +2,7 @@ import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { GqlAuthAccessGuard } from 'src/commons/auth/gql-auth.guard';
 import { CurrentUser } from 'src/commons/auth/gql-user.param';
+import { Store } from '../stores/entities/store.entity';
 import { User } from '../users/entities/user.entity';
 import {
   CreateTumblerRecordInput,
@@ -10,7 +11,7 @@ import {
 import { SearchTumblerRecordInput } from './dto/search.tumbler-record.dto';
 import { TumblerRecordsOutput } from './dto/tumbler-record.dto';
 import { TumblerRecord } from './entities/tumbler-record.entity';
-import { CreateTumblerRecordTransactionInput } from './transactions/dto/create.tumbler-record.transaction.dto';
+import { CreateTumblerRecordWithCreateStoreInput } from './transactions/dto/create.tumbler-record.transaction.dto';
 import { TumblerRecordsService } from './tumbler-records.service';
 
 @Resolver('TumblerRecord')
@@ -36,9 +37,9 @@ export class TumblerRecordResolver {
   public async createTumblerRecordWithCreateStore(
     @CurrentUser('user') user: User,
     @Args('input')
-    input: CreateTumblerRecordTransactionInput,
+    input: CreateTumblerRecordWithCreateStoreInput,
   ): Promise<TumblerRecord> {
-    return await this.tumblerRecordsService.createWithTransaction(input, user);
+    return this.tumblerRecordsService.createWithTransaction(input, user);
   }
 
   @UseGuards(GqlAuthAccessGuard)
@@ -67,6 +68,21 @@ export class TumblerRecordResolver {
       user,
       searchTumblerRecordInput,
     );
+  }
+
+  @UseGuards(GqlAuthAccessGuard)
+  @Query(() => [Store], {
+    description: '유저가 가장 많이 방문한 공간을 순위대로 가져옵니다.',
+  })
+  public async mostVisitedStores(
+    @Args('limit', {
+      nullable: true,
+      defaultValue: 1,
+    })
+    limit: number,
+    @CurrentUser('user') user: User,
+  ) {
+    return await this.tumblerRecordsService.mostVisitedStore(user, limit);
   }
 
   @Query(() => TumblerRecord, {
