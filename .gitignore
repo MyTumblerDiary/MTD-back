@@ -39,3 +39,6 @@ lerna-debug.log*
 #database
 mysql
 redis 
+
+# GQLschema 생락
+/**/graphql/

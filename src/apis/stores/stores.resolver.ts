@@ -3,6 +3,7 @@ import { PaginationInput } from 'src/commons/pagination/dto/pagination.dto';
 import { CreateStoreInput } from './dto/create.store.dto';
 import { OrderStoreInput } from './dto/order.store.dto';
 import { SearchStoreInput } from './dto/search.store.dto';
+import { StoresOutput } from './dto/store.dto';
 import { UpdateStoreInput } from './dto/update.store.dto';
 import { Store } from './entities/store.entity';
 import { StoresService } from './stores.service';
@@ -21,7 +22,7 @@ export class StoresResolver {
     return await this.storesService.create(createStoreInput);
   }
 
-  @Query(() => [Store], {
+  @Query(() => StoresOutput, {
     name: 'stores',
     description: 'Find all stores',
   })
@@ -38,7 +39,7 @@ export class StoresResolver {
       nullable: true,
     })
     orderStoreInput: OrderStoreInput = new OrderStoreInput(),
-  ) {
+  ): Promise<StoresOutput> {
     return await this.storesService.findAll(
       paginationInput,
       searchStoreInput,

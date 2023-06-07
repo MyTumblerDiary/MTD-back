@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { CreateStoreInput } from 'src/apis/spaces/stores/dto/create.store.dto';
+import { CreateStoreInput } from 'src/apis/stores/dto/create.store.dto';
 import { User } from 'src/apis/users/entities/user.entity';
 import { CreateTumblerRecordInput } from '../../dto/create.tumbler-record.dto';
 
