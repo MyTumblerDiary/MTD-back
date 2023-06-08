@@ -1,14 +1,12 @@
 import { Module } from '@nestjs/common';
-import { EmailService } from './email.service';
+import { CloudAwsModule } from '../clouds/aws/cloud-aws.module';
+import { UserModule } from '../users/users.module';
 import { EmailResolver } from './email.resolver';
-import { UserService } from '../users/users.service';
-import { UserResolver } from '../users/users.resolver';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '../users/entities/user.entity';
+import { EmailService } from './email.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User])],
-  providers: [EmailService, EmailResolver, UserService, UserResolver],
+  imports: [UserModule, CloudAwsModule],
+  providers: [EmailService, EmailResolver],
   exports: [EmailService],
 })
 export class EmailModule {}

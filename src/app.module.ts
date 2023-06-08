@@ -4,7 +4,6 @@ import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as redisStore from 'cache-manager-redis-store';
-import { ClientOpts } from 'redis';
 import { AuthModule } from './apis/auth/auth.module';
 import { CloudAwsModule } from './apis/clouds/aws/cloud-aws.module';
 import { EmailModule } from './apis/emails/email.module';
@@ -34,7 +33,7 @@ const ENV = process.env.NODE_ENV;
       ttl: 1,
       limit: 5,
     }),
-    CacheModule.register<ClientOpts>({
+    CacheModule.register({
       store: redisStore,
       isGlobal: true,
       host: process.env.REDIS_HOST,
