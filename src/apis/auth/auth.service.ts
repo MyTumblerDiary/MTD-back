@@ -196,6 +196,7 @@ export class AuthService {
 
   async logout(req: Request): Promise<string> {
     const accessToken = req.headers.authorization.split(' ')[1];
+    console.log(accessToken);
     await this.cacheManager.set(accessToken, 'accessToken', { ttl: 120 });
     return '로그아웃에 성공했습니다';
   }

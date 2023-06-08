@@ -1,23 +1,14 @@
-import {
-  CACHE_MANAGER,
-  Inject,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import * as bcrypt from 'bcrypt';
-import { Cache } from 'cache-manager';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AuthService } from '../../../apis/auth/auth.service';
+import { RefreshTokenPayload } from '../refresh-token.payload';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
-  constructor(
-    private readonly authService: AuthService,
-    @Inject(CACHE_MANAGER)
-    private readonly cacheManager: Cache,
-  ) {
+  constructor(private readonly authService: AuthService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -25,18 +16,13 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
       passReqToCallback: true,
     });
   }
-  async validate(req: Request, payload: { email: string; sub: string }) {
+  async validate(req: Request, payload: RefreshTokenPayload) {
     const { email, sub } = payload;
     const refreshToken = req.rawHeaders
       .filter((ele) => {
         return ele.match(/Bearer/);
       })[0]
       .split(' ')[1];
-
-    const check = await this.cacheManager.get(refreshToken);
-
-    if (check) throw new UnauthorizedException();
-
     const storedRefreshToken = await this.authService.findRefreshTokenByUserId(
       sub,
     );
