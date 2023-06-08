@@ -100,20 +100,8 @@ export class TumblerRecordsService {
     );
 
     const totalUsedTumbler: number = tumblers.length;
-
-    const mostVisitedStore: TumblerRecord[] =
-      await this.tumblerRecordsRepository
-        .createQueryBuilder('tumblerRecord')
-        .select('tumblerRecord.storeId')
-        .addSelect('COUNT(tumblerRecord.storeId)', 'count')
-        .where('tumblerRecord.userId = :id', { id })
-        .groupBy('tumblerRecord.storeId')
-        .orderBy('count', 'DESC')
-        .limit(1)
-        .getRawMany();
-
     return {
-      tumblerRecords: tumblers,
+      tumblerRecords: searchedTumbler,
       totalDiscount,
       totalUsedTumbler,
       filteredTumbler,
@@ -139,9 +127,13 @@ export class TumblerRecordsService {
     searchTumblerRecordInput: SearchTumblerRecordInput,
   ): Promise<TumblerRecord[]> {
     const { searchBy, value } = searchTumblerRecordInput;
-    const tumblerRecords = await this.tumblerRecordsRepository.find({
-      where: { [searchBy]: value },
-    });
+    const qb = this.tumblerRecordsRepository.createQueryBuilder('tumblerRecord');
+    const tumblerRecords = await qb
+      .where(`tumblerRecord.${searchBy} LIKE :value`, {
+        value: `%${value}%`,
+      })
+      .getMany();
+    
     return tumblerRecords;
   }
 
