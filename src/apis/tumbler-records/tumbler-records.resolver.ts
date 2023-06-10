@@ -61,7 +61,9 @@ export class TumblerRecordResolver {
   })
   public async tumblerRecords(
     @CurrentUser('user') user: User,
-    @Args('searchTumblerRecordInput')
+    @Args('searchTumblerRecordInput', {
+      nullable: true,
+    })
     searchTumblerRecordInput?: SearchTumblerRecordInput,
   ): Promise<TumblerRecordsOutput> {
     return await this.tumblerRecordsService.findByUserId(

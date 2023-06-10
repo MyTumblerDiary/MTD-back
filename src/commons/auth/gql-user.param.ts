@@ -7,3 +7,10 @@ export const CurrentUser = createParamDecorator(
     return ctx.getContext().req.user;
   },
 );
+
+export const CurrentToken = createParamDecorator(
+  (data, context: ExecutionContext) => {
+    const ctx = GqlExecutionContext.create(context);
+    return ctx.getContext().req;
+  },
+);

@@ -76,8 +76,30 @@ export class TumblerRecordsService {
 
   public async findByUserId(
     { id }: User,
-    searchTumblerRecordInput: SearchTumblerRecordInput,
+    searchTumblerRecordInput?: SearchTumblerRecordInput,
   ): Promise<TumblerRecordsOutput> {
+    const tumblers: TumblerRecord[] = await this.tumblerRecordsRepository.find({
+      where: { user: { id } },
+      relations: ['user'],
+    });
+
+    const totalUsedTumbler: number = tumblers.length;
+
+    const totalDiscount: number = tumblers.reduce(
+      (acc, cur) => acc + (cur.prices || 0),
+      0,
+    );
+
+    if (!searchTumblerRecordInput) {
+      return {
+        tumblerRecords: tumblers,
+        totalDiscount,
+        totalUsedTumbler,
+        filteredTumbler: totalUsedTumbler,
+        filteredDiscount: totalDiscount,
+      };
+    }
+
     const searchedTumbler: TumblerRecord[] = await this.search(
       searchTumblerRecordInput,
     );
@@ -89,17 +111,6 @@ export class TumblerRecordsService {
 
     const filteredTumbler: number = searchedTumbler.length;
 
-    const tumblers: TumblerRecord[] = await this.tumblerRecordsRepository.find({
-      where: { user: { id } },
-      relations: ['user'],
-    });
-
-    const totalDiscount: number = tumblers.reduce(
-      (acc, cur) => acc + (cur.prices || 0),
-      0,
-    );
-
-    const totalUsedTumbler: number = tumblers.length;
     return {
       tumblerRecords: searchedTumbler,
       totalDiscount,
@@ -127,13 +138,14 @@ export class TumblerRecordsService {
     searchTumblerRecordInput: SearchTumblerRecordInput,
   ): Promise<TumblerRecord[]> {
     const { searchBy, value } = searchTumblerRecordInput;
-    const qb = this.tumblerRecordsRepository.createQueryBuilder('tumblerRecord');
+    const qb =
+      this.tumblerRecordsRepository.createQueryBuilder('tumblerRecord');
     const tumblerRecords = await qb
       .where(`tumblerRecord.${searchBy} LIKE :value`, {
         value: `%${value}%`,
       })
       .getMany();
-    
+
     return tumblerRecords;
   }
 

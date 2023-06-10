@@ -19,6 +19,10 @@ export class CloudAwsService {
     });
   }
 
+  ses(): AWS.SES {
+    return new AWS.SES();
+  }
+
   s3(): AWS.S3 {
     return new AWS.S3();
   }

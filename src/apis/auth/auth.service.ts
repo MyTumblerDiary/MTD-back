@@ -2,30 +2,28 @@ import {
   CACHE_MANAGER,
   Inject,
   Injectable,
-  UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
+import AppleSignIn from 'apple-signin-auth';
 import axios from 'axios';
 import * as bcrypt from 'bcrypt';
+import { Cache } from 'cache-manager';
+import { Request } from 'express';
+import * as jwt from 'jsonwebtoken';
+import { JwtPayload } from 'jsonwebtoken';
 import * as qs from 'qs';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { UserService } from '../users/users.service';
-import { RefreshToken } from './entities/refreshToken.entity';
-import * as jwt from 'jsonwebtoken';
-import { Cache } from 'cache-manager';
-import AppleSignIn from 'apple-signin-auth';
-import { JwtPayload } from 'jsonwebtoken';
 import { LoginResponseDto } from './dto/auth.output.dto';
 import { LoginInputDto } from './dto/login.input.dto';
+import { RefreshToken } from './entities/refreshToken.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
     @InjectRepository(RefreshToken)
     private readonly refreshtokenRepository: Repository<RefreshToken>,
     private readonly userService: UserService,
@@ -41,7 +39,7 @@ export class AuthService {
     });
   }
 
-  async setRefreshToken({ user }): Promise<string> {
+  async setRefreshToken(user: User): Promise<string> {
     const refreshToken = this.jwtService.sign(
       { email: user.email, sub: user.id },
       { secret: process.env.REFRESH_SECRET_KEY, expiresIn: '2w' },
@@ -61,7 +59,7 @@ export class AuthService {
     }
     return refreshToken;
   }
-  async setAccessToken({ user }): Promise<string> {
+  async setAccessToken(user: User): Promise<string> {
     const accessToken = this.jwtService.sign(
       { email: user.email, sub: user.id },
       { secret: process.env.ACCESS_SECRET_KEY, expiresIn: '1h' },
@@ -85,8 +83,8 @@ export class AuthService {
     if (!isAuth)
       throw new UnprocessableEntityException('비밀번호가 틀렸습니다.');
     return {
-      accessToken: await this.setAccessToken({ user }),
-      refreshToken: await this.setRefreshToken({ user }),
+      accessToken: await this.setAccessToken(user),
+      refreshToken: await this.setRefreshToken(user),
     };
   }
 
@@ -101,7 +99,7 @@ export class AuthService {
         grant_type: 'authorization_code',
         client_id: process.env.OAUTH_KAKAO_ID,
         client_secret: process.env.OAUTH_KAKAO_SECRET,
-        redirect_uri: process.env.OAUTH_KAKAO_REDIRECT_URI,
+        redirect_uri: process.env.OAUTH_KAKAO_CALLBACK,
         code,
       }),
     });
@@ -128,7 +126,7 @@ export class AuthService {
       const errorMessage = `${user.email} 이메일로 이미 가입된 계정이 있습니다.`;
       throw new UnprocessableEntityException(errorMessage, user.email);
     } else if (!user) {
-      user = await this.userRepository.save({
+      user = await this.userService.create({
         email: profile.kakao_account.email,
         password: hashedPassword,
         nickname: profile.properties.nickname,
@@ -136,8 +134,8 @@ export class AuthService {
       });
     }
     return {
-      accessToken: await this.setAccessToken({ user }),
-      refreshToken: await this.setRefreshToken({ user }),
+      accessToken: await this.setAccessToken(user),
+      refreshToken: await this.setRefreshToken(user),
     };
   }
 
@@ -149,7 +147,6 @@ export class AuthService {
       redirect_uri: process.env.OAUTH_GOOGLE_CALLBACK,
       code: decodeURIComponent(code),
     });
-
     const response = await axios.post(
       'https://oauth2.googleapis.com/token',
       data,
@@ -178,39 +175,28 @@ export class AuthService {
   async googleLogin(accessToken: string): Promise<LoginResponseDto> {
     const profile = await this.getUserByGoogleAccessToken(accessToken);
     let user = await this.userService.findOneByEmail(profile.email);
-    const hashedPassword = await bcrypt.hash(profile.sub.toString(), 10);
+
     if (user && user.social !== 'google') {
       const errorMessage = `${user.email} 이메일로 이미 가입된 계정이 있습니다.`;
       throw new UnprocessableEntityException(errorMessage, user.email);
     } else if (!user) {
-      user = await this.userRepository.save({
+      user = await this.userService.create({
         email: profile.email,
-        password: hashedPassword,
+        password: profile.sub.toString(),
         nickname: profile.email.split('@')[0],
         social: 'google',
       });
     }
     return {
-      accessToken: await this.setAccessToken({ user }),
-      refreshToken: await this.setRefreshToken({ user }),
+      accessToken: await this.setAccessToken(user),
+      refreshToken: await this.setRefreshToken(user),
     };
   }
 
-  async logout({ context }): Promise<string> {
-    const accessToken = context.req.headers.authorization.replace(
-      'Bearer ',
-      '',
-    );
-    try {
-      jwt.verify(accessToken, process.env.ACCESS_SECRET_KEY);
-      //jwt.verify(refreshToken, process.env.REFRESH_SECRET_KEY);
-    } catch (error) {
-      throw new UnauthorizedException();
-    }
-
+  async logout(req: Request): Promise<string> {
+    const accessToken = req.headers.authorization.split(' ')[1];
+    console.log(accessToken);
     await this.cacheManager.set(accessToken, 'accessToken', { ttl: 120 });
-    // await this.cacheManager.set(refreshToken, 'refreshToken', { ttl: 120 });
-
     return '로그아웃에 성공했습니다';
   }
 
@@ -236,22 +222,21 @@ export class AuthService {
   async appleLogin(idToken: string): Promise<LoginResponseDto> {
     const decodedToken = jwt.decode(idToken) as JwtPayload;
     let user = await this.userService.findOneByEmail(decodedToken.email);
-    const hashedPassword = await bcrypt.hash(decodedToken.sub.toString(), 10);
     if (user && user.social !== 'apple') {
       const errorMessage = `${user.email} 이메일로 이미 가입된 계정이 있습니다.`;
       throw new UnprocessableEntityException(errorMessage, user.email);
     } else if (!user) {
-      user = await this.userRepository.save({
+      user = await this.userService.create({
         email: decodedToken.email,
-        password: hashedPassword,
+        password: decodedToken.sub.toString(),
         nickname: decodedToken.email.split('@')[0],
         social: 'apple',
       });
     }
 
     return {
-      accessToken: await this.setAccessToken({ user }),
-      refreshToken: await this.setRefreshToken({ user }),
+      accessToken: await this.setAccessToken(user),
+      refreshToken: await this.setRefreshToken(user),
     };
   }
 }
