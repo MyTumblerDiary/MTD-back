@@ -60,8 +60,8 @@ export class EmailService {
   }
 
   async createUserSendEmail(email: string): Promise<string> {
-    // const user = await this.userService.findOneByEmail(email);
-    // if (!user) throw new ConflictException('존재하지 않는 이메일입니다');
+    const user = await this.userService.findOneByEmail(email);
+    if (!user) throw new ConflictException('존재하지 않는 이메일입니다');
     await this.verifyEmailAddress(email);
     const getRandomCode = (min: number, max: number) => {
       min = Math.ceil(min);
