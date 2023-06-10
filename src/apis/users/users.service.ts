@@ -96,4 +96,11 @@ export class UserService {
     };
     return await this.userRepository.save(newUser);
   }
+
+  async getUser(user: User) {
+    const userInfo = await this.userRepository.findOne({
+      where: { email: user.email },
+    });
+    return userInfo;
+  }
 }
