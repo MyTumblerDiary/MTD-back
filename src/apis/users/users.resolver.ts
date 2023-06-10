@@ -62,4 +62,12 @@ export class UserResolver {
   ) {
     return await this.userService.resetPassword(userEmail, password);
   }
+
+  @UseGuards(GqlAuthAccessGuard)
+  @Query(() => User, {
+    description: '유저 정보 가져오기',
+  })
+  async user(@CurrentUser('user') user: User): Promise<User> {
+    return await this.userService.getUser(user);
+  }
 }
