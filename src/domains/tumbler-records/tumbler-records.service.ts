@@ -1,5 +1,4 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { StoresService } from '../stores/stores.service';
 import { User } from '../users/entities/user.entity';
 import { CreateTumblerRecordInput } from './dto/create.tumbler-record.dto';
 import {
@@ -21,7 +20,6 @@ export class TumblerRecordsService {
     @Inject(TUMBLER_RECORDS_REPOSITORY)
     private readonly repository: TumblerRecordsRepository,
     private readonly createTransaction: CreateTumblerRecordTransaction,
-    private readonly storesService: StoresService,
   ) {}
 
   public async create(
@@ -30,6 +28,7 @@ export class TumblerRecordsService {
   ): Promise<TumblerRecord> {
     const newTumblerRecord = this.repository.create({
       ...createTumblerRecordInput,
+
       user,
     });
     return this.repository.save(newTumblerRecord);
@@ -44,8 +43,7 @@ export class TumblerRecordsService {
       createStoreInput: input.createStoreInput,
       user,
     };
-
-    return await this.createTransaction.run(transactionInput);
+    return this.createTransaction.run(transactionInput);
   }
 
   public async findAll(relations?: string[]): Promise<TumblerRecord[]> {

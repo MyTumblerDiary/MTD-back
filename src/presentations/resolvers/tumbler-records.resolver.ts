@@ -2,10 +2,7 @@ import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { GqlAuthAccessGuard } from 'src/commons/auth/gql-auth.guard';
 import { CurrentUser } from 'src/commons/auth/gql-user.param';
-import {
-  CreateTumblerRecordInput,
-  CreateTumblerRecordOnPrivateSpaceInput,
-} from 'src/domains/tumbler-records/dto/create.tumbler-record.dto';
+import { CreateTumblerRecordInput } from 'src/domains/tumbler-records/dto/create.tumbler-record.dto';
 import { CreateTumblerRecordWithCreateStoreInput } from 'src/domains/tumbler-records/dto/create.tumbler-record.transaction.dto';
 import { SearchTumblerRecordInput } from 'src/domains/tumbler-records/dto/search.tumbler-record.dto';
 import { TumblerRecordsOutput } from 'src/domains/tumbler-records/dto/tumbler-record.dto';
@@ -36,7 +33,7 @@ export class TumblerRecordResolver {
   public async createTumblerRecordOnPrivateSpace(
     @CurrentUser('user') user: User,
     @Args('input')
-    input: CreateTumblerRecordOnPrivateSpaceInput,
+    input: CreateTumblerRecordInput,
   ) {
     return await this.tumblerRecordsService.create(input, user);
   }
