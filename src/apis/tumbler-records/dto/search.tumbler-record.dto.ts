@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { SearchInput } from 'src/commons/search/dto/search.dto';
+import { SearchInput } from 'src/infrastructures/database/search/dto/search.dto';
 
 export enum SearchTumblerRecordBy {
   ID = 'id',

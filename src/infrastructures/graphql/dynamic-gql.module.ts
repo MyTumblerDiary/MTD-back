@@ -1,9 +1,13 @@
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { DynamicModule } from '@nestjs/common';
-import * as path from 'path';
+import { DynamicModule, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { APP_FILTER } from '@nestjs/core';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
+import { Request, Response } from 'express';
+import { Connection } from 'mysql2';
+import * as path from 'path';
+import { GqlExceptionFilter } from './filter/gql-exception.filter';
 
 export class DynamicGqlModule {
   static forRoot(): DynamicModule {
@@ -16,7 +20,7 @@ export class DynamicGqlModule {
           useFactory: async (configService: ConfigService) => ({
             autoSchemaFile: path.join(
               process.cwd(),
-              'src/commons/graphql/schema.gql',
+              'src/infrastructures/graphql/schema.gql',
             ),
             driver: ApolloDriver,
             playground: false,
@@ -24,7 +28,15 @@ export class DynamicGqlModule {
               configService.get('NODE_ENV') === 'dev'
                 ? [ApolloServerPluginLandingPageLocalDefault({ embed: true })]
                 : null,
-            context: ({ req, res, connection }) => {
+            context: ({
+              req,
+              res,
+              connection,
+            }: {
+              req: Request;
+              res: Response;
+              connection: Connection;
+            }) => {
               if (req) {
                 const user = req.headers.authorization;
                 return { req, res, user };
@@ -34,6 +46,13 @@ export class DynamicGqlModule {
             },
           }),
         }),
+      ],
+      providers: [
+        {
+          provide: APP_FILTER,
+          useClass: GqlExceptionFilter,
+        },
+        Logger,
       ],
     };
   }

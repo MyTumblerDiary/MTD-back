@@ -41,4 +41,4 @@ mysql
 redis 
 
 # GQLschema 생락
-/**/graphql/
+/**/*.gql

@@ -1,13 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, UpdateResult } from 'typeorm';
-import { Store } from '../stores/entities/store.entity';
+import { Inject, Injectable } from '@nestjs/common';
 import { StoresService } from '../stores/stores.service';
 import { User } from '../users/entities/user.entity';
 import { CreateTumblerRecordInput } from './dto/create.tumbler-record.dto';
 import { SearchTumblerRecordInput } from './dto/search.tumbler-record.dto';
 import { TumblerRecordsOutput } from './dto/tumbler-record.dto';
 import { TumblerRecord } from './entities/tumbler-record.entity';
+import {
+  TUMBLER_RECORDS_REPOSITORY,
+  TumblerRecordsRepository,
+} from './interfaces/tumbler-records.repostitory';
 import CreateTumblerRecordTransaction from './transactions/create.tumbler-record.transaction';
 import {
   CreateTumblerRecordTransactionInput,
@@ -17,8 +18,8 @@ import {
 @Injectable()
 export class TumblerRecordsService {
   constructor(
-    @InjectRepository(TumblerRecord)
-    private readonly tumblerRecordsRepository: Repository<TumblerRecord>,
+    @Inject(TUMBLER_RECORDS_REPOSITORY)
+    private readonly repository: TumblerRecordsRepository,
     private readonly createTransaction: CreateTumblerRecordTransaction,
     private readonly storesService: StoresService,
   ) {}
@@ -27,11 +28,11 @@ export class TumblerRecordsService {
     createTumblerRecordInput: CreateTumblerRecordInput,
     user: User,
   ): Promise<TumblerRecord> {
-    const newTumblerRecord = this.tumblerRecordsRepository.create({
+    const newTumblerRecord = this.repository.create({
       ...createTumblerRecordInput,
       user,
     });
-    return await this.tumblerRecordsRepository.save(newTumblerRecord);
+    return await this.repository.save(newTumblerRecord);
   }
 
   public async createWithStoreId(
@@ -59,7 +60,7 @@ export class TumblerRecordsService {
   }
 
   public async findAll(relations?: string[]): Promise<TumblerRecord[]> {
-    return await this.tumblerRecordsRepository.find({
+    return await this.repository.find({
       relations,
     });
   }
@@ -68,7 +69,7 @@ export class TumblerRecordsService {
     id: string,
     relations?: string[],
   ): Promise<TumblerRecord> {
-    return await this.tumblerRecordsRepository.findOne({
+    return await this.repository.findOne({
       where: { id },
       relations,
     });
@@ -78,7 +79,7 @@ export class TumblerRecordsService {
     { id }: User,
     searchTumblerRecordInput?: SearchTumblerRecordInput,
   ): Promise<TumblerRecordsOutput> {
-    const tumblers: TumblerRecord[] = await this.tumblerRecordsRepository.find({
+    const tumblers: TumblerRecord[] = await this.repository.find({
       where: { user: { id } },
       relations: ['user'],
     });
@@ -120,48 +121,20 @@ export class TumblerRecordsService {
     };
   }
 
-  public async mostVisitedStore({ id }: User, limit = 1): Promise<Store[]> {
-    const mostVisitedStoreIds: string[] = await this.tumblerRecordsRepository
-      .createQueryBuilder('tumblerRecord')
-      .select('tumblerRecord.storeId')
-      .addSelect('COUNT(tumblerRecord.storeId)', 'count')
-      .where('tumblerRecord.userId = :id', { id })
-      .groupBy('tumblerRecord.storeId')
-      .orderBy('count', 'DESC')
-      .limit(1)
-      .getRawMany();
-
-    return this.storesService.findManyByIds(mostVisitedStoreIds);
-  }
-
   public async search(
     searchTumblerRecordInput: SearchTumblerRecordInput,
   ): Promise<TumblerRecord[]> {
-    const { searchBy, value } = searchTumblerRecordInput;
-    const qb =
-      this.tumblerRecordsRepository.createQueryBuilder('tumblerRecord');
-    const tumblerRecords = await qb
-      .where(`tumblerRecord.${searchBy} LIKE :value`, {
-        value: `%${value}%`,
-      })
-      .getMany();
-
-    return tumblerRecords;
+    return this.repository.search(searchTumblerRecordInput);
   }
 
   public async update(
     id: string,
     updateTumblerRecordInput: CreateTumblerRecordInput,
-  ): Promise<boolean> {
-    const result: UpdateResult = await this.tumblerRecordsRepository.update(
-      id,
-      updateTumblerRecordInput,
-    );
-    return result.affected === 1;
+  ): Promise<TumblerRecord> {
+    return this.repository.update(id, updateTumblerRecordInput);
   }
 
   public async delete(id: string): Promise<boolean> {
-    const result = await this.tumblerRecordsRepository.softDelete(id);
-    return result.affected === 1;
+    return this.repository.softDelete(id);
   }
 }

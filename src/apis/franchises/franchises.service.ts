@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { SearchInput } from 'src/commons/search/dto/search.dto';
+import { SearchInput } from 'src/infrastructures/database/search/dto/search.dto';
 import { Like, Repository } from 'typeorm';
 import { CreateFranchiseInput } from './dto/create.franchise.dto';
 import { UpdateFranchiseInput } from './dto/update.franchise.dto';

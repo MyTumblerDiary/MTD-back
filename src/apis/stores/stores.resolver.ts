@@ -1,5 +1,5 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { PaginationInput } from 'src/commons/pagination/dto/pagination.dto';
+import { PaginationInput } from 'src/infrastructures/database/pagination/dto/pagination.dto';
 import { CreateStoreInput } from './dto/create.store.dto';
 import { OrderStoreInput } from './dto/order.store.dto';
 import { SearchStoreInput } from './dto/search.store.dto';

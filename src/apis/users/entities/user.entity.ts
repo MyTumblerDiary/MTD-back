@@ -1,11 +1,11 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import { Exclude } from 'class-transformer';
 import { IsEmail } from 'class-validator';
-import { TumblerRecord } from 'src/apis/tumbler-records/entities/tumbler-record.entity';
-import { Column, Entity, OneToMany } from 'typeorm';
-import { CommonEntity } from '../../../commons/entities/common.entity';
 import { RefreshToken } from 'src/apis/auth/entities/refreshToken.entity';
 import { SocialLoginType } from 'src/apis/auth/interfaces/social.interface';
+import { TumblerRecord } from 'src/apis/tumbler-records/entities/tumbler-record.entity';
+import { Column, Entity, OneToMany } from 'typeorm';
+import { CommonEntity } from '../../../infrastructures/database/entities/common.entity';
 
 @InputType('UserInputType', { isAbstract: true })
 @Entity({ name: 'users' })

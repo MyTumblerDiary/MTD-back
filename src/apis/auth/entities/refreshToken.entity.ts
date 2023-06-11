@@ -1,7 +1,7 @@
-import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
 import { Field, InputType } from '@nestjs/graphql';
-import { CommonEntity } from 'src/commons/entities/common.entity';
+import { CommonEntity } from 'src/infrastructures/database/entities/common.entity';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { User } from '../../users/entities/user.entity';
 
 @InputType('refreshTokenInputType', { isAbstract: true })
 @Entity({ name: 'refreshTokens' })

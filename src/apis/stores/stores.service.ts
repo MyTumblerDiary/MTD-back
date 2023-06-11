@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PaginationInput } from 'src/commons/pagination/dto/pagination.dto';
+import { PaginationInput } from 'src/infrastructures/database/pagination/dto/pagination.dto';
 import { In, Repository, SelectQueryBuilder } from 'typeorm';
 import { CreateStoreInput } from './dto/create.store.dto';
 import { OrderStoreInput } from './dto/order.store.dto';

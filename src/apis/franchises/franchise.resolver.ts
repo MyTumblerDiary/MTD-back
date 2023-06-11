@@ -1,7 +1,7 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { GqlAuthAccessGuard } from 'src/commons/auth/gql-auth.guard';
-import { SearchInput } from 'src/commons/search/dto/search.dto';
+import { SearchInput } from 'src/infrastructures/database/search/dto/search.dto';
 import { CreateFranchiseInput } from './dto/create.franchise.dto';
 import { UpdateFranchiseInput } from './dto/update.franchise.dto';
 import { Franchise } from './entities/franchise.entity';

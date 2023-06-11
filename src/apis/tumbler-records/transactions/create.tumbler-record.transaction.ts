@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Franchise } from 'src/apis/franchises/entities/franchise.entity';
 import { CreateStoreInput } from 'src/apis/stores/dto/create.store.dto';
 import { Store } from 'src/apis/stores/entities/store.entity';
-import { BaseTransaction } from 'src/commons/transactions/base-transaction';
+import { BaseTransaction } from 'src/infrastructures/database/transactions/base-transaction';
 import { DataSource, EntityManager } from 'typeorm';
 import { TumblerRecord } from '../entities/tumbler-record.entity';
 import { CreateTumblerRecordTransactionInput } from './dto/create.tumbler-record.transaction.dto';
@@ -19,40 +19,17 @@ export default class CreateTumblerRecordTransaction extends BaseTransaction<
     data: CreateTumblerRecordTransactionInput,
     manager: EntityManager,
   ): Promise<TumblerRecord> {
-    const store = await manager.save(
-      Store,
-      manager.create(Store, data.createStoreInput),
-    );
+    await this.checkExistFranchise(manager, data.createStoreInput);
 
-    const franchise = await this.checkExistFranchise(
-      manager,
-      data.createStoreInput,
-    );
+    const store = await this.findOrCreateStore(manager, data.createStoreInput);
 
-    if (franchise) {
-      data.createStoreInput.discountPrice = franchise.discountPrice;
-    }
-
-    const tumblerRecord = await manager.save(
-      TumblerRecord,
+    return manager.save(
       manager.create(TumblerRecord, {
         ...data.createTumblerRecordInput,
-        user: data.user,
-        placeType: 'CAFE',
         store,
+        user: data.user,
       }),
     );
-    return manager.findOneOrFail(TumblerRecord, {
-      where: {
-        id: tumblerRecord.id,
-      },
-      relations: {
-        store: {
-          franchise: true,
-        },
-        user: true,
-      },
-    });
   }
 
   private async checkExistFranchise(
@@ -71,5 +48,23 @@ export default class CreateTumblerRecordTransaction extends BaseTransaction<
     } catch (error) {
       throw new Error('존재하지 않는 프랜차이즈입니다.');
     }
+  }
+
+  private async findOrCreateStore(
+    manager: EntityManager,
+    createStoreInput: CreateStoreInput,
+  ): Promise<Store> {
+    const { kakaoUId } = createStoreInput;
+    const store = await manager.findOne(Store, {
+      where: {
+        kakaoUId,
+      },
+    });
+    if (store) {
+      return store;
+    }
+
+    // 존재하지 않는다면 새로 생성합니다.
+    return manager.save(manager.create(Store, createStoreInput));
   }
 }

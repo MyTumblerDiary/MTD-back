@@ -11,6 +11,7 @@ export class CreateStoreInput extends PickType(Store, [
   'latitude',
   'longitude',
   'imageFileKey',
+  'kakaoUId',
 ]) {
   @Field(() => String, {
     nullable: true,

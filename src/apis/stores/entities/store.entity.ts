@@ -1,7 +1,7 @@
 import { Field, Float, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { Franchise } from 'src/apis/franchises/entities/franchise.entity';
 import { TumblerRecord } from 'src/apis/tumbler-records/entities/tumbler-record.entity';
-import { CommonEntity } from 'src/commons/entities/common.entity';
+import { CommonEntity } from 'src/infrastructures/database/entities/common.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity({
@@ -82,6 +82,16 @@ export class Store extends CommonEntity {
     description: '가게의 경도입니다. ',
   })
   longitude: number;
+
+  @Column({
+    nullable: false,
+    type: 'varchar',
+  })
+  @Field(() => String, {
+    nullable: false,
+    description: '카카오 API에서 제공하는 가게의 고유 ID입니다. ',
+  })
+  kakaoUId: string;
 
   @Column({
     nullable: true,

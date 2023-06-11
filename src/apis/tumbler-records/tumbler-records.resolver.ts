@@ -2,7 +2,6 @@ import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { GqlAuthAccessGuard } from 'src/commons/auth/gql-auth.guard';
 import { CurrentUser } from 'src/commons/auth/gql-user.param';
-import { Store } from '../stores/entities/store.entity';
 import { User } from '../users/entities/user.entity';
 import {
   CreateTumblerRecordInput,
@@ -72,21 +71,6 @@ export class TumblerRecordResolver {
     );
   }
 
-  @UseGuards(GqlAuthAccessGuard)
-  @Query(() => [Store], {
-    description: '유저가 가장 많이 방문한 공간을 순위대로 가져옵니다.',
-  })
-  public async mostVisitedStores(
-    @Args('limit', {
-      nullable: true,
-      defaultValue: 1,
-    })
-    limit: number,
-    @CurrentUser('user') user: User,
-  ) {
-    return await this.tumblerRecordsService.mostVisitedStore(user, limit);
-  }
-
   @Query(() => TumblerRecord, {
     description: '텀블러 기록을 하나 가져옵니다.',
   })
@@ -94,14 +78,14 @@ export class TumblerRecordResolver {
     return await this.tumblerRecordsService.findOne(id);
   }
 
-  @Mutation(() => Boolean, {
+  @Mutation(() => TumblerRecord, {
     description: '텀블러 기록을 수정합니다.',
   })
   public async updateTumblerRecord(
     @Args('id') id: string,
     @Args('updateTumblerRecordInput')
     updateTumblerRecordInput: CreateTumblerRecordInput,
-  ): Promise<boolean> {
+  ): Promise<TumblerRecord> {
     return await this.tumblerRecordsService.update(
       id,
       updateTumblerRecordInput,

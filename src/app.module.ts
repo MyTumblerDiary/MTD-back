@@ -1,6 +1,6 @@
-import { CacheModule, Logger, Module } from '@nestjs/common';
+import { CacheModule, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as redisStore from 'cache-manager-redis-store';
@@ -11,11 +11,10 @@ import { FranchisesModule } from './apis/franchises/franchises.module';
 import { StoresModule } from './apis/stores/stores.module';
 import { TumblerRecordsModule } from './apis/tumbler-records/tumbler-records.module';
 import { UserModule } from './apis/users/users.module';
-import { GqlExceptionFilter } from './commons/filter/gql-exception.filter';
-import { GqlThrottlerGuard } from './commons/guards/gql.throttler.guard';
 import { configOptions } from './config/config';
 import { ormOption } from './config/typeorm.config';
-import { DynamicGqlModule } from './dynamic-gql.module';
+import { DynamicGqlModule } from './infrastructures/graphql/dynamic-gql.module';
+import { GqlThrottlerGuard } from './infrastructures/graphql/guards/gql.throttler.guard';
 
 const ENV = process.env.NODE_ENV;
 
@@ -52,11 +51,6 @@ const ENV = process.env.NODE_ENV;
       provide: APP_GUARD,
       useClass: GqlThrottlerGuard,
     },
-    {
-      provide: APP_FILTER,
-      useClass: GqlExceptionFilter,
-    },
-    Logger,
   ],
 })
 export class AppModule {}
