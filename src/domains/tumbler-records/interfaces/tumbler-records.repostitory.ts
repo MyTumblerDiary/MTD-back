@@ -1,3 +1,4 @@
+import { User } from 'src/domains/users/entities/user.entity';
 import { CustomRepository } from 'src/infrastructures/database/repositories/custom-repository';
 import { SearchTumblerRecordInput } from '../dto/search.tumbler-record.dto';
 import { TumblerRecord } from '../entities/tumbler-record.entity';
@@ -14,7 +15,7 @@ export interface TumblerRecordsRepository
 
   findOneOrFail(options?: any): Promise<TumblerRecord>;
 
-  search(input?: SearchTumblerRecordInput): Promise<TumblerRecord[]>;
+  search(input: SearchTumblerRecordInput, user: User): Promise<TumblerRecord[]>;
 
   update(id: string, data: Partial<TumblerRecord>): Promise<TumblerRecord>;
 

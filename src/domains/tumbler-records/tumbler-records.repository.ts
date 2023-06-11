@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
+import { User } from '../users/entities/user.entity';
 import { CreateTumblerRecordInput } from './dto/create.tumbler-record.dto';
 import { SearchTumblerRecordInput } from './dto/search.tumbler-record.dto';
 import { UpdateTumblerRecordInput } from './dto/update.tumbler-record.dto';
@@ -17,12 +18,6 @@ export class TumblerRecordsTypeOrmRepository
   ) {}
 
   public create(input: CreateTumblerRecordInput): TumblerRecord {
-    return this.tumblerRecordsRepository.create(input);
-  }
-
-  public createTransaction(
-    input: CreateTumblerRecordInput,
-  ): CreateTumblerRecordInput {
     return this.tumblerRecordsRepository.create(input);
   }
 
@@ -46,16 +41,18 @@ export class TumblerRecordsTypeOrmRepository
     return await this.tumblerRecordsRepository.findOneOrFail(options);
   }
 
-  public async search(searchInput: SearchTumblerRecordInput) {
+  public async search(searchInput: SearchTumblerRecordInput, user: User) {
     const { searchBy, value } = searchInput;
     const queryBuilder =
       this.tumblerRecordsRepository.createQueryBuilder('tumblerRecord');
+
+    queryBuilder.where('tumblerRecord.user_id = :user_id', { userId: user.id });
 
     if (searchBy) {
       queryBuilder.where(`tumblerRecord.${searchBy} = :value`, { value });
     }
 
-    return await queryBuilder.getMany();
+    return queryBuilder.getMany();
   }
 
   public async update(

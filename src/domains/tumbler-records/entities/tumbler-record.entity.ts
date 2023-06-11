@@ -2,7 +2,7 @@ import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { Store } from 'src/domains/stores/entities/store.entity';
 import { User } from 'src/domains/users/entities/user.entity';
 import { CommonEntity } from 'src/infrastructures/database/entities/common.entity';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, DeepPartial, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 @Entity({
   name: 'tumbler_records',
@@ -10,6 +10,10 @@ import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 @InputType('TumblerRecordInputType', { isAbstract: true })
 @ObjectType({ description: '텀블러 기록 Entity' })
 export class TumblerRecord extends CommonEntity implements TumblerRecord {
+  constructor(partial?: DeepPartial<TumblerRecord>) {
+    super();
+    Object.assign(this, partial);
+  }
   @Field(() => Int, { description: '텀블러 할인 금액', nullable: true })
   @Column({ type: 'int', nullable: true })
   prices?: number;

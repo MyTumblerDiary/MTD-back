@@ -32,18 +32,7 @@ export class TumblerRecordsService {
       ...createTumblerRecordInput,
       user,
     });
-    return await this.repository.save(newTumblerRecord);
-  }
-
-  public async createWithStoreId(
-    createTumblerRecordInput: CreateTumblerRecordInput,
-    user: User,
-  ): Promise<TumblerRecord> {
-    if (!createTumblerRecordInput.storeId) {
-      throw new Error('storeId가 없습니다.');
-    }
-    await this.storesService.findOneById(createTumblerRecordInput.storeId);
-    return await this.create(createTumblerRecordInput, user);
+    return this.repository.save(newTumblerRecord);
   }
 
   public async createWithTransaction(
@@ -76,34 +65,25 @@ export class TumblerRecordsService {
   }
 
   public async findByUserId(
-    { id }: User,
+    user: User,
     searchTumblerRecordInput?: SearchTumblerRecordInput,
   ): Promise<TumblerRecordsOutput> {
-    const tumblers: TumblerRecord[] = await this.repository.find({
-      where: { user: { id } },
-      relations: ['user'],
+    const getSearched = this.repository.search(searchTumblerRecordInput, user);
+    const getAll = this.repository.find({
+      where: { user },
     });
 
-    const totalUsedTumbler: number = tumblers.length;
+    const [searchedTumbler, allTumbler] = await Promise.all([
+      getSearched,
+      getAll,
+    ]);
 
-    const totalDiscount: number = tumblers.reduce(
-      (acc, cur) => acc + (cur.prices || 0),
+    const totalDiscount: number = allTumbler.reduce(
+      (acc: number, cur: TumblerRecord) => acc + (cur.prices || 0),
       0,
     );
 
-    if (!searchTumblerRecordInput) {
-      return {
-        tumblerRecords: tumblers,
-        totalDiscount,
-        totalUsedTumbler,
-        filteredTumbler: totalUsedTumbler,
-        filteredDiscount: totalDiscount,
-      };
-    }
-
-    const searchedTumbler: TumblerRecord[] = await this.search(
-      searchTumblerRecordInput,
-    );
+    const totalUsedTumbler: number = allTumbler.length;
 
     const filteredDiscount: number = searchedTumbler.reduce(
       (acc: number, cur: TumblerRecord) => acc + (cur.prices || 0),
@@ -119,12 +99,6 @@ export class TumblerRecordsService {
       filteredTumbler,
       filteredDiscount,
     };
-  }
-
-  public async search(
-    searchTumblerRecordInput: SearchTumblerRecordInput,
-  ): Promise<TumblerRecord[]> {
-    return this.repository.search(searchTumblerRecordInput);
   }
 
   public async update(
