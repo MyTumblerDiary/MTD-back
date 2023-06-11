@@ -3,7 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Cache } from 'cache-manager';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { User } from 'src/applications/users/entities/user.entity';
+import { User } from 'src/domains/users/entities/user.entity';
 import { AccessTokenPayload } from '../access-token.payload';
 export class JwtAccessStrategy extends PassportStrategy(Strategy, 'access') {
   constructor(
