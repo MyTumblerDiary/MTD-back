@@ -13,7 +13,7 @@ import { Cache } from 'cache-manager';
 import { Request } from 'express';
 import * as jwt from 'jsonwebtoken';
 import { JwtPayload } from 'jsonwebtoken';
-import qs from 'qs';
+import * as qs from 'qs';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { UserService } from '../users/users.service';
@@ -99,7 +99,7 @@ export class AuthService {
         grant_type: 'authorization_code',
         client_id: process.env.OAUTH_KAKAO_ID,
         client_secret: process.env.OAUTH_KAKAO_SECRET,
-        redirect_uri: process.env.OAUTH_KAKAO_REDIRECT_URI,
+        redirect_uri: process.env.OAUTH_KAKAO_CALLBACK,
         code,
       }),
     });
@@ -147,7 +147,6 @@ export class AuthService {
       redirect_uri: process.env.OAUTH_GOOGLE_CALLBACK,
       code: decodeURIComponent(code),
     });
-
     const response = await axios.post(
       'https://oauth2.googleapis.com/token',
       data,
@@ -196,6 +195,7 @@ export class AuthService {
 
   async logout(req: Request): Promise<string> {
     const accessToken = req.headers.authorization.split(' ')[1];
+    console.log(accessToken);
     await this.cacheManager.set(accessToken, 'accessToken', { ttl: 120 });
     return '로그아웃에 성공했습니다';
   }

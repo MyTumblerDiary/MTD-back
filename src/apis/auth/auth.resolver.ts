@@ -1,11 +1,11 @@
-import { Req, UseGuards } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { Request } from 'express';
 import {
   GqlAuthAccessGuard,
   GqlAuthRefreshGuard,
 } from 'src/commons/auth/gql-auth.guard';
-import { CurrentUser } from 'src/commons/auth/gql-user.param';
+import { CurrentToken, CurrentUser } from 'src/commons/auth/gql-user.param';
 import { User } from '../users/entities/user.entity';
 import { AuthService } from './auth.service';
 import { LoginResponseDto } from './dto/auth.output.dto';
@@ -60,7 +60,7 @@ export class AuthResolver {
   @Mutation(() => String, {
     description: '로그아웃',
   })
-  async logout(@Req() req: Request): Promise<string> {
+  async logout(@CurrentToken('req') req: Request): Promise<string> {
     return await this.authService.logout(req);
   }
 }

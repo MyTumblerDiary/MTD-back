@@ -1,6 +1,7 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { GqlAuthAccessGuard } from 'src/commons/auth/gql-auth.guard';
+import { SearchInput } from 'src/commons/search/dto/search.dto';
 import { CreateFranchiseInput } from './dto/create.franchise.dto';
 import { UpdateFranchiseInput } from './dto/update.franchise.dto';
 import { Franchise } from './entities/franchise.entity';
@@ -26,6 +27,17 @@ export class FranchisesResolver {
   })
   public async franchise(@Args('id') id: string): Promise<Franchise> {
     return await this.franchisesService.findOne(id);
+  }
+
+  @UseGuards(GqlAuthAccessGuard)
+  @Query(() => [Franchise], {
+    name: 'franchisesBySearch',
+    description: '검색 조건에 맞는 프렌차이즈를 조회합니다. ',
+  })
+  public async franchisesBySearch(
+    @Args('searchInput') searchInput: SearchInput,
+  ): Promise<Franchise[]> {
+    return await this.franchisesService.search(searchInput);
   }
 
   @UseGuards(GqlAuthAccessGuard)

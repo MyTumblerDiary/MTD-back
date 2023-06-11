@@ -31,7 +31,7 @@ const ENV = process.env.NODE_ENV;
     TypeOrmModule.forRoot(ormOption),
     ThrottlerModule.forRoot({
       ttl: 1,
-      limit: 5,
+      limit: 10,
     }),
     CacheModule.register({
       store: redisStore,
