@@ -1,5 +1,5 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
-import { ormOption } from '../../../config/typeorm.config';
+import { ormOption } from './typeorm.config';
 
 const dataSourceOptions = {
   ...ormOption,
