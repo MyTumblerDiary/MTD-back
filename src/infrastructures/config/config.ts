@@ -4,7 +4,7 @@ import * as path from 'path';
 
 const ENV = process.env.NODE_ENV;
 dotenv.config({
-  path: path.join(__dirname, `../../config/.${ENV}.env`),
+  path: path.resolve(process.cwd(), `config/.${ENV}.env`),
 });
 
 export const configOptions: ConfigModuleOptions = {
