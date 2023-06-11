@@ -15,6 +15,7 @@ import { configOptions } from './infrastructures/config/config';
 import { ormOption } from './infrastructures/database/config/typeorm.config';
 import { DynamicGqlModule } from './infrastructures/graphql/dynamic-gql.module';
 import { GqlThrottlerGuard } from './infrastructures/graphql/guards/gql.throttler.guard';
+import { HealthCheckController } from './presentations/controllers/health-check.controller';
 
 const ENV = process.env.NODE_ENV;
 
@@ -52,5 +53,6 @@ const ENV = process.env.NODE_ENV;
       useClass: GqlThrottlerGuard,
     },
   ],
+  controllers: [HealthCheckController],
 })
 export class AppModule {}
