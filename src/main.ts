@@ -13,7 +13,7 @@ async function bootstrap() {
     origin: true,
     credentials: true,
   });
-    
+
   app.get(GraphQLSchemaHost);
 
   await app.listen(port, () => {
