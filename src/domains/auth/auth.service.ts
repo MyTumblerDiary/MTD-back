@@ -12,14 +12,15 @@ import * as bcrypt from 'bcrypt';
 import { Cache } from 'cache-manager';
 import { Request } from 'express';
 import * as jwt from 'jsonwebtoken';
-import { JwtPayload } from 'jsonwebtoken';
 import * as qs from 'qs';
+import { AccessTokenPayload } from 'src/commons/auth/access-token.payload';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { UserService } from '../users/users.service';
 import { LoginResponseDto } from './dto/auth.output.dto';
 import { LoginInputDto } from './dto/login.input.dto';
 import { RefreshToken } from './entities/refreshToken.entity';
+import { UserAuth } from './interfaces/user-auth';
 
 @Injectable()
 export class AuthService {
@@ -31,12 +32,11 @@ export class AuthService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
-  async findRefreshTokenByUserId(
-    userId: string,
-  ): Promise<RefreshToken | undefined> {
-    return this.refreshtokenRepository.findOne({
+  async findRefreshTokenByUserId(userId: string): Promise<RefreshToken> {
+    const refreshToken = this.refreshtokenRepository.findOne({
       where: { user: { id: userId } },
-    });
+    }) as Promise<RefreshToken>;
+    return refreshToken;
   }
 
   async setRefreshToken(user: User): Promise<string> {
@@ -59,7 +59,7 @@ export class AuthService {
     }
     return refreshToken;
   }
-  async setAccessToken(user: User): Promise<string> {
+  async setAccessToken(user: UserAuth): Promise<string> {
     const accessToken = this.jwtService.sign(
       { email: user.email, sub: user.id },
       { secret: process.env.ACCESS_SECRET_KEY, expiresIn: '1h' },
@@ -69,7 +69,7 @@ export class AuthService {
 
   async loginUser(loginInputDto: LoginInputDto): Promise<LoginResponseDto> {
     const { email, password } = loginInputDto;
-    const user = await this.userService.findOneByEmail(email);
+    const user: User = (await this.userService.findOneByEmail(email)) as User;
     if (!user) {
       throw new UnprocessableEntityException(
         '해당 이메일이 등록되어 있지 않습니다.',
@@ -194,7 +194,7 @@ export class AuthService {
   }
 
   async logout(req: Request): Promise<string> {
-    const accessToken = req.headers.authorization.split(' ')[1];
+    const accessToken = req.headers.authorization?.split(' ')[1] as string;
     console.log(accessToken);
     await this.cacheManager.set(accessToken, 'accessToken', { ttl: 120 });
     return '로그아웃에 성공했습니다';
@@ -220,8 +220,10 @@ export class AuthService {
   }
 
   async appleLogin(idToken: string): Promise<LoginResponseDto> {
-    const decodedToken = jwt.decode(idToken) as JwtPayload;
-    let user = await this.userService.findOneByEmail(decodedToken.email);
+    const decodedToken: AccessTokenPayload = jwt.decode(
+      idToken,
+    ) as AccessTokenPayload;
+    let user: User = await this.userService.findOneByEmail(decodedToken.email);
     if (user && user.social !== 'apple') {
       const errorMessage = `${user.email} 이메일로 이미 가입된 계정이 있습니다.`;
       throw new UnprocessableEntityException(errorMessage, user.email);

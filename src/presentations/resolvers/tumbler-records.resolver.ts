@@ -2,6 +2,7 @@ import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { GqlAuthAccessGuard } from 'src/commons/auth/gql-auth.guard';
 import { CurrentUser } from 'src/commons/auth/gql-user.param';
+import { UserAuth } from 'src/domains/auth/interfaces/user-auth';
 import { CreateTumblerRecordInput } from 'src/domains/tumbler-records/dto/create.tumbler-record.dto';
 import { CreateTumblerRecordWithCreateStoreInput } from 'src/domains/tumbler-records/dto/create.tumbler-record.transaction.dto';
 import { SearchTumblerRecordInput } from 'src/domains/tumbler-records/dto/search.tumbler-record.dto';
@@ -31,7 +32,7 @@ export class TumblerRecordResolver {
     description: '개인 공간에서의 텀블러 기록을 생성합니다. ',
   })
   public async createTumblerRecordOnPrivateSpace(
-    @CurrentUser('user') user: User,
+    @CurrentUser('user') user: UserAuth,
     @Args('input')
     input: CreateTumblerRecordInput,
   ) {
@@ -44,7 +45,7 @@ export class TumblerRecordResolver {
     이때, 검색 필터를 적용하면 검색된 텀블러 기록만 가져옵니다. `,
   })
   public async tumblerRecords(
-    @CurrentUser('user') user: User,
+    @CurrentUser('user') user: UserAuth,
     @Args('searchTumblerRecordInput', {
       nullable: true,
     })

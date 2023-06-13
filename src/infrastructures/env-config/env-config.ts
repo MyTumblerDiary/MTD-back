@@ -11,3 +11,5 @@ export const configOptions: ConfigModuleOptions = {
   isGlobal: true,
   envFilePath: `config/.${ENV}.env`,
 };
+
+export type EnvVariables = ReservedEnvironmentVariables;

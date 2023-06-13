@@ -3,6 +3,7 @@ import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthAccessGuard } from 'src/commons/auth/gql-auth.guard';
 import { CurrentUser } from 'src/commons/auth/gql-user.param';
+import { UserAuth } from 'src/domains/auth/interfaces/user-auth';
 import { CreateUserInput } from 'src/domains/users/dto/createUsers.input';
 import { UpdateUserInput } from 'src/domains/users/dto/updateUsers.input';
 import { User } from 'src/domains/users/entities/user.entity';
@@ -25,7 +26,7 @@ export class UserResolver {
     description: '유저정보 수정',
   })
   async updateUser(
-    @CurrentUser('user') user: User,
+    @CurrentUser('user') user: UserAuth,
     @Args('updateUserInput') updateUserInput: UpdateUserInput,
   ) {
     return await this.userService.updateUser(user, updateUserInput);
@@ -35,7 +36,7 @@ export class UserResolver {
   @Mutation(() => Boolean, {
     description: '유저정보 삭제',
   })
-  deleteUser(@CurrentUser('user') user: User) {
+  deleteUser(@CurrentUser('user') user: UserAuth) {
     return this.userService.deleteUser(user);
   }
 
@@ -67,7 +68,7 @@ export class UserResolver {
   @Query(() => User, {
     description: '유저 정보 가져오기',
   })
-  async user(@CurrentUser('user') user: User): Promise<User> {
+  async user(@CurrentUser('user') user: UserAuth): Promise<User> {
     return await this.userService.getUser(user);
   }
 }

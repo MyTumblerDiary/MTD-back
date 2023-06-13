@@ -5,7 +5,6 @@ import { APP_FILTER } from '@nestjs/core';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
 import { Request, Response } from 'express';
-import { Connection } from 'mysql2';
 import * as path from 'path';
 import { GqlExceptionFilter } from './filter/gql-exception.filter';
 
@@ -24,26 +23,13 @@ export class DynamicGqlModule {
             ),
             driver: ApolloDriver,
             playground: false,
-            plugins:
-              configService.get('NODE_ENV') === 'dev'
-                ? [ApolloServerPluginLandingPageLocalDefault({ embed: true })]
-                : null,
-            context: ({
+            plugins: [
+              ApolloServerPluginLandingPageLocalDefault({ embed: true }),
+            ],
+            context: ({ req, res }: { req: Request; res: Response }) => ({
               req,
               res,
-              connection,
-            }: {
-              req: Request;
-              res: Response;
-              connection: Connection;
-            }) => {
-              if (req) {
-                const user = req.headers.authorization;
-                return { req, res, user };
-              } else {
-                return { connection };
-              }
-            },
+            }),
           }),
         }),
       ],

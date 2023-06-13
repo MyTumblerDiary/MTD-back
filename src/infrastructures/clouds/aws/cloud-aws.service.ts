@@ -56,7 +56,7 @@ export class CloudAwsService {
     fileKey: string,
   ): Promise<AWS.Request<AWS.S3.GetObjectOutput, AWS.AWSError>> {
     return new AWS.S3().getObject({
-      Bucket: process.env.AWS_BUCKET_NAME,
+      Bucket: process.env.AWS_S3_BUCKET_NAME,
       Key: fileKey,
     });
   }
@@ -66,7 +66,7 @@ export class CloudAwsService {
   ): Promise<AWS.Request<AWS.S3.GetObjectOutput, AWS.AWSError>[]> {
     return fileKeyArray.map((fileKey) => {
       return new AWS.S3().getObject({
-        Bucket: process.env.AWS_BUCKET_NAME,
+        Bucket: process.env.AWS_S3_BUCKET_NAME,
         Key: fileKey,
       });
     });

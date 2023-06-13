@@ -63,11 +63,11 @@ export class FranchisesResolver {
   }
 
   @UseGuards(GqlAuthAccessGuard)
-  @Mutation(() => Franchise, {
+  @Mutation(() => Boolean, {
     name: 'deleteFranchise',
     description: '프렌차이즈를 삭제합니다. ',
   })
-  public async deleteFranchise(@Args('id') id: string): Promise<Franchise> {
+  public async deleteFranchise(@Args('id') id: string): Promise<boolean> {
     return await this.franchisesService.delete(id);
   }
 }

@@ -2,7 +2,7 @@ import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import { Exclude } from 'class-transformer';
 import { IsEmail } from 'class-validator';
 import { RefreshToken } from 'src/domains/auth/entities/refreshToken.entity';
-import { SocialLoginType } from 'src/domains/auth/interfaces/social.interface';
+import { SocialLoginType } from 'src/domains/auth/interfaces/social.type';
 import { TumblerRecord } from 'src/domains/tumbler-records/entities/tumbler-record.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
 import { CommonEntity } from '../../../infrastructures/database/entities/common.entity';
@@ -26,10 +26,10 @@ export class User extends CommonEntity {
   })
   @Field(() => String, {
     description: '비밀번호입니다. ',
-    nullable: true,
+    nullable: false,
   })
   @Exclude()
-  password?: string;
+  password: string;
 
   @Column({
     type: 'varchar',

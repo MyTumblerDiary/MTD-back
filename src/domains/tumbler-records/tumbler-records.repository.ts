@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
-import { User } from '../users/entities/user.entity';
+import { UserAuth } from '../auth/interfaces/user-auth';
 import { CreateTumblerRecordInput } from './dto/create.tumbler-record.dto';
 import { SearchTumblerRecordInput } from './dto/search.tumbler-record.dto';
 import { UpdateTumblerRecordInput } from './dto/update.tumbler-record.dto';
@@ -33,15 +33,28 @@ export class TumblerRecordsTypeOrmRepository
     return await this.tumblerRecordsRepository.find(options);
   }
 
-  public async findOne(options?: FindOneOptions): Promise<TumblerRecord> {
-    return await this.tumblerRecordsRepository.findOne(options);
+  public async findByUserId(id: string): Promise<TumblerRecord[]> {
+    return this.tumblerRecordsRepository.find({
+      where: {
+        user: {
+          id,
+        },
+      },
+    });
   }
 
-  public async findOneOrFail(options?: FindOneOptions): Promise<TumblerRecord> {
+  public async findOne(options: FindOneOptions): Promise<TumblerRecord | null> {
+    return this.tumblerRecordsRepository.findOne(options);
+  }
+
+  public async findOneOrFail(options: FindOneOptions): Promise<TumblerRecord> {
     return await this.tumblerRecordsRepository.findOneOrFail(options);
   }
 
-  public async search(searchInput: SearchTumblerRecordInput, user: User) {
+  public async search(
+    searchInput: SearchTumblerRecordInput,
+    user: UserAuth,
+  ): Promise<TumblerRecord[]> {
     const { searchBy, value } = searchInput;
     const queryBuilder =
       this.tumblerRecordsRepository.createQueryBuilder('tumblerRecord');
@@ -51,7 +64,6 @@ export class TumblerRecordsTypeOrmRepository
     if (searchBy) {
       queryBuilder.where(`tumblerRecord.${searchBy} = :value`, { value });
     }
-
     return queryBuilder.getMany();
   }
 

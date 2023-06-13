@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import * as bcrypt from 'bcrypt';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { RefreshToken } from 'src/domains/auth/entities/refreshToken.entity';
 import { AuthService } from '../../../domains/auth/auth.service';
 import { RefreshTokenPayload } from '../refresh-token.payload';
 
@@ -17,15 +18,20 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
     });
   }
   async validate(req: Request, payload: RefreshTokenPayload) {
-    const { email, sub } = payload;
-    const refreshToken = req.rawHeaders
+    const {
+      email,
+      sub,
+    }: {
+      email: string;
+      sub: string;
+    } = payload;
+    const refreshToken: string = req.rawHeaders
       .filter((ele) => {
         return ele.match(/Bearer/);
       })[0]
       .split(' ')[1];
-    const storedRefreshToken = await this.authService.findRefreshTokenByUserId(
-      sub,
-    );
+    const storedRefreshToken: RefreshToken =
+      (await this.authService.findRefreshTokenByUserId(sub)) as RefreshToken;
     if (
       !refreshToken ||
       !(await this.compareRefreshTokens(

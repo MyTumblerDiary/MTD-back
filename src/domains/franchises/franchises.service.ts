@@ -13,19 +13,21 @@ export class FranchisesService {
     private readonly franchisesRepository: Repository<Franchise>,
   ) {}
 
-  async create(createFranchiseInput: CreateFranchiseInput) {
+  async create(createFranchiseInput: CreateFranchiseInput): Promise<Franchise> {
     return this.franchisesRepository.save(
       this.franchisesRepository.create(createFranchiseInput),
     );
   }
 
-  async createBulk(createFranchiseInputs: CreateFranchiseInput[]) {
+  async createBulk(
+    createFranchiseInputs: CreateFranchiseInput[],
+  ): Promise<Franchise[]> {
     return this.franchisesRepository.save(
       this.franchisesRepository.create(createFranchiseInputs),
     );
   }
 
-  async findAll() {
+  async findAll(): Promise<Franchise[]> {
     return this.franchisesRepository.find();
   }
 
@@ -37,19 +39,22 @@ export class FranchisesService {
     });
   }
 
-  async findOne(id: string) {
-    return this.franchisesRepository.findOne({
+  async findOne(id: string): Promise<Franchise> {
+    return this.franchisesRepository.findOneOrFail({
       where: { id },
     });
   }
 
-  async update(id: string, updateFranchiseInput: UpdateFranchiseInput) {
+  async update(
+    id: string,
+    updateFranchiseInput: UpdateFranchiseInput,
+  ): Promise<Franchise> {
     await this.franchisesRepository.update(id, updateFranchiseInput);
     return this.findOne(id);
   }
 
-  async delete(id: string) {
+  async delete(id: string): Promise<boolean> {
     await this.franchisesRepository.delete(id);
-    return this.findOne(id);
+    return true;
   }
 }

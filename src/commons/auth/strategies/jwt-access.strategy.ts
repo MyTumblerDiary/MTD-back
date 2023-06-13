@@ -3,7 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Cache } from 'cache-manager';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { User } from 'src/domains/users/entities/user.entity';
+import { UserAuth } from 'src/domains/auth/interfaces/user-auth';
 import { AccessTokenPayload } from '../access-token.payload';
 export class JwtAccessStrategy extends PassportStrategy(Strategy, 'access') {
   constructor(
@@ -18,14 +18,14 @@ export class JwtAccessStrategy extends PassportStrategy(Strategy, 'access') {
     });
   }
 
-  async validate(req: Request, payload: AccessTokenPayload): Promise<User> {
-    const accessToken = req.headers.authorization.split(' ')[1];
-    const check = await this.cacheManager.get(accessToken);
+  async validate(req: Request, payload: AccessTokenPayload): Promise<UserAuth> {
+    const accessToken = req.headers.authorization?.split(' ')[1] as string;
+    const check = await this.cacheManager.get<string>(accessToken);
 
     if (check) throw new UnauthorizedException();
     return {
       id: payload.sub,
       email: payload.email,
-    };
+    } as UserAuth;
   }
 }

@@ -6,10 +6,10 @@ import {
   GqlAuthRefreshGuard,
 } from 'src/commons/auth/gql-auth.guard';
 import { CurrentToken, CurrentUser } from 'src/commons/auth/gql-user.param';
+import { UserAuth } from 'src/domains/auth/interfaces/user-auth';
 import { AuthService } from '../../domains/auth/auth.service';
 import { LoginResponseDto } from '../../domains/auth/dto/auth.output.dto';
 import { LoginInputDto } from '../../domains/auth/dto/login.input.dto';
-import { User } from '../../domains/users/entities/user.entity';
 
 @Resolver()
 export class AuthResolver {
@@ -28,7 +28,7 @@ export class AuthResolver {
   @Mutation(() => String, {
     description: 'accesstoken 재발급',
   })
-  restoreAccessToken(@CurrentUser('user') user: User): Promise<string> {
+  restoreAccessToken(@CurrentUser('user') user: UserAuth): Promise<string> {
     return this.authService.setAccessToken(user);
   }
 

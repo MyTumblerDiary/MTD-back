@@ -2,6 +2,7 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
+import { UserAuth } from '../auth/interfaces/user-auth';
 import { CreateUserInput } from './dto/createUsers.input';
 import { UpdateUserInput } from './dto/updateUsers.input';
 import { User } from './entities/user.entity';
@@ -13,27 +14,27 @@ export class UserService {
   ) {}
 
   async findOne(id: string) {
-    return await this.userRepository.findOne({ where: { id } });
+    return await this.userRepository.findOneOrFail({ where: { id } });
   }
 
   async findOneByEmail(email: string) {
-    return await this.userRepository.findOne({ where: { email } });
+    return await this.userRepository.findOneOrFail({ where: { email } });
   }
 
   async create(createUserInput: CreateUserInput) {
-    createUserInput.password = await bcrypt.hash(createUserInput.password, 10);
+    createUserInput.password = await bcrypt.hash(createUserInput?.password, 10);
     const result = await this.userRepository.save({
       ...createUserInput,
     });
     return result;
   }
 
-  async updateUser(user: User, updateUserInput: UpdateUserInput) {
-    const userInfo = await this.userRepository.findOne({
+  async updateUser(user: UserAuth, updateUserInput: UpdateUserInput) {
+    const userInfo = (await this.userRepository.findOne({
       where: { email: user.email },
-    });
+    })) as User;
     if (updateUserInput.nickname) {
-      if (userInfo.nickname === updateUserInput.nickname) {
+      if (userInfo?.nickname === updateUserInput.nickname) {
         throw new ConflictException(
           '현재 닉네임과 다른 닉네임을 입력해주세요.',
         );
@@ -41,10 +42,10 @@ export class UserService {
         await this.checkNickname(updateUserInput.nickname);
       }
     }
-    if (updateUserInput.password) {
-      const isCurrentPasswordValid = await bcrypt.compare(
+    if (updateUserInput.password && userInfo.password) {
+      const isCurrentPasswordValid = bcrypt.compare(
         updateUserInput.currentPassword,
-        userInfo.password,
+        userInfo?.password,
       );
 
       if (!isCurrentPasswordValid) {
@@ -67,7 +68,7 @@ export class UserService {
     return await this.userRepository.save(newUser);
   }
 
-  async deleteUser(user: User) {
+  async deleteUser(user: UserAuth) {
     const result = await this.userRepository.softDelete({ email: user.email });
     return result.affected ? true : false;
   }
@@ -97,10 +98,10 @@ export class UserService {
     return await this.userRepository.save(newUser);
   }
 
-  async getUser(user: User) {
+  async getUser(user: UserAuth) {
     const userInfo = await this.userRepository.findOne({
       where: { email: user.email },
     });
-    return userInfo;
+    return userInfo as User;
   }
 }

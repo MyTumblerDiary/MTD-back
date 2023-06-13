@@ -1,21 +1,27 @@
-import { User } from 'src/domains/users/entities/user.entity';
+import { UserAuth } from 'src/domains/auth/interfaces/user-auth';
 import { CustomRepository } from 'src/infrastructures/database/repositories/custom-repository';
+import { DeepPartial } from 'typeorm';
 import { SearchTumblerRecordInput } from '../dto/search.tumbler-record.dto';
 import { TumblerRecord } from '../entities/tumbler-record.entity';
 
 export interface TumblerRecordsRepository
   extends CustomRepository<TumblerRecord> {
-  create(data: Partial<TumblerRecord>): TumblerRecord;
+  create(data: DeepPartial<TumblerRecord>): TumblerRecord;
 
   save(data: TumblerRecord): Promise<TumblerRecord>;
 
   find(options?: any): Promise<TumblerRecord[]>;
 
-  findOne(options?: any): Promise<TumblerRecord>;
+  findByUserId(id: string): Promise<TumblerRecord[]>;
 
-  findOneOrFail(options?: any): Promise<TumblerRecord>;
+  findOne(options: any): Promise<TumblerRecord | null>;
 
-  search(input: SearchTumblerRecordInput, user: User): Promise<TumblerRecord[]>;
+  findOneOrFail(options: any): Promise<TumblerRecord>;
+
+  search(
+    input: SearchTumblerRecordInput,
+    user: UserAuth,
+  ): Promise<TumblerRecord[]>;
 
   update(id: string, data: Partial<TumblerRecord>): Promise<TumblerRecord>;
 

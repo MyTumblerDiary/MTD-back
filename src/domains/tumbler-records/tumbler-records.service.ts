@@ -1,5 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { UserAuth } from '../auth/interfaces/user-auth';
 import { User } from '../users/entities/user.entity';
+import { UserService } from '../users/users.service';
 import { CreateTumblerRecordInput } from './dto/create.tumbler-record.dto';
 import {
   CreateTumblerRecordTransactionInput,
@@ -20,15 +22,16 @@ export class TumblerRecordsService {
     @Inject(TUMBLER_RECORDS_REPOSITORY)
     private readonly repository: TumblerRecordsRepository,
     private readonly createTransaction: CreateTumblerRecordTransaction,
+    private readonly userService: UserService,
   ) {}
 
   public async create(
     createTumblerRecordInput: CreateTumblerRecordInput,
-    user: User,
+    userAuth: UserAuth,
   ): Promise<TumblerRecord> {
+    const user = await this.userService.findOneByEmail(userAuth.email);
     const newTumblerRecord = this.repository.create({
       ...createTumblerRecordInput,
-
       user,
     });
     return this.repository.save(newTumblerRecord);
@@ -56,47 +59,49 @@ export class TumblerRecordsService {
     id: string,
     relations?: string[],
   ): Promise<TumblerRecord> {
-    return await this.repository.findOne({
+    return await this.repository.findOneOrFail({
       where: { id },
       relations,
     });
   }
 
   public async findByUserId(
-    user: User,
+    user: UserAuth,
     searchTumblerRecordInput?: SearchTumblerRecordInput,
   ): Promise<TumblerRecordsOutput> {
-    const getSearched = this.repository.search(searchTumblerRecordInput, user);
-    const getAll = this.repository.find({
-      where: { user },
-    });
+    // searchTumblerRecordInput이 없으면 모든 텀블러 기록과 총 누적 할인 금액, 총 할인 횟수를 가져옵니다.
+    const totalResult = await this.repository.findByUserId(user.id);
 
-    const [searchedTumbler, allTumbler] = await Promise.all([
-      getSearched,
-      getAll,
-    ]);
+    if (!searchTumblerRecordInput) {
+      return {
+        tumblerRecords: totalResult,
+        totalDiscount: await this.accumulateDiscount(totalResult),
+        totalUsedTumbler: totalResult.length,
+      };
+    }
 
-    const totalDiscount: number = allTumbler.reduce(
-      (acc: number, cur: TumblerRecord) => acc + (cur.prices || 0),
-      0,
+    // searchTumblerRecordInput이 있으면 검색된 텀블러 기록과 총 누적 할인 금액, 총 할인 횟수를 가져옵니다.
+    const searchedResult: TumblerRecord[] = await this.repository.search(
+      searchTumblerRecordInput,
+      user,
     );
-
-    const totalUsedTumbler: number = allTumbler.length;
-
-    const filteredDiscount: number = searchedTumbler.reduce(
-      (acc: number, cur: TumblerRecord) => acc + (cur.prices || 0),
-      0,
-    );
-
-    const filteredTumbler: number = searchedTumbler.length;
 
     return {
-      tumblerRecords: searchedTumbler,
-      totalDiscount,
-      totalUsedTumbler,
-      filteredTumbler,
-      filteredDiscount,
+      tumblerRecords: searchedResult,
+      totalDiscount: await this.accumulateDiscount(totalResult),
+      totalUsedTumbler: totalResult.length,
+      filteredDiscount: await this.accumulateDiscount(searchedResult),
+      filteredTumbler: searchedResult.length,
     };
+  }
+
+  private async accumulateDiscount(tumblerRecords: TumblerRecord[]) {
+    return tumblerRecords.reduce((acc: number, cur: TumblerRecord) => {
+      if (cur.prices) {
+        return acc + cur.prices;
+      }
+      return acc;
+    }, 0);
   }
 
   public async update(

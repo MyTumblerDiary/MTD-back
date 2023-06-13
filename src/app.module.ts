@@ -11,8 +11,8 @@ import { StoresModule } from './domains/stores/stores.module';
 import { TumblerRecordsModule } from './domains/tumbler-records/tumbler-records.module';
 import { UserModule } from './domains/users/users.module';
 import { CloudAwsModule } from './infrastructures/clouds/aws/cloud-aws.module';
-import { configOptions } from './infrastructures/config/config';
 import { ormOption } from './infrastructures/database/config/typeorm.config';
+import { configOptions } from './infrastructures/env-config/env-config';
 import { DynamicGqlModule } from './infrastructures/graphql/dynamic-gql.module';
 import { GqlThrottlerGuard } from './infrastructures/graphql/guards/gql.throttler.guard';
 import { HealthCheckController } from './presentations/controllers/health-check.controller';
@@ -37,7 +37,7 @@ const ENV = process.env.NODE_ENV;
       store: redisStore,
       isGlobal: true,
       host: process.env.REDIS_HOST,
-      port: parseInt(process.env.REDIS_PORT),
+      port: Number(process.env.REDIS_PORT),
       ttl: 120,
     }),
     TumblerRecordsModule,

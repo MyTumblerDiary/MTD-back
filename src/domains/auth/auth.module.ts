@@ -5,6 +5,7 @@ import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtAccessStrategy } from 'src/commons/auth/strategies/jwt-access.strategy';
 import { JwtRefreshStrategy } from 'src/commons/auth/strategies/jwt-refresh.strategy';
+import { EnvConfigModule } from 'src/infrastructures/env-config/env-config.module';
 import { AuthResolver } from '../../presentations/resolvers/auth.resolver';
 import { UserModule } from '../users/users.module';
 import { AuthService } from './auth.service';
@@ -14,6 +15,7 @@ import { RefreshToken } from './entities/refreshToken.entity';
     UserModule,
     PassportModule.register({ defaultStrategy: 'jwt-access' }),
     JwtModule.registerAsync({
+      imports: [EnvConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('ACCESS_SECRET_KEY'),

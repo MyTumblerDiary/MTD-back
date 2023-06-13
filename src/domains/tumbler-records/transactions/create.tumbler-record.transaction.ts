@@ -37,7 +37,7 @@ export default class CreateTumblerRecordTransaction extends BaseTransaction<
     createStoreInput: CreateStoreInput,
   ): Promise<Franchise | null> {
     if (!createStoreInput?.franchiseId) {
-      return;
+      return null;
     }
     try {
       return manager.findOneOrFail(Franchise, {

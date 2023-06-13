@@ -7,7 +7,7 @@ export interface CustomRepository<T> {
 
   find(options?: any): Promise<T[]>;
 
-  findOne(options?: any): Promise<T>;
+  findOne(options: any): Promise<T | null>;
 
   findOneOrFail(options?: any): Promise<T>;
 
