@@ -4,12 +4,11 @@ import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as redisStore from 'cache-manager-redis-store';
-import { ClientOpts } from 'redis';
 import { AuthModule } from './apis/auth/auth.module';
 import { CloudAwsModule } from './apis/clouds/aws/cloud-aws.module';
+import { EmailModule } from './apis/emails/email.module';
 import { FranchisesModule } from './apis/franchises/franchises.module';
-import { PrivateSpacesModule } from './apis/spaces/private-spaces/private-spaces.module';
-import { StoresModule } from './apis/spaces/stores/stores.module';
+import { StoresModule } from './apis/stores/stores.module';
 import { TumblerRecordsModule } from './apis/tumbler-records/tumbler-records.module';
 import { UserModule } from './apis/users/users.module';
 import { GqlExceptionFilter } from './commons/filter/gql-exception.filter';
@@ -26,23 +25,23 @@ const ENV = process.env.NODE_ENV;
     UserModule,
     AuthModule,
     StoresModule,
-    PrivateSpacesModule,
     FranchisesModule,
     CloudAwsModule,
     DynamicGqlModule.forRoot(),
     TypeOrmModule.forRoot(ormOption),
     ThrottlerModule.forRoot({
       ttl: 1,
-      limit: 5,
+      limit: 10,
     }),
-    CacheModule.register<ClientOpts>({
+    CacheModule.register({
       store: redisStore,
       isGlobal: true,
-      host: process.env.HOST,
-      port: 6379,
+      host: process.env.REDIS_HOST,
+      port: parseInt(process.env.REDIS_PORT),
       ttl: 120,
     }),
     TumblerRecordsModule,
+    EmailModule,
   ],
   providers: [
     {

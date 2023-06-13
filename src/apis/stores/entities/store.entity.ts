@@ -1,9 +1,12 @@
 import { Field, Float, InputType, Int, ObjectType } from '@nestjs/graphql';
+import { Franchise } from 'src/apis/franchises/entities/franchise.entity';
 import { TumblerRecord } from 'src/apis/tumbler-records/entities/tumbler-record.entity';
 import { CommonEntity } from 'src/commons/entities/common.entity';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 
-@Entity()
+@Entity({
+  name: 'stores',
+})
 @InputType('StoreInputType', { isAbstract: true })
 @ObjectType({ description: '가게 Entity' })
 export class Store extends CommonEntity {
@@ -62,6 +65,7 @@ export class Store extends CommonEntity {
 
   @Column({
     nullable: false,
+    type: 'float',
   })
   @Field(() => Float, {
     nullable: false,
@@ -71,6 +75,7 @@ export class Store extends CommonEntity {
 
   @Column({
     nullable: false,
+    type: 'float',
   })
   @Field(() => Float, {
     nullable: false,
@@ -93,4 +98,16 @@ export class Store extends CommonEntity {
     description: '가게의 텀블러 기록들입니다. ',
   })
   tumblerRecords?: TumblerRecord[];
+
+  @ManyToOne(() => Franchise, (franchise) => franchise.stores, {
+    nullable: true,
+  })
+  @JoinColumn({
+    name: 'franchise_id',
+  })
+  @Field(() => Franchise, {
+    nullable: true,
+    description: '가게가 속한 프랜차이즈입니다. ',
+  })
+  franchise: Franchise;
 }

@@ -1,21 +1,15 @@
-import {
-  CACHE_MANAGER,
-  ConflictException,
-  Inject,
-  Injectable,
-} from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import { Cache } from 'cache-manager';
-import * as nodemailer from 'nodemailer';
 import { Repository } from 'typeorm';
+import { CreateUserInput } from './dto/createUsers.input';
+import { UpdateUserInput } from './dto/updateUsers.input';
 import { User } from './entities/user.entity';
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>, //
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async findOne(id: string) {
@@ -26,7 +20,7 @@ export class UserService {
     return await this.userRepository.findOne({ where: { email } });
   }
 
-  async create({ createUserInput }) {
+  async create(createUserInput: CreateUserInput) {
     createUserInput.password = await bcrypt.hash(createUserInput.password, 10);
     const result = await this.userRepository.save({
       ...createUserInput,
@@ -34,86 +28,79 @@ export class UserService {
     return result;
   }
 
-  async updateUser({ userEmail, updateUserInput }) {
-    const user = await this.userRepository.findOne({
-      where: { email: userEmail },
+  async updateUser(user: User, updateUserInput: UpdateUserInput) {
+    const userInfo = await this.userRepository.findOne({
+      where: { email: user.email },
     });
-    updateUserInput.password = await bcrypt.hash(updateUserInput.password, 10);
+    if (updateUserInput.nickname) {
+      if (userInfo.nickname === updateUserInput.nickname) {
+        throw new ConflictException(
+          '현재 닉네임과 다른 닉네임을 입력해주세요.',
+        );
+      } else {
+        await this.checkNickname(updateUserInput.nickname);
+      }
+    }
+    if (updateUserInput.password) {
+      const isCurrentPasswordValid = await bcrypt.compare(
+        updateUserInput.currentPassword,
+        userInfo.password,
+      );
+
+      if (!isCurrentPasswordValid) {
+        throw new ConflictException('현재 비밀번호가 올바르지 않습니다.');
+      } else if (updateUserInput.password === updateUserInput.currentPassword) {
+        throw new ConflictException(
+          '현재 비밀번호와 다른 비밀번호를 입력해주세요.',
+        );
+      }
+      updateUserInput.password = await bcrypt.hash(
+        updateUserInput.password,
+        10,
+      );
+    }
+    const { currentPassword, ...updatedFields } = updateUserInput;
     const newUser = {
-      ...user,
-      email: userEmail,
-      ...updateUserInput,
+      ...userInfo,
+      ...updatedFields,
     };
     return await this.userRepository.save(newUser);
   }
 
-  async deleteUser({ userEmail }) {
-    const result = await this.userRepository.softDelete({ email: userEmail });
-    //return result.affected ? true : false;
-    return result;
+  async deleteUser(user: User) {
+    const result = await this.userRepository.softDelete({ email: user.email });
+    return result.affected ? true : false;
   }
 
-  async fetchUserPassword(email: string) {
-    const user = await this.userRepository.findOne({ where: { email } });
-    if (!user) throw new ConflictException('존재하지 않는 이메일입니다');
-    return 1;
-  }
-
-  async sendEmail(email: string): Promise<boolean> {
-    //const user = await this.userRepository.findOne({ where: { id } });
-
-    const getRandomCode = (min, max) => {
-      min = Math.ceil(min);
-      max = Math.floor(max);
-      return Math.floor(Math.random() * (max - min)) + min;
-    };
-
-    const randomCode = getRandomCode(111111, 999999);
-
-    const transport = nodemailer.createTransport({
-      service: 'Gmail',
-      secure: true,
-      auth: {
-        type: 'OAuth2',
-        user: process.env.GMAIL_ID,
-        clientId: process.env.GMAIL_CLIENT_ID,
-        clientSecret: process.env.GMAIL_CLIENT_SECRET,
-        refreshToken: process.env.GMAIL_REFRESH_TOKEN,
-      },
-    });
-
-    if (randomCode) {
-      await this.cacheManager.get(`${email}'s AuthenticationCode`);
-    }
-    await this.cacheManager.set(`${email}'s AuthenticationCode`, randomCode);
-
-    const sendResult = await transport.sendMail({
-      from: {
-        name: '인증관리자',
-        address: process.env.GMAIL_ID,
-      },
-      subject: '내 서비스 인증 메일',
-      to: [email],
-      text: `The Authentication code is ${randomCode}`,
-    });
-    return sendResult.accepted.length > 0;
-  }
-
-  async checkCode({ email, code }) {
-    const chk = await this.cacheManager.get(`${email}'s AuthenticationCode`);
-    if (chk != code) throw new ConflictException('코드가 맞지 않습니다.');
-    return true;
-  }
-
-  async checkEmail({ email }) {
+  async checkEmail(email: string) {
     const user = await this.userRepository.findOne({ where: { email } });
     if (user) throw new ConflictException('이미 등록된 이메일 입니다.');
     return true;
   }
 
-  async checkNickname({ nickname }) {
+  async checkNickname(nickname: string) {
     const user = await this.userRepository.findOne({ where: { nickname } });
     if (user) throw new ConflictException('이미 등록된 닉네임 입니다.');
     return true;
+  }
+
+  async resetPassword(userEmail: string, password: string) {
+    const user = await this.userRepository.findOne({
+      where: { email: userEmail },
+    });
+    if (!user) throw new ConflictException('이메일이 존재하지 않습니다.');
+    password = await bcrypt.hash(password, 10);
+    const newUser = {
+      ...user,
+      password,
+    };
+    return await this.userRepository.save(newUser);
+  }
+
+  async getUser(user: User) {
+    const userInfo = await this.userRepository.findOne({
+      where: { email: user.email },
+    });
+    return userInfo;
   }
 }

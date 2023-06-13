@@ -5,14 +5,13 @@ import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtAccessStrategy } from 'src/commons/auth/strategies/jwt-access.strategy';
 import { JwtRefreshStrategy } from 'src/commons/auth/strategies/jwt-refresh.strategy';
-import { JwtGoogleStrategy } from 'src/commons/auth/strategies/jwt-social-google.strategy';
-import { JwtKakaoStrategy } from 'src/commons/auth/strategies/jwt-social-kakao.strategy';
-import { User } from '../users/entities/user.entity';
-import { UserService } from '../users/users.service';
+import { UserModule } from '../users/users.module';
 import { AuthResolver } from './auth.resolver';
 import { AuthService } from './auth.service';
+import { RefreshToken } from './entities/refreshToken.entity';
 @Module({
   imports: [
+    UserModule,
     PassportModule.register({ defaultStrategy: 'jwt-access' }),
     JwtModule.registerAsync({
       inject: [ConfigService],
@@ -20,18 +19,10 @@ import { AuthService } from './auth.service';
         secret: configService.get<string>('ACCESS_SECRET_KEY'),
       }),
     }),
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([RefreshToken]),
   ],
 
-  providers: [
-    JwtAccessStrategy,
-    JwtRefreshStrategy,
-    JwtGoogleStrategy,
-    JwtKakaoStrategy,
-    AuthResolver,
-    AuthService,
-    UserService,
-  ],
+  providers: [JwtAccessStrategy, JwtRefreshStrategy, AuthResolver, AuthService],
   exports: [AuthService],
 })
 export class AuthModule {}

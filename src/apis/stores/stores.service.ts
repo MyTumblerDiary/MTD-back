@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationInput } from 'src/commons/pagination/dto/pagination.dto';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { In, Repository, SelectQueryBuilder } from 'typeorm';
 import { CreateStoreInput } from './dto/create.store.dto';
 import { OrderStoreInput } from './dto/order.store.dto';
 import { SearchStoreInput } from './dto/search.store.dto';
+import { StoresOutput } from './dto/store.dto';
 import { UpdateStoreInput } from './dto/update.store.dto';
 import { Store } from './entities/store.entity';
 
@@ -23,23 +24,47 @@ export class StoresService {
     paginationInput: PaginationInput,
     searchStoreInput: SearchStoreInput,
     orderStoreInput: OrderStoreInput,
-  ): Promise<Store[]> {
+  ): Promise<StoresOutput> {
     const qb = this.storeRepository.createQueryBuilder('store');
+    const searchedQb = await this.findBySearchQb(searchStoreInput, qb);
     const paginatedQb = await this.findByPaginationQb(
       paginationInput.page,
       paginationInput.limit,
-      qb,
+      searchedQb,
     );
-    const searchedQb = await this.findBySearchQb(searchStoreInput, paginatedQb);
-    const orderedQb = await this.findByOrderQb(orderStoreInput, searchedQb);
+    const orderedQb = await this.findByOrderQb(orderStoreInput, paginatedQb);
 
-    return orderedQb.getMany();
+    const stores = await orderedQb.getMany();
+    const totalCount = await this.storeRepository.count();
+    const searchedCount = await searchedQb.getCount();
+    const pagesCount = Math.ceil(searchedCount / paginationInput.limit);
+    const currentPage = paginationInput.page;
+
+    return {
+      stores,
+      totalCount,
+      pagesCount,
+      currentPage,
+      searchedCount,
+    };
   }
 
   public async findOneById(id: string): Promise<Store> {
-    return await this.storeRepository.findOne({
+    try {
+      return await this.storeRepository.findOneOrFail({
+        where: {
+          id,
+        },
+      });
+    } catch (error) {
+      throw new Error('존재하지 않는 공간입니다.');
+    }
+  }
+
+  public async findManyByIds(ids: string[]): Promise<Store[]> {
+    return await this.storeRepository.find({
       where: {
-        id,
+        id: In(ids),
       },
     });
   }
