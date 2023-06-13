@@ -1,11 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateStoreInput } from 'src/domains/stores/dto/create.store.dto';
-import { CreateTumblerRecordInput } from 'src/domains/tumbler-records/dto/create.tumbler-record.dto';
-import { CreateTumblerRecordTransactionInput } from 'src/domains/tumbler-records/dto/create.tumbler-record.transaction.dto';
-import CreateTumblerRecordTransaction from 'src/domains/tumbler-records/transactions/create.tumbler-record.transaction';
-import { TUMBLER_RECORDS_REPOSITORY } from 'src/domains/tumbler-records/tumbler-records.module';
-import { TumblerRecordsService } from 'src/domains/tumbler-records/tumbler-records.service';
-import { User } from 'src/domains/users/entities/user.entity';
+import { UserAuth } from 'src/applications/auth/interfaces/user-auth';
+import { CreateStoreInput } from 'src/applications/stores/dto/create.store.dto';
+import { CreateTumblerRecordInput } from 'src/applications/tumbler-records/dto/create.tumbler-record.dto';
+import { CreateTumblerRecordTransactionInput } from 'src/applications/tumbler-records/dto/create.tumbler-record.transaction.dto';
+import CreateTumblerRecordTransaction from 'src/applications/tumbler-records/transactions/create.tumbler-record.transaction';
+import { TUMBLER_RECORDS_REPOSITORY } from 'src/applications/tumbler-records/tumbler-records.module';
+import { TumblerRecordsService } from 'src/applications/tumbler-records/tumbler-records.service';
+import { UserService } from 'src/applications/users/users.service';
 import { MockTumblerRecordsTypeOrmRepository } from '../mocks/mock.tumbler-records.repository';
 import { TumblerRecordBuilder } from '../mocks/tumbler-records.builder';
 
@@ -19,6 +20,12 @@ describe('TumblerRecordsService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TumblerRecordsService,
+        {
+          provide: UserService,
+          useValue: {
+            findOneByEmail: jest.fn(),
+          },
+        },
         CreateTumblerRecordTransaction,
         {
           provide: TUMBLER_RECORDS_REPOSITORY,
@@ -33,7 +40,7 @@ describe('TumblerRecordsService', () => {
             mockBuilder.build({
               ...input.createTumblerRecordInput,
               store: input.createStoreInput,
-              user: input.user,
+              user: input.userAuth,
             }),
         }),
       })
@@ -49,7 +56,7 @@ describe('TumblerRecordsService', () => {
   describe('createWithTransaction', () => {
     let createTumblerRecordInput: CreateTumblerRecordInput;
     let createStoreInput: CreateStoreInput;
-    let user: User;
+    let userAuth: UserAuth;
     beforeEach(() => {
       createTumblerRecordInput = {
         prices: 1000,
@@ -71,8 +78,8 @@ describe('TumblerRecordsService', () => {
         imageFileKey: 'test_key.jpg',
       };
 
-      user = {
-        id: 'test user id',
+      userAuth = {
+        id: 'test',
         email: 'test@test.com',
       };
     });
@@ -87,13 +94,13 @@ describe('TumblerRecordsService', () => {
         {
           createTumblerRecordInput,
           createStoreInput,
-          user,
+          userAuth,
         };
 
       // when
       const result = await service.createWithTransaction(
         createTumblerRecordTransactionInput,
-        user,
+        userAuth,
       );
 
       // then
@@ -101,7 +108,7 @@ describe('TumblerRecordsService', () => {
         mockBuilder.build({
           ...createTumblerRecordInput,
           store: createStoreInput,
-          user: user,
+          user: userAuth,
         }),
       );
     });

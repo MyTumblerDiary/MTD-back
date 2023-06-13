@@ -1,6 +1,6 @@
+import { CreateTumblerRecordInput } from 'src/applications/tumbler-records/dto/create.tumbler-record.dto';
+import { TumblerRecord } from 'src/applications/tumbler-records/entities/tumbler-record.entity';
 import { uuid } from 'src/commons/utils/functions';
-import { CreateTumblerRecordInput } from 'src/domains/tumbler-records/dto/create.tumbler-record.dto';
-import { TumblerRecord } from 'src/domains/tumbler-records/entities/tumbler-record.entity';
 import { MockBuilder } from 'test/mock.builder';
 import { DeepPartial } from 'typeorm';
 

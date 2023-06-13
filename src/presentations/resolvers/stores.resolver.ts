@@ -1,11 +1,11 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { CreateStoreInput } from 'src/domains/stores/dto/create.store.dto';
-import { OrderStoreInput } from 'src/domains/stores/dto/order.store.dto';
-import { SearchStoreInput } from 'src/domains/stores/dto/search.store.dto';
-import { StoresOutput } from 'src/domains/stores/dto/store.dto';
-import { UpdateStoreInput } from 'src/domains/stores/dto/update.store.dto';
-import { Store } from 'src/domains/stores/entities/store.entity';
-import { StoresService } from 'src/domains/stores/stores.service';
+import { CreateStoreInput } from 'src/applications/stores/dto/create.store.dto';
+import { OrderStoreInput } from 'src/applications/stores/dto/order.store.dto';
+import { SearchStoreInput } from 'src/applications/stores/dto/search.store.dto';
+import { StoresOutput } from 'src/applications/stores/dto/store.dto';
+import { UpdateStoreInput } from 'src/applications/stores/dto/update.store.dto';
+import { Store } from 'src/applications/stores/entities/store.entity';
+import { StoresService } from 'src/applications/stores/stores.service';
 import { PaginationInput } from 'src/infrastructures/database/pagination/dto/pagination.dto';
 
 @Resolver('Store')

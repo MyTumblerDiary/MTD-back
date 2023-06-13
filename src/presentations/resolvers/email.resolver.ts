@@ -1,5 +1,5 @@
 import { Args, Query, Resolver } from '@nestjs/graphql';
-import { EmailService } from 'src/domains/emails/email.service';
+import { EmailService } from 'src/applications/emails/email.service';
 
 @Resolver()
 export class EmailResolver {

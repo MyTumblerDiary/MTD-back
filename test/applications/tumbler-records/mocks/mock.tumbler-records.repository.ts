@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { SearchTumblerRecordInput } from 'src/domains/tumbler-records/dto/search.tumbler-record.dto';
-import { TumblerRecord } from 'src/domains/tumbler-records/entities/tumbler-record.entity';
-import { TumblerRecordsRepository } from '../../../../dist/domains/tumbler-records/interfaces/tumbler-records.repostitory';
+import { SearchTumblerRecordInput } from 'src/applications/tumbler-records/dto/search.tumbler-record.dto';
+import { TumblerRecord } from 'src/applications/tumbler-records/entities/tumbler-record.entity';
+import { TumblerRecordsRepository } from 'src/applications/tumbler-records/interfaces/tumbler-records.repostitory';
 
 @Injectable()
 export class MockTumblerRecordsTypeOrmRepository
@@ -26,6 +26,20 @@ export class MockTumblerRecordsTypeOrmRepository
       reject(new Error(`find tumblerRecord error`));
     });
   }
+
+  findByUserId(id: string): Promise<TumblerRecord[]> {
+    return new Promise((resolve: any, reject) => {
+      resolve([
+        new TumblerRecord({
+          user: {
+            id,
+          },
+        }),
+      ]);
+      reject(new Error(`findByUserId tumblerRecord error`));
+    });
+  }
+
   findOne(options?: any): Promise<TumblerRecord> {
     return new Promise((resolve: any, reject) => {
       resolve(new TumblerRecord());

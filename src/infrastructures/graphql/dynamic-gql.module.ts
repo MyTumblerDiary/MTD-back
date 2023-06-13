@@ -16,7 +16,7 @@ export class DynamicGqlModule {
         GraphQLModule.forRootAsync<ApolloDriverConfig>({
           inject: [ConfigService],
           driver: ApolloDriver,
-          useFactory: async (configService: ConfigService) => ({
+          useFactory: async () => ({
             autoSchemaFile: path.join(
               process.cwd(),
               'src/infrastructures/graphql/schema.gql',

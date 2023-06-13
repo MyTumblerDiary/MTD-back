@@ -1,15 +1,14 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { UserAuth } from 'src/applications/auth/interfaces/user-auth';
+import { CreateTumblerRecordInput } from 'src/applications/tumbler-records/dto/create.tumbler-record.dto';
+import { CreateTumblerRecordWithCreateStoreInput } from 'src/applications/tumbler-records/dto/create.tumbler-record.transaction.dto';
+import { SearchTumblerRecordInput } from 'src/applications/tumbler-records/dto/search.tumbler-record.dto';
+import { TumblerRecordsOutput } from 'src/applications/tumbler-records/dto/tumbler-record.dto';
+import { TumblerRecord } from 'src/applications/tumbler-records/entities/tumbler-record.entity';
+import { TumblerRecordsService } from 'src/applications/tumbler-records/tumbler-records.service';
 import { GqlAuthAccessGuard } from 'src/commons/auth/gql-auth.guard';
 import { CurrentUser } from 'src/commons/auth/gql-user.param';
-import { UserAuth } from 'src/domains/auth/interfaces/user-auth';
-import { CreateTumblerRecordInput } from 'src/domains/tumbler-records/dto/create.tumbler-record.dto';
-import { CreateTumblerRecordWithCreateStoreInput } from 'src/domains/tumbler-records/dto/create.tumbler-record.transaction.dto';
-import { SearchTumblerRecordInput } from 'src/domains/tumbler-records/dto/search.tumbler-record.dto';
-import { TumblerRecordsOutput } from 'src/domains/tumbler-records/dto/tumbler-record.dto';
-import { TumblerRecord } from 'src/domains/tumbler-records/entities/tumbler-record.entity';
-import { TumblerRecordsService } from 'src/domains/tumbler-records/tumbler-records.service';
-import { User } from 'src/domains/users/entities/user.entity';
 
 @Resolver('TumblerRecord')
 export class TumblerRecordResolver {
@@ -20,11 +19,11 @@ export class TumblerRecordResolver {
     description: '텀블러 기록을 생성합니다. ',
   })
   public async createTumblerRecord(
-    @CurrentUser('user') user: User,
+    @CurrentUser('userAuth') userAuth: UserAuth,
     @Args('input')
     input: CreateTumblerRecordWithCreateStoreInput,
   ): Promise<TumblerRecord> {
-    return this.tumblerRecordsService.createWithTransaction(input, user);
+    return this.tumblerRecordsService.createWithTransaction(input, userAuth);
   }
 
   @UseGuards(GqlAuthAccessGuard)
