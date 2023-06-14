@@ -2,6 +2,23 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+"""가맹점 Entity"""
+type Franchise {
+  id: String!
+  createdAt: String!
+  updatedAt: String
+  deletedAt: String
+
+  """가맹점 이름입니다. """
+  name: String!
+
+  """가맹점 텀블러 할인 금액입니다. """
+  discountPrice: Int
+
+  """가맹점에 속한 가게들입니다. """
+  stores: [Store!]
+}
+
 """가게 Entity"""
 type Store {
   id: String!
@@ -35,6 +52,9 @@ type Store {
 
   """가게의 텀블러 기록들입니다. """
   tumblerRecords: [TumblerRecord!]
+
+  """가게가 속한 프랜차이즈입니다. """
+  franchise: Franchise
 }
 
 """텀블러 기록 Entity"""
@@ -99,20 +119,6 @@ type S3PresignedUrlOutput {
   fileKey: String!
 }
 
-"""가맹점 Entity"""
-type Franchise {
-  id: String!
-  createdAt: String!
-  updatedAt: String
-  deletedAt: String
-
-  """가맹점 이름입니다. """
-  name: String!
-
-  """가맹점 텀블러 할인 금액입니다. """
-  discountPrice: Int
-}
-
 type StoresOutput {
   """가게 목록"""
   stores: [Store!]!
@@ -169,11 +175,17 @@ type Query {
   """id로 하나의 프렌차이즈를 조회합니다. """
   franchise(id: String!): Franchise!
 
+  """검색 조건에 맞는 프렌차이즈를 조회합니다. """
+  franchisesBySearch(searchInput: SearchInput!): [Franchise!]!
+
   """
   유저의 모든 텀블러 사용 기록과 누적 할인 금액, 할인 횟수를 가져옵니다.
       이때, 검색 필터를 적용하면 검색된 텀블러 기록만 가져옵니다. 
   """
-  tumblerRecords(searchTumblerRecordInput: SearchTumblerRecordInput!): TumblerRecordsOutput!
+  tumblerRecords(searchTumblerRecordInput: SearchTumblerRecordInput): TumblerRecordsOutput!
+
+  """유저가 가장 많이 방문한 공간을 순위대로 가져옵니다."""
+  mostVisitedStores(limit: Float = 1): [Store!]!
 
   """텀블러 기록을 하나 가져옵니다."""
   tumblerRecord(id: String!): TumblerRecord!
@@ -226,6 +238,17 @@ enum OrderDirection {
 input OrderStoreInput {
   orderBy: StoreField = NAME
   orderDirection: OrderDirection = DESC
+}
+
+input SearchInput {
+  """검색할 필드입니다. """
+  searchBy: String = "id"
+
+  """검색할 값입니다. """
+  value: String = ""
+
+  """정렬 방식입니다. """
+  order: OrderDirection = DESC
 }
 
 input SearchTumblerRecordInput {
@@ -295,7 +318,7 @@ type Mutation {
   createTumblerRecordWithStoreId(input: CreateTumblerRecordInput!): TumblerRecord!
 
   """새로운 공간에 대한 텀블러 기록을 생성합니다. """
-  createTumblerRecordWithCreateStore(input: CreateTumblerRecordTransactionInput!): TumblerRecord!
+  createTumblerRecordWithCreateStore(input: CreateTumblerRecordWithCreateStoreInput!): TumblerRecord!
 
   """개인 공간에서의 텀블러 기록을 생성합니다. """
   createTumblerRecordOnPrivateSpace(input: CreateTumblerRecordOnPrivateSpaceInput!): TumblerRecord!
@@ -359,6 +382,9 @@ input CreateStoreInput {
 
   """AWS S3 버킷에 저장되는 가게의 대표 이미지 파일키 입니다. """
   imageFileKey: String
+
+  """프랜차이즈 id입니다. 프랜차이즈라면 해당 id를 넣어주세요. """
+  franchiseId: String
 }
 
 input UpdateStoreInput {
@@ -385,6 +411,9 @@ input UpdateStoreInput {
 
   """AWS S3 버킷에 저장되는 가게의 대표 이미지 파일키 입니다. """
   imageFileKey: String
+
+  """프랜차이즈 id입니다. 프랜차이즈라면 해당 id를 넣어주세요. """
+  franchiseId: String
 }
 
 input CreateFranchiseInput {
@@ -437,84 +466,12 @@ input CreateTumblerRecordInput {
   storeId: String
 }
 
-input CreateTumblerRecordTransactionInput {
+input CreateTumblerRecordWithCreateStoreInput {
   """텀블러 기록을 생성을 위한 Input data입니다. """
   createTumblerRecordInput: CreateTumblerRecordInput!
 
   """공간 생성을 위한 Input data입니다. """
   createStoreInput: CreateStoreInput!
-
-  """유저 정보입니다. """
-  user: UserInputType!
-}
-
-input UserInputType {
-  """이메일"""
-  email: String!
-
-  """비밀번호입니다. """
-  password: String
-
-  """닉네임은 최대 20자까지만 가능합니다. """
-  nickname: String
-
-  """local, google, kakao, apple 중 하나입니다. """
-  social: String!
-
-  """유저가 가지고 있는 텀블러 기록들입니다. """
-  tumblerRecords: [TumblerRecordInputType!]
-}
-
-input TumblerRecordInputType {
-  """텀블러 할인 금액"""
-  prices: Int
-
-  """텀블러 기록 메모"""
-  memo: String
-
-  """텀블러 이미지 파일 키"""
-  imageFileKey: String
-
-  """텀블러를 사용한 날짜입니다. 양식은 YYYY-MM-DD입니다. """
-  usedAt: String!
-
-  """텀블러를 사용한 장소의 타입입니다. """
-  placeType: String
-
-  """텀블러 기록을 가진 유저"""
-  user: UserInputType!
-
-  """텀블러를 사용한 매장"""
-  store: StoreInputType
-}
-
-input StoreInputType {
-  """가게 이름입니다. """
-  name: String!
-
-  """해당 가게에서의 텀블러 할인 가격입니다. """
-  discountPrice: Int!
-
-  """가게의 도로명 주소입니다. """
-  streetNameAddress: String!
-
-  """가게의 지번 주소입니다. """
-  lotNumberAddress: String!
-
-  """가게의 상세 주소입니다. """
-  detailAddress: String!
-
-  """가게의 위도입니다. """
-  latitude: Float!
-
-  """가게의 경도입니다. """
-  longitude: Float!
-
-  """AWS S3 버킷에 저장되는 가게의 대표 이미지 파일키 입니다. """
-  imageFileKey: String
-
-  """가게의 텀블러 기록들입니다. """
-  tumblerRecords: [TumblerRecordInputType!]
 }
 
 """새로운 공간에 대한 텀블러 기록을 생성할 때 사용되는 Input Type"""
