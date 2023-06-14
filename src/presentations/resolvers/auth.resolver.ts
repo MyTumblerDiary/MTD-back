@@ -2,11 +2,15 @@ import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { Request } from 'express';
 import { UserAuth } from 'src/applications/auth/interfaces/user-auth';
+
 import {
   GqlAuthAccessGuard,
   GqlAuthRefreshGuard,
-} from 'src/commons/auth/gql-auth.guard';
-import { CurrentToken, CurrentUser } from 'src/commons/auth/gql-user.param';
+} from 'src/infrastructures/common/auth/gql-auth.guard';
+import {
+  CurrentToken,
+  CurrentUser,
+} from 'src/infrastructures/common/auth/gql-user.param';
 import { AuthService } from '../../applications/auth/auth.service';
 import { LoginResponseDto } from '../../applications/auth/dto/auth.output.dto';
 import { LoginInputDto } from '../../applications/auth/dto/login.input.dto';

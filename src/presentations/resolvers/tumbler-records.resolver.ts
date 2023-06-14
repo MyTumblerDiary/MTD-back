@@ -7,8 +7,8 @@ import { SearchTumblerRecordInput } from 'src/applications/tumbler-records/dto/s
 import { TumblerRecordsOutput } from 'src/applications/tumbler-records/dto/tumbler-record.dto';
 import { TumblerRecord } from 'src/applications/tumbler-records/entities/tumbler-record.entity';
 import { TumblerRecordsService } from 'src/applications/tumbler-records/tumbler-records.service';
-import { GqlAuthAccessGuard } from 'src/commons/auth/gql-auth.guard';
-import { CurrentUser } from 'src/commons/auth/gql-user.param';
+import { GqlAuthAccessGuard } from 'src/infrastructures/common/auth/gql-auth.guard';
+import { CurrentUser } from 'src/infrastructures/common/auth/gql-user.param';
 
 @Resolver('TumblerRecord')
 export class TumblerRecordResolver {

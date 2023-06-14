@@ -3,8 +3,8 @@ import { PassportStrategy } from '@nestjs/passport';
 import * as bcrypt from 'bcrypt';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { AuthService } from 'src/applications/auth/auth.service';
 import { RefreshToken } from 'src/applications/auth/entities/refreshToken.entity';
-import { AuthService } from '../../../applications/auth/auth.service';
 import { RefreshTokenPayload } from '../refresh-token.payload';
 
 @Injectable()

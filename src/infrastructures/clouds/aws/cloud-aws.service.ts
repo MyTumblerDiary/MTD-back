@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as AWS from 'aws-sdk';
 import * as mimeTypes from 'mime-types';
-import { uuid } from 'src/commons/utils/functions';
+
+import { uuid } from 'src/infrastructures/common/utils/functions';
 import {
   S3PresignedUrlInput,
   S3PresignedUrlOutput,

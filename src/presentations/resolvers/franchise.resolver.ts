@@ -4,7 +4,7 @@ import { CreateFranchiseInput } from 'src/applications/franchises/dto/create.fra
 import { UpdateFranchiseInput } from 'src/applications/franchises/dto/update.franchise.dto';
 import { Franchise } from 'src/applications/franchises/entities/franchise.entity';
 import { FranchisesService } from 'src/applications/franchises/franchises.service';
-import { GqlAuthAccessGuard } from 'src/commons/auth/gql-auth.guard';
+import { GqlAuthAccessGuard } from 'src/infrastructures/common/auth/gql-auth.guard';
 import { SearchInput } from 'src/infrastructures/database/search/dto/search.dto';
 
 @Resolver('Franchise')

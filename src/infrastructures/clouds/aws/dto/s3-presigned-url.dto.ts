@@ -1,5 +1,5 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
-import { ImageType } from 'src/commons/utils/images/image-type.enum';
+import { ImageType } from 'src/infrastructures/common/utils/images/image-type.enum';
 
 @ObjectType()
 export class S3PresignedUrlOutput {
