@@ -73,6 +73,7 @@ export class TumblerRecordsService {
     userAuth: UserAuth,
     nowDate: Date,
   ): Promise<DateArrangedTumblerRecordOutput> {
+    console.log('userAuth', userAuth);
     const tumblerRecords = await this.repository.findByUserId(userAuth.id);
     return this.tumblerRecordHelper.getArrangedByDateTumblerRecords(
       tumblerRecords,

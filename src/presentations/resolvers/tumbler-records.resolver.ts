@@ -53,6 +53,7 @@ export class TumblerRecordResolver {
     return await this.tumblerRecordsService.findWithPaginate(input, userAuth);
   }
 
+  @UseGuards(GqlAuthAccessGuard)
   @Query(() => DateArrangedTumblerRecordOutput, {
     description: '특정 유저의 텀블러 기록을 날짜별로 정리하여 가져옵니다.',
   })

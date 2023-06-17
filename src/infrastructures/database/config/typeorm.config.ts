@@ -20,9 +20,7 @@ export const ormOption: TypeOrmModuleOptions = {
   synchronize: true,
   namingStrategy: new SnakeNamingStrategy(),
   charset: 'utf8mb4',
-  entities: [path.join(__dirname, '../**/*.entity{.ts,.js}')],
-  migrations: [path.join(__dirname, '../migrations/**/*{.ts,.js}')],
-  migrationsTableName: 'migrations',
+  entities: ['dist/**/*.entity{.ts,.js}'],
   extra: {
     connectionLimit: 10, // Maximum number of connections in pool
     queueLimit: 0, // Maximum number of waiting clients
