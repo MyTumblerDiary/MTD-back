@@ -10,19 +10,19 @@ export class FindWithOptionsTumblerRecordInput {
     description: '텀블러 기록을 가져올 때 사용할 페이징 옵션입니다.',
     nullable: true,
   })
-  paginateInput?: PaginateTumblerRecordInput;
+  paginateInput: PaginateTumblerRecordInput;
+
+  @Field(() => OrderTumblerRecordInput, {
+    description: '텀블러 기록을 가져올 때 사용할 정렬 옵션입니다.',
+    nullable: true,
+  })
+  orderInput: OrderTumblerRecordInput;
 
   @Field(() => SearchTumblerRecordInput, {
     description: '텀블러 기록을 가져올 때 사용할 검색 옵션입니다.',
     nullable: true,
   })
   searchInput?: SearchTumblerRecordInput;
-
-  @Field(() => OrderTumblerRecordInput, {
-    description: '텀블러 기록을 가져올 때 사용할 정렬 옵션입니다.',
-    nullable: true,
-  })
-  orderInput?: OrderTumblerRecordInput;
 }
 
 @ObjectType()
