@@ -43,14 +43,14 @@ export class TumblerRecordResolver {
   @Query(() => PaginatedTumblerRecordOutput, {
     description: `특정 유저의 페이지네이션 된 텀블러 기록을 가져옵니다.`,
   })
-  public async tumblerRecords(
+  public async tumblerRecordsPaginated(
     @CurrentUser('userAuth') userAuth: UserAuth,
     @Args('input', {
       nullable: true,
     })
     input: FindWithOptionsTumblerRecordInput,
   ): Promise<PaginatedTumblerRecordOutput> {
-    return await this.tumblerRecordsService.findWithPaginate(input, userAuth);
+    return await this.tumblerRecordsService.findWithPaginate(userAuth, input);
   }
 
   @UseGuards(GqlAuthAccessGuard)

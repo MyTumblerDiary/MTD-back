@@ -1,5 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { SearchInput } from 'src/infrastructures/database/search/dto/search.dto';
+import { TumblerRecord } from '../entities/tumbler-record.entity';
+import { TumblerRecordField } from '../enum/tumbler-record.field';
 
 export enum SearchTumblerRecordBy {
   ID = 'id',
@@ -11,13 +13,13 @@ export enum SearchTumblerRecordBy {
 }
 
 @InputType()
-export class SearchTumblerRecordInput extends SearchInput {
-  @Field(() => String, {
+export class SearchTumblerRecordInput extends SearchInput<TumblerRecord> {
+  @Field(() => TumblerRecordField, {
     nullable: true,
     description:
       '검색할 필드입니다. TumblerRecord Entity에 포함된 필드만 검색 가능합니다.(Snake case로 넣어주어야 합니다. ))',
   })
-  searchBy: string;
+  searchBy: TumblerRecordField;
 
   @Field(() => String, {
     nullable: true,

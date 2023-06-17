@@ -79,17 +79,19 @@ export class TumblerRecordsTypeOrmRepository {
     user: UserAuth,
   ): Promise<[TumblerRecord[], number]> {
     const { paginateInput, searchInput, orderInput } = findInput;
-    const qb = this.selectQueryBuilder();
-    if (paginateInput) this.paginateQb(paginateInput, qb);
+    const qb = await this.selectQueryBuilder();
     if (searchInput) this.searchQb(searchInput, user, qb);
     if (orderInput) this.orderQb(orderInput, qb);
+    if (paginateInput) this.paginateQb(paginateInput, qb);
 
     const [tumblerRecords, totalCount] = await qb.getManyAndCount();
 
     return [tumblerRecords, totalCount];
   }
 
-  private selectQueryBuilder(): SelectQueryBuilder<TumblerRecord> {
+  private async selectQueryBuilder(): Promise<
+    SelectQueryBuilder<TumblerRecord>
+  > {
     return this.tumblerRecordsRepository.createQueryBuilder('tumblerRecord');
   }
 
@@ -113,7 +115,9 @@ export class TumblerRecordsTypeOrmRepository {
     qb.where('tumblerRecord.user_id = :user_id', { userId: user.id });
 
     if (searchBy) {
-      qb.where(`tumblerRecord.${searchBy} = :value`, { value });
+      qb.where(`tumblerRecord.${searchBy} LIKE :value`, {
+        value: `%${value}%`,
+      });
     }
     return qb;
   }

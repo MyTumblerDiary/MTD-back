@@ -1,9 +1,10 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { SearchInput } from 'src/infrastructures/database/search/dto/search.dto';
+import { Store } from '../entities/store.entity';
 import { StoreField } from '../enums/store-field.enum';
 
 @InputType()
-export class SearchStoreInput extends SearchInput {
+export class SearchStoreInput extends SearchInput<Store> {
   constructor() {
     super();
   }

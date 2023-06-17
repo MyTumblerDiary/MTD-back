@@ -1,11 +1,11 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CreateFranchiseInput } from 'src/applications/franchises/dto/create.franchise.dto';
+import { SearchFranchiseInput } from 'src/applications/franchises/dto/search.franchise.dto';
 import { UpdateFranchiseInput } from 'src/applications/franchises/dto/update.franchise.dto';
 import { Franchise } from 'src/applications/franchises/entities/franchise.entity';
 import { FranchisesService } from 'src/applications/franchises/franchises.service';
 import { GqlAuthAccessGuard } from 'src/infrastructures/auth/gql-auth.guard';
-import { SearchInput } from 'src/infrastructures/database/search/dto/search.dto';
 
 @Resolver('Franchise')
 export class FranchisesResolver {
@@ -35,7 +35,7 @@ export class FranchisesResolver {
     description: '검색 조건에 맞는 프렌차이즈를 조회합니다. ',
   })
   public async franchisesBySearch(
-    @Args('searchInput') searchInput: SearchInput,
+    @Args('searchInput') searchInput: SearchFranchiseInput,
   ): Promise<Franchise[]> {
     return await this.franchisesService.search(searchInput);
   }

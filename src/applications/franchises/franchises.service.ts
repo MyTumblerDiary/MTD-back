@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { SearchInput } from 'src/infrastructures/database/search/dto/search.dto';
 import { Like, Repository } from 'typeorm';
 import { CreateFranchiseInput } from './dto/create.franchise.dto';
+import { SearchFranchiseInput } from './dto/search.franchise.dto';
 import { UpdateFranchiseInput } from './dto/update.franchise.dto';
 import { Franchise } from './entities/franchise.entity';
 
@@ -31,7 +31,7 @@ export class FranchisesService {
     return this.franchisesRepository.find();
   }
 
-  async search(searchInput: SearchInput): Promise<Franchise[]> {
+  async search(searchInput: SearchFranchiseInput): Promise<Franchise[]> {
     return this.franchisesRepository.find({
       where: {
         [searchInput.searchBy]: Like(`%${searchInput.value}%`),

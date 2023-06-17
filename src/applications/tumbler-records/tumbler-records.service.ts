@@ -82,21 +82,28 @@ export class TumblerRecordsService {
   }
 
   public async findWithPaginate(
-    findOptions: FindWithOptionsTumblerRecordInput,
     userAuth: UserAuth,
+    findInput?: FindWithOptionsTumblerRecordInput,
   ): Promise<PaginatedTumblerRecordOutput> {
-    const [tumblerRecords, totalCount] =
-      await this.repository.findByUserIdWithQb(findOptions, userAuth);
+    if (!findInput) {
+      const tumblerRecords = await this.repository.findByUserId(userAuth.id);
+      return {
+        tumblerRecords,
+      };
+    }
 
-    const totalPages: number = Math.ceil(
-      totalCount / findOptions.paginateInput.limit,
-    );
+    const [tumblerRecords, totalCount] =
+      await this.repository.findByUserIdWithQb(findInput, userAuth);
+
+    const totalPages: number = findInput.paginateInput
+      ? Math.ceil(totalCount / findInput.paginateInput.limit)
+      : 1;
 
     return {
       tumblerRecords,
       totalCount,
       currentCount: tumblerRecords.length,
-      currentPage: findOptions.paginateInput.page,
+      currentPage: findInput.paginateInput ? findInput.paginateInput.page : 1,
       totalPages,
     };
   }

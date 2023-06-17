@@ -19,8 +19,20 @@ export class TumblerRecordHelper {
 
     const dateUnitTumblerRecordOutputs: DateUnitTumblerRecordOutput[] = [];
     tumblerRecordsMap.forEach((tumblerRecords, day) => {
+      const sumOfdiscountedPrice = tumblerRecords.reduce(
+        (acc: number, tumblerRecord: TumblerRecord) => {
+          if (tumblerRecord.prices) {
+            return acc + tumblerRecord.prices;
+          }
+          return acc;
+        },
+        0,
+      );
+
       dateUnitTumblerRecordOutputs.push({
-        key: day,
+        day,
+        countOfTumblerRecords: tumblerRecords.length,
+        sumOfdiscountedPrice,
         value: tumblerRecords,
       });
     });

@@ -1,4 +1,4 @@
-import { Field, InputType, ObjectType } from '@nestjs/graphql';
+import { Field, InputType, ObjectType, PartialType } from '@nestjs/graphql';
 import {
   PaginationInput,
   PaginationOutput,
@@ -9,7 +9,9 @@ import { TumblerRecord } from '../entities/tumbler-record.entity';
 export class PaginateTumblerRecordInput extends PaginationInput {}
 
 @ObjectType()
-export class PaginatedTumblerRecordOutput extends PaginationOutput {
+export class PaginatedTumblerRecordOutput extends PartialType(
+  PaginationOutput,
+) {
   @Field(() => [TumblerRecord], {
     description: '텀블러 기록을 가져옵니다.',
   })
