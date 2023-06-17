@@ -5,11 +5,14 @@ import { Repository } from 'typeorm';
 import { CreateUserInput } from './dto/createUsers.input';
 import { UpdateUserInput } from './dto/updateUsers.input';
 import { User } from './entities/user.entity';
+import { RefreshToken } from '../auth/entities/refreshToken.entity';
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>, //
+    @InjectRepository(RefreshToken)
+    private readonly refreshtokenRepository: Repository<RefreshToken>,
   ) {}
 
   async findOne(id: string) {
@@ -68,7 +71,8 @@ export class UserService {
   }
 
   async deleteUser(user: User) {
-    const result = await this.userRepository.softDelete({ email: user.email });
+    await this.refreshtokenRepository.delete({ user: user });
+    const result = await this.userRepository.delete({ email: user.email });
     return result.affected ? true : false;
   }
 
