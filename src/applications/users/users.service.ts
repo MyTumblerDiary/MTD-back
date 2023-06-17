@@ -2,6 +2,7 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
+import { RefreshToken } from '../auth/entities/refreshToken.entity';
 import { UserAuth } from '../auth/interfaces/user-auth';
 import { CreateUserInput } from './dto/createUsers.input';
 import { UpdateUserInput } from './dto/updateUsers.input';
@@ -11,6 +12,8 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>, //
+    @InjectRepository(RefreshToken)
+    private readonly refreshtokenRepository: Repository<RefreshToken>,
   ) {}
 
   async findOne(id: string) {
@@ -68,8 +71,9 @@ export class UserService {
     return await this.userRepository.save(newUser);
   }
 
-  async deleteUser(user: UserAuth) {
-    const result = await this.userRepository.softDelete({ email: user.email });
+  async deleteUser(user: User) {
+    await this.refreshtokenRepository.delete({ user: user });
+    const result = await this.userRepository.delete({ email: user.email });
     return result.affected ? true : false;
   }
 

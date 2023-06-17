@@ -5,9 +5,13 @@ import { JwtAccessStrategy } from 'src/infrastructures/auth/strategies/jwt-acces
 import { UserResolver } from 'src/presentations/resolvers/users.resolver';
 import { User } from './entities/user.entity';
 import { UserService } from './users.service';
+import { RefreshToken } from '../auth/entities/refreshToken.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User])],
+  imports: [
+    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([RefreshToken]),
+  ],
   providers: [JwtAccessStrategy, UserResolver, UserService],
   exports: [UserService],
 })
