@@ -1,7 +1,7 @@
 # compiled output
 /dist
 /node_modules
-/config
+.*.env
 yarn.lock
 
 # Logs
@@ -41,4 +41,4 @@ mysql
 redis 
 
 # GQLschema 생락
-/**/graphql/
+/**/*.gql

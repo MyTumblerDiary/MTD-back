@@ -1,21 +1,21 @@
-import { CacheModule, Logger, Module } from '@nestjs/common';
+import { CacheModule, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as redisStore from 'cache-manager-redis-store';
-import { AuthModule } from './apis/auth/auth.module';
-import { CloudAwsModule } from './apis/clouds/aws/cloud-aws.module';
-import { EmailModule } from './apis/emails/email.module';
-import { FranchisesModule } from './apis/franchises/franchises.module';
-import { StoresModule } from './apis/stores/stores.module';
-import { TumblerRecordsModule } from './apis/tumbler-records/tumbler-records.module';
-import { UserModule } from './apis/users/users.module';
-import { GqlExceptionFilter } from './commons/filter/gql-exception.filter';
-import { GqlThrottlerGuard } from './commons/guards/gql.throttler.guard';
-import { configOptions } from './config/config';
-import { ormOption } from './config/typeorm.config';
-import { DynamicGqlModule } from './dynamic-gql.module';
+import { AuthModule } from './applications/auth/auth.module';
+import { EmailModule } from './applications/emails/email.module';
+import { FranchisesModule } from './applications/franchises/franchises.module';
+import { StoresModule } from './applications/stores/stores.module';
+import { TumblerRecordsModule } from './applications/tumbler-records/tumbler-records.module';
+import { UserModule } from './applications/users/users.module';
+import { CloudAwsModule } from './infrastructures/clouds/aws/cloud-aws.module';
+import { ormOption } from './infrastructures/database/config/typeorm.config';
+import { configOptions } from './infrastructures/env-config/env-config';
+import { DynamicGqlModule } from './infrastructures/graphql/dynamic-gql.module';
+import { GqlThrottlerGuard } from './infrastructures/graphql/guards/gql.throttler.guard';
+import { HealthCheckController } from './presentations/controllers/health-check.controller';
 
 const ENV = process.env.NODE_ENV;
 
@@ -37,7 +37,7 @@ const ENV = process.env.NODE_ENV;
       store: redisStore,
       isGlobal: true,
       host: process.env.REDIS_HOST,
-      port: parseInt(process.env.REDIS_PORT),
+      port: Number(process.env.REDIS_PORT),
       ttl: 120,
     }),
     TumblerRecordsModule,
@@ -52,11 +52,7 @@ const ENV = process.env.NODE_ENV;
       provide: APP_GUARD,
       useClass: GqlThrottlerGuard,
     },
-    {
-      provide: APP_FILTER,
-      useClass: GqlExceptionFilter,
-    },
-    Logger,
   ],
+  controllers: [HealthCheckController],
 })
 export class AppModule {}
