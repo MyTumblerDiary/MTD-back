@@ -1,19 +1,23 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { UserAuth } from '../auth/interfaces/user-auth';
 import { UserService } from '../users/users.service';
+
 import { CreateTumblerRecordInput } from './dto/create.tumbler-record.dto';
 import {
   CreateTumblerRecordTransactionInput,
   CreateTumblerRecordWithCreateStoreInput,
 } from './dto/create.tumbler-record.transaction.dto';
-import { SearchTumblerRecordInput } from './dto/search.tumbler-record.dto';
-import { TumblerRecordsOutput } from './dto/tumbler-record.dto';
+import { FindWithOptionsTumblerRecordInput } from './dto/find-with-qb.tumbler-record.input';
+
+import { DateArrangedTumblerRecordOutput } from './dto/date-arranged.tumbler-record.dto';
+import { PaginatedTumblerRecordOutput } from './dto/paginate.tumbler-record.dto';
 import { TumblerRecord } from './entities/tumbler-record.entity';
 import {
   TUMBLER_RECORDS_REPOSITORY,
   TumblerRecordsRepository,
 } from './interfaces/tumbler-records.repostitory';
 import CreateTumblerRecordTransaction from './transactions/create.tumbler-record.transaction';
+import { TumblerRecordHelper } from './tumbler-records.helper';
 
 @Injectable()
 export class TumblerRecordsService {
@@ -22,6 +26,7 @@ export class TumblerRecordsService {
     private readonly repository: TumblerRecordsRepository,
     private readonly createTransaction: CreateTumblerRecordTransaction,
     private readonly userService: UserService,
+    private readonly tumblerRecordHelper: TumblerRecordHelper,
   ) {}
 
   public async create(
@@ -64,33 +69,34 @@ export class TumblerRecordsService {
     });
   }
 
-  public async findByUserId(
-    user: UserAuth,
-    searchTumblerRecordInput?: SearchTumblerRecordInput,
-  ): Promise<TumblerRecordsOutput> {
-    // searchTumblerRecordInput이 없으면 모든 텀블러 기록과 총 누적 할인 금액, 총 할인 횟수를 가져옵니다.
-    const totalResult = await this.repository.findByUserId(user.id);
+  public async findByDate(
+    userAuth: UserAuth,
+    nowDate: Date,
+  ): Promise<DateArrangedTumblerRecordOutput> {
+    const tumblerRecords = await this.repository.findByUserId(userAuth.id);
+    return this.tumblerRecordHelper.getArrangedByDateTumblerRecords(
+      tumblerRecords,
+      nowDate,
+    );
+  }
 
-    if (!searchTumblerRecordInput) {
-      return {
-        tumblerRecords: totalResult,
-        totalDiscount: await this.accumulateDiscount(totalResult),
-        totalUsedTumbler: totalResult.length,
-      };
-    }
+  public async findWithPaginate(
+    findOptions: FindWithOptionsTumblerRecordInput,
+    userAuth: UserAuth,
+  ): Promise<PaginatedTumblerRecordOutput> {
+    const [tumblerRecords, totalCount] =
+      await this.repository.findByUserIdWithQb(findOptions, userAuth);
 
-    // searchTumblerRecordInput이 있으면 검색된 텀블러 기록과 총 누적 할인 금액, 총 할인 횟수를 가져옵니다.
-    const searchedResult: TumblerRecord[] = await this.repository.search(
-      searchTumblerRecordInput,
-      user,
+    const totalPages: number = Math.ceil(
+      totalCount / findOptions.paginateInput.limit,
     );
 
     return {
-      tumblerRecords: searchedResult,
-      totalDiscount: await this.accumulateDiscount(totalResult),
-      totalUsedTumbler: totalResult.length,
-      filteredDiscount: await this.accumulateDiscount(searchedResult),
-      filteredTumbler: searchedResult.length,
+      tumblerRecords,
+      totalCount,
+      currentCount: tumblerRecords.length,
+      currentPage: findOptions.paginateInput.page,
+      totalPages,
     };
   }
 

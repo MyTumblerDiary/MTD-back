@@ -2,7 +2,7 @@ import { Field, ObjectType } from '@nestjs/graphql';
 import { TumblerRecord } from '../entities/tumbler-record.entity';
 
 @ObjectType()
-export class TumblerRecordsOutput {
+export class TumblerRecordsWithCountsOutput {
   @Field(() => [TumblerRecord], {
     description: '유저의 모든 텀블러 기록을 가져옵니다.',
   })

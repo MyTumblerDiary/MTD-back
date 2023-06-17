@@ -1,6 +1,6 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
-import { GqlAuthAccessGuard } from 'src/infrastructures/common/auth/gql-auth.guard';
+import { GqlAuthAccessGuard } from 'src/infrastructures/auth/gql-auth.guard';
 import { CloudAwsService } from './cloud-aws.service';
 import {
   S3PresignedUrlInput,

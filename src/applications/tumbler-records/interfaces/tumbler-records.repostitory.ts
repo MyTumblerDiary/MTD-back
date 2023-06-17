@@ -1,7 +1,7 @@
 import { UserAuth } from 'src/applications/auth/interfaces/user-auth';
 import { CustomRepository } from 'src/infrastructures/database/repositories/custom-repository';
 import { DeepPartial } from 'typeorm';
-import { SearchTumblerRecordInput } from '../dto/search.tumbler-record.dto';
+import { FindWithOptionsTumblerRecordInput } from '../dto/find-with-qb.tumbler-record.input';
 import { TumblerRecord } from '../entities/tumbler-record.entity';
 
 export interface TumblerRecordsRepository
@@ -12,22 +12,22 @@ export interface TumblerRecordsRepository
 
   find(options?: any): Promise<TumblerRecord[]>;
 
-  findByUserId(id: string): Promise<TumblerRecord[]>;
-
   findOne(options: any): Promise<TumblerRecord | null>;
 
   findOneOrFail(options: any): Promise<TumblerRecord>;
-
-  search(
-    input: SearchTumblerRecordInput,
-    user: UserAuth,
-  ): Promise<TumblerRecord[]>;
 
   update(id: string, data: Partial<TumblerRecord>): Promise<TumblerRecord>;
 
   delete(id: string): Promise<boolean>;
 
   softDelete(id: string): Promise<boolean>;
+
+  findByUserId(id: string): Promise<TumblerRecord[]>;
+
+  findByUserIdWithQb(
+    input: FindWithOptionsTumblerRecordInput,
+    user: UserAuth,
+  ): Promise<[TumblerRecord[], number]>;
 }
 
 export const TUMBLER_RECORDS_REPOSITORY = Symbol('TUMBLER_RECORDS_REPOSITORY');

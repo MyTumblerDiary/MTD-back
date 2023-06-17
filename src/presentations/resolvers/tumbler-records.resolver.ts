@@ -3,12 +3,13 @@ import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UserAuth } from 'src/applications/auth/interfaces/user-auth';
 import { CreateTumblerRecordInput } from 'src/applications/tumbler-records/dto/create.tumbler-record.dto';
 import { CreateTumblerRecordWithCreateStoreInput } from 'src/applications/tumbler-records/dto/create.tumbler-record.transaction.dto';
-import { SearchTumblerRecordInput } from 'src/applications/tumbler-records/dto/search.tumbler-record.dto';
-import { TumblerRecordsOutput } from 'src/applications/tumbler-records/dto/tumbler-record.dto';
+import { DateArrangedTumblerRecordOutput } from 'src/applications/tumbler-records/dto/date-arranged.tumbler-record.dto';
+import { FindWithOptionsTumblerRecordInput } from 'src/applications/tumbler-records/dto/find-with-qb.tumbler-record.input';
 import { TumblerRecord } from 'src/applications/tumbler-records/entities/tumbler-record.entity';
 import { TumblerRecordsService } from 'src/applications/tumbler-records/tumbler-records.service';
-import { GqlAuthAccessGuard } from 'src/infrastructures/common/auth/gql-auth.guard';
-import { CurrentUser } from 'src/infrastructures/common/auth/gql-user.param';
+import { GqlAuthAccessGuard } from 'src/infrastructures/auth/gql-auth.guard';
+import { CurrentUser } from 'src/infrastructures/auth/gql-user.param';
+import { PaginatedTumblerRecordOutput } from '../../applications/tumbler-records/dto/paginate.tumbler-record.dto';
 
 @Resolver('TumblerRecord')
 export class TumblerRecordResolver {
@@ -39,21 +40,26 @@ export class TumblerRecordResolver {
   }
 
   @UseGuards(GqlAuthAccessGuard)
-  @Query(() => TumblerRecordsOutput, {
-    description: `유저의 모든 텀블러 사용 기록과 누적 할인 금액, 할인 횟수를 가져옵니다.
-    이때, 검색 필터를 적용하면 검색된 텀블러 기록만 가져옵니다. `,
+  @Query(() => PaginatedTumblerRecordOutput, {
+    description: `특정 유저의 페이지네이션 된 텀블러 기록을 가져옵니다.`,
   })
   public async tumblerRecords(
-    @CurrentUser('user') user: UserAuth,
-    @Args('searchTumblerRecordInput', {
+    @CurrentUser('userAuth') userAuth: UserAuth,
+    @Args('input', {
       nullable: true,
     })
-    searchTumblerRecordInput?: SearchTumblerRecordInput,
-  ): Promise<TumblerRecordsOutput> {
-    return await this.tumblerRecordsService.findByUserId(
-      user,
-      searchTumblerRecordInput,
-    );
+    input: FindWithOptionsTumblerRecordInput,
+  ): Promise<PaginatedTumblerRecordOutput> {
+    return await this.tumblerRecordsService.findWithPaginate(input, userAuth);
+  }
+
+  @Query(() => DateArrangedTumblerRecordOutput, {
+    description: '특정 유저의 텀블러 기록을 날짜별로 정리하여 가져옵니다.',
+  })
+  public async tumblerRecordsArrangedByDate(
+    @CurrentUser('userAuth') userAuth: UserAuth,
+  ): Promise<DateArrangedTumblerRecordOutput> {
+    return await this.tumblerRecordsService.findByDate(userAuth, new Date());
   }
 
   @Query(() => TumblerRecord, {

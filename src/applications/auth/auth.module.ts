@@ -4,8 +4,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { JwtAccessStrategy } from 'src/infrastructures/common/auth/strategies/jwt-access.strategy';
-import { JwtRefreshStrategy } from 'src/infrastructures/common/auth/strategies/jwt-refresh.strategy';
+import { JwtAccessStrategy } from 'src/infrastructures/auth/strategies/jwt-access.strategy';
+import { JwtRefreshStrategy } from 'src/infrastructures/auth/strategies/jwt-refresh.strategy';
 import { EnvConfigModule } from 'src/infrastructures/env-config/env-config.module';
 import { AuthResolver } from '../../presentations/resolvers/auth.resolver';
 import { UserModule } from '../users/users.module';

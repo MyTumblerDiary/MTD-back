@@ -1,17 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
+import {
+  FindManyOptions,
+  FindOneOptions,
+  Repository,
+  SelectQueryBuilder,
+} from 'typeorm';
 import { UserAuth } from '../auth/interfaces/user-auth';
 import { CreateTumblerRecordInput } from './dto/create.tumbler-record.dto';
+import { FindWithOptionsTumblerRecordInput } from './dto/find-with-qb.tumbler-record.input';
+import { OrderTumblerRecordInput } from './dto/order.tumbler-record.dto';
+import { PaginateTumblerRecordInput } from './dto/paginate.tumbler-record.dto';
 import { SearchTumblerRecordInput } from './dto/search.tumbler-record.dto';
 import { UpdateTumblerRecordInput } from './dto/update.tumbler-record.dto';
 import { TumblerRecord } from './entities/tumbler-record.entity';
-import { TumblerRecordsRepository } from './interfaces/tumbler-records.repostitory';
 
 @Injectable()
-export class TumblerRecordsTypeOrmRepository
-  implements TumblerRecordsRepository
-{
+export class TumblerRecordsTypeOrmRepository {
   constructor(
     @InjectRepository(TumblerRecord)
     private readonly tumblerRecordsRepository: Repository<TumblerRecord>,
@@ -51,22 +56,6 @@ export class TumblerRecordsTypeOrmRepository
     return await this.tumblerRecordsRepository.findOneOrFail(options);
   }
 
-  public async search(
-    searchInput: SearchTumblerRecordInput,
-    user: UserAuth,
-  ): Promise<TumblerRecord[]> {
-    const { searchBy, value } = searchInput;
-    const queryBuilder =
-      this.tumblerRecordsRepository.createQueryBuilder('tumblerRecord');
-
-    queryBuilder.where('tumblerRecord.user_id = :user_id', { userId: user.id });
-
-    if (searchBy) {
-      queryBuilder.where(`tumblerRecord.${searchBy} = :value`, { value });
-    }
-    return queryBuilder.getMany();
-  }
-
   public async update(
     id: string,
     updateTumblerRecordInput: UpdateTumblerRecordInput,
@@ -83,5 +72,58 @@ export class TumblerRecordsTypeOrmRepository
   public async delete(id: string): Promise<boolean> {
     const deleteResult = await this.tumblerRecordsRepository.delete(id);
     return deleteResult.affected === 1;
+  }
+
+  public async findByUserIdWithQb(
+    findInput: FindWithOptionsTumblerRecordInput,
+    user: UserAuth,
+  ): Promise<[TumblerRecord[], number]> {
+    const { paginateInput, searchInput, orderInput } = findInput;
+    const qb = this.selectQueryBuilder();
+    if (paginateInput) this.paginateQb(paginateInput, qb);
+    if (searchInput) this.searchQb(searchInput, user, qb);
+    if (orderInput) this.orderQb(orderInput, qb);
+
+    const [tumblerRecords, totalCount] = await qb.getManyAndCount();
+
+    return [tumblerRecords, totalCount];
+  }
+
+  private selectQueryBuilder(): SelectQueryBuilder<TumblerRecord> {
+    return this.tumblerRecordsRepository.createQueryBuilder('tumblerRecord');
+  }
+
+  private paginateQb(
+    paginateInput: PaginateTumblerRecordInput,
+    qb: SelectQueryBuilder<TumblerRecord>,
+  ): SelectQueryBuilder<TumblerRecord> {
+    const { page, limit } = paginateInput;
+    qb.skip((page - 1) * limit);
+    qb.take(limit);
+    return qb;
+  }
+
+  private searchQb(
+    searchInput: SearchTumblerRecordInput,
+    user: UserAuth,
+    qb: SelectQueryBuilder<TumblerRecord>,
+  ): SelectQueryBuilder<TumblerRecord> {
+    const { searchBy, value } = searchInput;
+
+    qb.where('tumblerRecord.user_id = :user_id', { userId: user.id });
+
+    if (searchBy) {
+      qb.where(`tumblerRecord.${searchBy} = :value`, { value });
+    }
+    return qb;
+  }
+
+  private orderQb(
+    orderInput: OrderTumblerRecordInput,
+    qb: SelectQueryBuilder<TumblerRecord>,
+  ): SelectQueryBuilder<TumblerRecord> {
+    const { orderBy, orderDirection } = orderInput;
+    qb.orderBy(`tumblerRecord.${orderBy}`, orderDirection);
+    return qb;
   }
 }

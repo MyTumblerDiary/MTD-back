@@ -13,7 +13,7 @@ import { Cache } from 'cache-manager';
 import { Request } from 'express';
 import * as jwt from 'jsonwebtoken';
 import * as qs from 'qs';
-import { AccessTokenPayload } from 'src/infrastructures/common/auth/access-token.payload';
+import { AccessTokenPayload } from 'src/infrastructures/auth/access-token.payload';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { UserService } from '../users/users.service';

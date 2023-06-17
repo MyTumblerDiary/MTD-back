@@ -15,7 +15,7 @@ export class SearchTumblerRecordInput extends SearchInput {
   @Field(() => String, {
     nullable: true,
     description:
-      '검색할 필드입니다. TumblerRecord Entity에 포함된 필드만 검색 가능합니다.',
+      '검색할 필드입니다. TumblerRecord Entity에 포함된 필드만 검색 가능합니다.(Snake case로 넣어주어야 합니다. ))',
   })
   searchBy: string;
 

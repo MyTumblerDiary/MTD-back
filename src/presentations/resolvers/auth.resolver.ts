@@ -6,11 +6,11 @@ import { UserAuth } from 'src/applications/auth/interfaces/user-auth';
 import {
   GqlAuthAccessGuard,
   GqlAuthRefreshGuard,
-} from 'src/infrastructures/common/auth/gql-auth.guard';
+} from 'src/infrastructures/auth/gql-auth.guard';
 import {
   CurrentToken,
   CurrentUser,
-} from 'src/infrastructures/common/auth/gql-user.param';
+} from 'src/infrastructures/auth/gql-user.param';
 import { AuthService } from '../../applications/auth/auth.service';
 import { LoginResponseDto } from '../../applications/auth/dto/auth.output.dto';
 import { LoginInputDto } from '../../applications/auth/dto/login.input.dto';
