@@ -71,7 +71,7 @@ export class UserService {
     return await this.userRepository.save(newUser);
   }
 
-  async deleteUser(user: User) {
+  async deleteUser(user: UserAuth) {
     await this.refreshtokenRepository.delete({ user: user });
     const result = await this.userRepository.delete({ email: user.email });
     return result.affected ? true : false;
