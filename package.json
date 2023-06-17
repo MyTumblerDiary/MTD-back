@@ -13,6 +13,7 @@
     "start:dev": "cross-env NODE_ENV=dev nest start --watch",
     "start:debug": "cross-env NODE_ENV=dev nest start --debug --watch",
     "start:prod": "npm run build && cross-env NODE_ENV=prod node dist/main",
+    "docker-up-server": "docker-compose up -d my-backend",
     "docker-up": "docker-compose up -d",
     "docker-down": "docker-compose down",
     "rm:all": "sudo rm -rf mysql redis",
