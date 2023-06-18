@@ -50,3 +50,14 @@ jobs:
           source: ./
           target: /home/ubuntu/MTD-back
           port: 22
+      - name: Docker restart
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.ELASTIC_IP }}
+          username: ubuntu
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          script: |
+            cd /home/ubuntu/MTD-back
+            docker-compose down
+            docker-compose up -d
