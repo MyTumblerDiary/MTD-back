@@ -62,7 +62,7 @@ export class AuthService {
   async setAccessToken(user: UserAuth): Promise<string> {
     const accessToken = this.jwtService.sign(
       { email: user.email, sub: user.id },
-      { secret: process.env.ACCESS_SECRET_KEY, expiresIn: '1h' },
+      { secret: process.env.ACCESS_SECRET_KEY, expiresIn: '2w' },
     );
     return accessToken;
   }
