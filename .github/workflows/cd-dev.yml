@@ -59,6 +59,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: 22
           script: |
+            cd ~/MTD-back &&
             docker stop mtd-back_my-backend_1 &&
             docker build -t my-backend . &&
             yarn docker-up-server &&
