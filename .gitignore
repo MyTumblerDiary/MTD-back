@@ -3,6 +3,7 @@
 /node_modules
 .*.env
 yarn.lock
+AuthKey_XA6RXFQ662.p8
 
 # Logs
 logs
