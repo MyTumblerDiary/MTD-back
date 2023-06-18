@@ -35,7 +35,8 @@ jobs:
           port: 22
 
           script: |
-            cd /home/ubuntu/MTD-back 
+            cd /home/ubuntu/MTD-back && 
+            git remote set-url origin git@github.com:MyTumblerDiary/MTD-back.git
             if git pull origin dev; then
               echo "Git pulled successfully"
             else
