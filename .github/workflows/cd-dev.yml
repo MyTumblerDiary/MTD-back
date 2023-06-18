@@ -36,7 +36,7 @@ jobs:
 
           script: |
             cd /home/ubuntu/MTD-back 
-            if git pull ssh dev; then
+            if git pull origin dev; then
               echo "Git pulled successfully"
             else
               echo "Git pulled failed" && exit 1
