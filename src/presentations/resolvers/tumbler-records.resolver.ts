@@ -41,7 +41,7 @@ export class TumblerRecordResolver {
 
   @UseGuards(GqlAuthAccessGuard)
   @Query(() => PaginatedTumblerRecordOutput, {
-    description: `특정 유저의 페이지네이션 된 텀블러 기록을 가져옵니다.`,
+    description: `특정 유저의 페이지네이션 된 텀블러 기록을 가져옵니다. 이때, 검색과 정렬 옵션을 사용할 수 있습니다.`,
   })
   public async tumblerRecordsPaginated(
     @CurrentUser('userAuth') userAuth: UserAuth,
@@ -63,11 +63,20 @@ export class TumblerRecordResolver {
     return await this.tumblerRecordsService.findByDate(userAuth, new Date());
   }
 
+  @UseGuards(GqlAuthAccessGuard)
   @Query(() => TumblerRecord, {
     description: '텀블러 기록을 하나 가져옵니다.',
   })
   public async tumblerRecord(@Args('id') id: string): Promise<TumblerRecord> {
     return await this.tumblerRecordsService.findOne(id);
+  }
+
+  @UseGuards(GqlAuthAccessGuard)
+  @Query(() => [TumblerRecord], {
+    description: '텀블러 기록을 모두 가져옵니다.',
+  })
+  public async tumblerRecords(): Promise<TumblerRecord[]> {
+    return await this.tumblerRecordsService.findAll();
   }
 
   @Mutation(() => TumblerRecord, {

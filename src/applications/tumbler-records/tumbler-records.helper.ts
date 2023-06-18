@@ -15,7 +15,7 @@ export class TumblerRecordHelper {
     nowDate: Date,
   ): DateArrangedTumblerRecordOutput {
     const tumblerRecordsMap: Map<number, TumblerRecord[]> =
-      this.tumblerRecordsMap(tumblerRecords, nowDate);
+      this.tumblerRecordsMapArrangedByDate(tumblerRecords, nowDate);
 
     const dateUnitTumblerRecordOutputs: DateUnitTumblerRecordOutput[] = [];
     tumblerRecordsMap.forEach((tumblerRecords, day) => {
@@ -42,7 +42,7 @@ export class TumblerRecordHelper {
     };
   }
 
-  private tumblerRecordsMap(
+  private tumblerRecordsMapArrangedByDate(
     tumblerRecords: TumblerRecord[],
     nowDate: Date,
   ): Map<number, TumblerRecord[]> {
@@ -59,10 +59,41 @@ export class TumblerRecordHelper {
       map.set(i, []);
     }
     tumblerRecords.forEach((tumblerRecord) => {
-      // tumblerRecord.usedAt의 끝 두 자리가 일자이다.
-      const day = Number(tumblerRecord.usedAt.toString().slice(-2)) as number;
-      const previousArray = map.get(day) as TumblerRecord[];
-      map.set(day, [...previousArray, tumblerRecord]);
+      const month: string = tumblerRecord.usedAt.toString().slice(-5, -3);
+      const nowMonth: string = (nowDate.getMonth() + 1)
+        .toString()
+        .padStart(2, '0');
+
+      if (month === nowMonth) {
+        // tumblerRecord.usedAt의 끝 두 자리가 일자이다.
+        const day = Number(tumblerRecord.usedAt.toString().slice(-2)) as number;
+        const previousArray = map.get(day) as TumblerRecord[];
+        map.set(day, [...previousArray, tumblerRecord]);
+      } else {
+        return;
+      }
+    });
+
+    return map;
+  }
+
+  private tumblerRecordsMapArrangedByMonth(
+    tumblerRecords: TumblerRecord[],
+    nowDate: Date,
+  ): Map<number, TumblerRecord[]> {
+    const map = new Map<number, TumblerRecord[]>() as Map<
+      number,
+      TumblerRecord[]
+    >;
+
+    for (let i = 1; i <= 12; i++) {
+      map.set(i, []);
+    }
+
+    tumblerRecords.forEach((tumblerRecord) => {
+      const month = Number(tumblerRecord.usedAt.toString().slice(4, 6));
+      const previousArray = map.get(month) as TumblerRecord[];
+      map.set(month, [...previousArray, tumblerRecord]);
     });
 
     return map;
