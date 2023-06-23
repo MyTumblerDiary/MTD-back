@@ -10,7 +10,7 @@ import AppleSignIn from 'apple-signin-auth';
 import axios from 'axios';
 import * as bcrypt from 'bcrypt';
 import { Cache } from 'cache-manager';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import * as jwt from 'jsonwebtoken';
 import * as qs from 'qs';
 import { AccessTokenPayload } from 'src/infrastructures/auth/access-token.payload';
@@ -39,7 +39,7 @@ export class AuthService {
     return refreshToken;
   }
 
-  async setRefreshToken(user: User): Promise<string> {
+  async setRefreshToken(user: User, res: Response): Promise<string> {
     const refreshToken = this.jwtService.sign(
       { email: user.email, sub: user.id },
       { secret: process.env.REFRESH_SECRET_KEY, expiresIn: '2w' },
@@ -57,6 +57,12 @@ export class AuthService {
         user,
       });
     }
+    res.cookie('refreshToken', refreshToken, {
+      path: '/',
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+    });
     return refreshToken;
   }
   async setAccessToken(user: UserAuth): Promise<string> {
@@ -67,9 +73,14 @@ export class AuthService {
     return accessToken;
   }
 
-  async loginUser(loginInputDto: LoginInputDto): Promise<LoginResponseDto> {
+  async loginUser(
+    loginInputDto: LoginInputDto,
+    res: Response,
+  ): Promise<LoginResponseDto> {
     const { email, password } = loginInputDto;
-    const user: User = (await this.userService.findOneByEmail(email)) as User;
+    const user: User = (await this.userService.loginFindOneByEmail(
+      email,
+    )) as User;
     if (!user) {
       throw new UnprocessableEntityException(
         '해당 이메일이 등록되어 있지 않습니다.',
@@ -84,7 +95,7 @@ export class AuthService {
       throw new UnprocessableEntityException('비밀번호가 틀렸습니다.');
     return {
       accessToken: await this.setAccessToken(user),
-      refreshToken: await this.setRefreshToken(user),
+      refreshToken: await this.setRefreshToken(user, res),
     };
   }
 
@@ -116,9 +127,12 @@ export class AuthService {
     return data;
   }
 
-  async kakaoLogin(accessToken: string): Promise<LoginResponseDto> {
+  async kakaoLogin(
+    accessToken: string,
+    res: Response,
+  ): Promise<LoginResponseDto> {
     const profile = await this.getUserByKakaoAccessToken(accessToken);
-    let user = await this.userService.findOneByEmail(
+    let user = await this.userService.loginFindOneByEmail(
       profile.kakao_account.email,
     );
     const hashedPassword = await bcrypt.hash(profile.id.toString(), 10);
@@ -135,7 +149,7 @@ export class AuthService {
     }
     return {
       accessToken: await this.setAccessToken(user),
-      refreshToken: await this.setRefreshToken(user),
+      refreshToken: await this.setRefreshToken(user, res),
     };
   }
 
@@ -172,9 +186,12 @@ export class AuthService {
     return data;
   }
 
-  async googleLogin(accessToken: string): Promise<LoginResponseDto> {
+  async googleLogin(
+    accessToken: string,
+    res: Response,
+  ): Promise<LoginResponseDto> {
     const profile = await this.getUserByGoogleAccessToken(accessToken);
-    let user = await this.userService.findOneByEmail(profile.email);
+    let user = await this.userService.loginFindOneByEmail(profile.email);
 
     if (user && user.social !== 'google') {
       const errorMessage = `${user.email} 이메일로 이미 가입된 계정이 있습니다.`;
@@ -189,7 +206,7 @@ export class AuthService {
     }
     return {
       accessToken: await this.setAccessToken(user),
-      refreshToken: await this.setRefreshToken(user),
+      refreshToken: await this.setRefreshToken(user, res),
     };
   }
 
@@ -219,11 +236,11 @@ export class AuthService {
     return tokenResponse.id_token;
   }
 
-  async appleLogin(idToken: string): Promise<LoginResponseDto> {
+  async appleLogin(idToken: string, res: Response): Promise<LoginResponseDto> {
     const decodedToken: AccessTokenPayload = jwt.decode(
       idToken,
     ) as AccessTokenPayload;
-    let user: User = await this.userService.findOneByEmail(decodedToken.email);
+    let user = await this.userService.loginFindOneByEmail(decodedToken.email);
     if (user && user.social !== 'apple') {
       const errorMessage = `${user.email} 이메일로 이미 가입된 계정이 있습니다.`;
       throw new UnprocessableEntityException(errorMessage, user.email);
@@ -238,7 +255,7 @@ export class AuthService {
 
     return {
       accessToken: await this.setAccessToken(user),
-      refreshToken: await this.setRefreshToken(user),
+      refreshToken: await this.setRefreshToken(user, res),
     };
   }
 }
