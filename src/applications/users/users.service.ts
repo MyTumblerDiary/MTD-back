@@ -108,4 +108,8 @@ export class UserService {
     });
     return userInfo as User;
   }
+
+  async loginFindOneByEmail(email: string) {
+    return await this.userRepository.findOne({ where: { email } });
+  }
 }
