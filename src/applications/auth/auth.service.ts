@@ -39,7 +39,7 @@ export class AuthService {
     return refreshToken;
   }
 
-  async setRefreshToken(user: User, res: Response): Promise<string> {
+  async setRefreshToken(user: UserAuth, res: Response): Promise<string> {
     const refreshToken = this.jwtService.sign(
       { email: user.email, sub: user.id },
       { secret: process.env.REFRESH_SECRET_KEY, expiresIn: '2w' },
@@ -256,6 +256,14 @@ export class AuthService {
     return {
       accessToken: await this.setAccessToken(user),
       refreshToken: await this.setRefreshToken(user, res),
+    };
+  }
+  async restoreToken(user: UserAuth, res: Response) {
+    const accessToken = await this.setAccessToken(user);
+    const refreshToken = await this.setRefreshToken(user, res);
+    return {
+      accessToken,
+      refreshToken,
     };
   }
 }

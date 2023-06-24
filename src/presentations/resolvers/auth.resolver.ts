@@ -25,16 +25,18 @@ export class AuthResolver {
     @Args('loginInput') loginInput: LoginInputDto,
     @Context('res') res: Response,
   ): Promise<LoginResponseDto> {
-    const tokens = this.authService.loginUser(loginInput, res);
-    return tokens;
+    return this.authService.loginUser(loginInput, res);
   }
 
   @UseGuards(GqlAuthRefreshGuard)
   @Mutation(() => String, {
     description: 'accesstoken 재발급',
   })
-  restoreAccessToken(@CurrentUser('user') user: UserAuth): Promise<string> {
-    return this.authService.setAccessToken(user);
+  restoreAccessToken(
+    @CurrentUser('user') user: UserAuth,
+    @Context('res') res: Response,
+  ): Promise<LoginResponseDto> {
+    return this.authService.restoreToken(user, res);
   }
 
   @Mutation(() => LoginResponseDto, {
